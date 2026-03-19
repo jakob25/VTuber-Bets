@@ -1,0 +1,47 @@
+{
+  "GremlinSupporter": {
+    "username": "GremlinSupporter",
+    "coins": 4700,
+    "joined_at": "2024-01-10T08:00:00",
+    "last_bonus": null,
+    "total_won": 1200,
+    "bets_correct": 4,
+    "bets_placed": 7
+  },
+  "StreamSniper99": {
+    "username": "StreamSniper99",
+    "coins": 6200,
+    "joined_at": "2024-01-09T15:00:00",
+    "last_bonus": null,
+    "total_won": 3400,
+    "bets_correct": 6,
+    "bets_placed": 9
+  },
+  "VoidChatEnjoyer": {
+    "username": "VoidChatEnjoyer",
+    "coins": 3100,
+    "joined_at": "2024-01-11T20:00:00",
+    "last_bonus": null,
+    "total_won": 800,
+    "bets_correct": 2,
+    "bets_placed": 5
+  },
+  "ChatGooblin": {
+    "username": "ChatGooblin",
+    "coins": 9800,
+    "joined_at": "2024-01-08T10:00:00",
+    "last_bonus": null,
+    "total_won": 7200,
+    "bets_correct": 8,
+    "bets_placed": 11
+  },
+  "PredictionKing": {
+    "username": "PredictionKing",
+    "coins": 2400,
+    "joined_at": "2024-01-12T14:00:00",
+    "last_bonus": null,
+    "total_won": 500,
+    "bets_correct": 1,
+    "bets_placed": 4
+  }
+}
