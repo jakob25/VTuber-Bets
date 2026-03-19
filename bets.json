@@ -1,0 +1,112 @@
+[
+  {
+    "id": "b001",
+    "vtuber": "Filian \ud83e\udd8a",
+    "title": "Will Filian actually beat the final boss this stream?",
+    "description": "She's been on this boss for 3 streams. Chat is losing it. Does she finally do it? \ud83d\udc40",
+    "options": ["YES she does it!! \ud83c\udf89", "NO she rage quits \ud83d\udca3"],
+    "status": "open",
+    "created_at": "2024-01-15T10:00:00",
+    "closes_at": "2024-01-15T22:00:00",
+    "bets": {},
+    "votes": {},
+    "result": null,
+    "created_by": "system",
+    "category": "Boss Fight"
+  },
+  {
+    "id": "b002",
+    "vtuber": "Shylily \ud83c\udf38",
+    "title": "How long is the yap session before game starts? Over/Under 18 mins",
+    "description": "Shylily opened stream and has been vibing with chat. When does the game actually start??",
+    "options": ["OVER 18 mins \ud83d\udde3\ufe0f", "UNDER 18 mins \ud83c\udfae"],
+    "status": "open",
+    "created_at": "2024-01-15T11:00:00",
+    "closes_at": "2024-01-15T18:00:00",
+    "bets": {},
+    "votes": {},
+    "result": null,
+    "created_by": "system",
+    "category": "Yap Session"
+  },
+  {
+    "id": "b003",
+    "vtuber": "Chibidoki \ud83d\udc38",
+    "title": "Will Chibi's model break at least once this stream?",
+    "description": "Tech scuff % is astronomically high. Will the frog physics malfunction again? \ud83d\udc38",
+    "options": ["YES model goes brrrr \ud83d\udca5", "NO flawless model \ud83d\ude07"],
+    "status": "open",
+    "created_at": "2024-01-15T09:00:00",
+    "closes_at": "2024-01-15T21:00:00",
+    "bets": {},
+    "votes": {},
+    "result": null,
+    "created_by": "system",
+    "category": "Tech Scuff"
+  },
+  {
+    "id": "b004",
+    "vtuber": "Limes \ud83c\udf4b",
+    "title": "Deaths before first dungeon clear? Over/Under 12 deaths",
+    "description": "Limes is playing a notoriously unforgiving roguelike. How many L's before W?",
+    "options": ["OVER 12 deaths \ud83d\udca3\ud83d\udca3\ud83d\udca3", "UNDER 12 deaths \ud83d\udde1\ufe0f"],
+    "status": "voting",
+    "created_at": "2024-01-14T20:00:00",
+    "closes_at": "2024-01-15T08:00:00",
+    "bets": {
+      "GremlinSupporter": {"option": "OVER 12 deaths \ud83d\udca3\ud83d\udca3\ud83d\udca3", "amount": 300},
+      "StreamSniper99":   {"option": "UNDER 12 deaths \ud83d\udde1\ufe0f", "amount": 150},
+      "VoidChatEnjoyer":  {"option": "OVER 12 deaths \ud83d\udca3\ud83d\udca3\ud83d\udca3", "amount": 500}
+    },
+    "votes": {
+      "GremlinSupporter": "OVER 12 deaths \ud83d\udca3\ud83d\udca3\ud83d\udca3",
+      "StreamSniper99":   "OVER 12 deaths \ud83d\udca3\ud83d\udca3\ud83d\udca3"
+    },
+    "result": null,
+    "created_by": "system",
+    "category": "Death Count"
+  },
+  {
+    "id": "b005",
+    "vtuber": "Nemu \ud83c\udf19",
+    "title": "Will Nemu randomly start singing mid-stream?",
+    "description": "It happens every time. The question is WHEN not IF. Will the karaoke arc activate?",
+    "options": ["YES sudden karaoke \ud83c\udfa4", "NO stays focused \ud83c\udfae"],
+    "status": "open",
+    "created_at": "2024-01-15T12:00:00",
+    "closes_at": "2024-01-16T00:00:00",
+    "bets": {},
+    "votes": {},
+    "result": null,
+    "created_by": "system",
+    "category": "Chaos Moment"
+  },
+  {
+    "id": "b006",
+    "vtuber": "Meat \ud83e\udd69",
+    "title": "Will they finish the announced game OR get distracted?",
+    "description": "The schedule said Hollow Knight. But there was a Minecraft tweet earlier... \ud83d\udc40",
+    "options": ["Finishes planned game \u2705", "Gets distracted / switches \ud83c\udf00"],
+    "status": "closed",
+    "created_at": "2024-01-14T16:00:00",
+    "closes_at": "2024-01-15T04:00:00",
+    "bets": {
+      "ChatGooblin":    {"option": "Gets distracted / switches \ud83c\udf00", "amount": 800},
+      "PredictionKing": {"option": "Finishes planned game \u2705", "amount": 200},
+      "NachtVoider":    {"option": "Gets distracted / switches \ud83c\udf00", "amount": 600},
+      "SkibidiAnalyst": {"option": "Finishes planned game \u2705", "amount": 350}
+    },
+    "votes": {
+      "ChatGooblin":    "Gets distracted / switches \ud83c\udf00",
+      "PredictionKing": "Gets distracted / switches \ud83c\udf00",
+      "NachtVoider":    "Gets distracted / switches \ud83c\udf00",
+      "SkibidiAnalyst": "Gets distracted / switches \ud83c\udf00",
+      "SupporterGal":   "Gets distracted / switches \ud83c\udf00",
+      "ChaosBrain":     "Gets distracted / switches \ud83c\udf00",
+      "LoreCrafter":    "Gets distracted / switches \ud83c\udf00",
+      "NewbieWatcher":  "Gets distracted / switches \ud83c\udf00"
+    },
+    "result": "Gets distracted / switches \ud83c\udf00",
+    "created_by": "system",
+    "category": "Game Completion"
+  }
