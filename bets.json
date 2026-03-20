@@ -1,4 +1,32 @@
-[  
-    {"bet": "example1"},  
-    {"bet": "example2"}  
+[
+  {
+    "name": "Bet 1",
+    "amount": 100,
+    "outcome": "Win"
+  },
+  {
+    "name": "Bet 2",
+    "amount": 50,
+    "outcome": "Lose"
+  },
+  {
+    "name": "Bet 3",
+    "amount": 200,
+    "outcome": "Win"
+  },
+  {
+    "name": "Bet 4",
+    "amount": 75,
+    "outcome": "Win"
+  },
+  {
+    "name": "Bet 5",
+    "amount": 30,
+    "outcome": "Lose"
+  },
+  {
+    "name": "Bet 6",
+    "amount": 120,
+    "outcome": "Win"
+  }
 ]
