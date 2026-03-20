@@ -1,21 +1,20 @@
-import requests
-import json
+import streamlit as st
+import pandas as pd
 
-# Constants
-API_URL = "https://api.example.com/data"
+st.title('VTuber Bets')
 
-# Function to fetch data
-def fetch_data():
-    response = requests.get(API_URL)
-    if response.status_code == 200:
-        return json.loads(response.text)
-    else:
-        return None
+# File upload
+file = st.file_uploader('Upload a CSV file with VTuber data', type='csv')
 
-# Main execution
-if __name__ == "__main__":
-    data = fetch_data()
-    if data:
-        print(data)
-    else:
-        print("Failed to fetch data.")
+if file is not None:
+    data = pd.read_csv(file)
+    st.write(data)
+
+# Display some metrics
+if 'wins' in data.columns:
+    total_wins = data['wins'].sum()
+    st.write(f'Total Wins: {total_wins}')
+
+if 'losses' in data.columns:
+    total_losses = data['losses'].sum()
+    st.write(f'Total Losses: {total_losses}')
