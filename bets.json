@@ -1,32 +1,113 @@
 [
   {
-    "name": "Bet 1",
-    "amount": 100,
-    "outcome": "Win"
+    "id": "b001",
+    "vtuber": "Filian 🦆",
+    "title": "Will Filian actually beat the final boss this stream?",
+    "description": "She's been on this boss for 3 streams. Chat is losing it. Does she finally do it? 👀",
+    "options": ["YES she does it!! 🎉", "NO she rage quits 💣"],
+    "status": "open",
+    "created_at": "2024-01-15T10:00:00",
+    "closes_at": "2024-01-15T22:00:00",
+    "bets": {},
+    "votes": {},
+    "result": null,
+    "created_by": "system",
+    "category": "Boss Fight"
   },
   {
-    "name": "Bet 2",
-    "amount": 50,
-    "outcome": "Lose"
+    "id": "b002",
+    "vtuber": "Shylily 🌸",
+    "title": "How long is the yap session before game starts? Over/Under 18 mins",
+    "description": "Shylily opened stream and has been vibing with chat. When does the game actually start??",
+    "options": ["OVER 18 mins 🗣️", "UNDER 18 mins 🎮"],
+    "status": "open",
+    "created_at": "2024-01-15T11:00:00",
+    "closes_at": "2024-01-15T18:00:00",
+    "bets": {},
+    "votes": {},
+    "result": null,
+    "created_by": "system",
+    "category": "Yap Session"
   },
   {
-    "name": "Bet 3",
-    "amount": 200,
-    "outcome": "Win"
+    "id": "b003",
+    "vtuber": "Chibidoki 🐸",
+    "title": "Will Chibi's model break at least once this stream?",
+    "description": "Tech scuff % is astronomically high. Will the frog physics malfunction again? 🐸",
+    "options": ["YES model goes brrrr 💥", "NO flawless model 😇"],
+    "status": "open",
+    "created_at": "2024-01-15T09:00:00",
+    "closes_at": "2024-01-15T21:00:00",
+    "bets": {},
+    "votes": {},
+    "result": null,
+    "created_by": "system",
+    "category": "Tech Scuff"
   },
   {
-    "name": "Bet 4",
-    "amount": 75,
-    "outcome": "Win"
+    "id": "b004",
+    "vtuber": "Limes 🍋",
+    "title": "Deaths before first dungeon clear? Over/Under 12 deaths",
+    "description": "Limes is playing a notoriously unforgiving roguelike. How many L's before W?",
+    "options": ["OVER 12 deaths 💣💣💣", "UNDER 12 deaths ⚔️"],
+    "status": "voting",
+    "created_at": "2024-01-14T20:00:00",
+    "closes_at": "2024-01-15T08:00:00",
+    "bets": {
+      "GremlinSupporter": {"option": "OVER 12 deaths 💣💣💣", "amount": 300},
+      "StreamSniper99": {"option": "UNDER 12 deaths ⚔️", "amount": 150},
+      "VoidChatEnjoyer": {"option": "OVER 12 deaths 💣💣💣", "amount": 500}
+    },
+    "votes": {
+      "GremlinSupporter": "OVER 12 deaths 💣💣💣",
+      "StreamSniper99": "OVER 12 deaths 💣💣💣"
+    },
+    "result": null,
+    "created_by": "system",
+    "category": "Death Count"
   },
   {
-    "name": "Bet 5",
-    "amount": 30,
-    "outcome": "Lose"
+    "id": "b005",
+    "vtuber": "Nemu 🌙",
+    "title": "Will Nemu randomly start singing mid-stream?",
+    "description": "It happens every time. The question is WHEN not IF. Will the karaoke arc activate?",
+    "options": ["YES sudden karaoke 🎤", "NO stays focused 🎮"],
+    "status": "open",
+    "created_at": "2024-01-15T12:00:00",
+    "closes_at": "2024-01-16T00:00:00",
+    "bets": {},
+    "votes": {},
+    "result": null,
+    "created_by": "system",
+    "category": "Chaos Moment"
   },
   {
-    "name": "Bet 6",
-    "amount": 120,
-    "outcome": "Win"
+    "id": "b006",
+    "vtuber": "Meat 🥩",
+    "title": "Will they finish the announced game OR get distracted?",
+    "description": "The schedule said Hollow Knight. But there was a Minecraft tweet earlier... 👀",
+    "options": ["Finishes planned game ✅", "Gets distracted / switches 🌳"],
+    "status": "closed",
+    "created_at": "2024-01-14T16:00:00",
+    "closes_at": "2024-01-15T04:00:00",
+    "bets": {
+      "ChatGooblin": {"option": "Gets distracted / switches 🌳", "amount": 800},
+      "PredictionKing": {"option": "Finishes planned game ✅", "amount": 200},
+      "NachtVoider": {"option": "Gets distracted / switches 🌳", "amount": 600},
+      "SkibidiAnalyst": {"option": "Finishes planned game ✅", "amount": 350}
+    },
+    "votes": {
+      "ChatGooblin": "Gets distracted / switches 🌳",
+      "PredictionKing": "Gets distracted / switches 🌳",
+      "NachtVoider": "Gets distracted / switches 🌳",
+      "SkibidiAnalyst": "Gets distracted / switches 🌳",
+      "SupporterGal": "Gets distracted / switches 🌳",
+      "ChaosBrain": "Gets distracted / switches 🌳",
+      "LoreCrafter": "Gets distracted / switches 🌳",
+      "NewbieWatcher": "Gets distracted / switches 🌳"
+    },
+    "result": "Gets distracted / switches 🌳",
+    "created_by": "system",
+    "category": "Game Completion"
   }
 ]
