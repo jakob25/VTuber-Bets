@@ -689,43 +689,52 @@ def cast_vote(bet_id: str, username: str, option: str):
 #  DB — RESOLUTION
 # ─────────────────────────────────────────────
 def resolve_bet(bet_id: str) -> tuple[bool, str]:
-    bet     = get_bet(bet_id)
-    entries = get_entries(bet_id)
-    votes   = get_votes(bet_id)
-
+    bet = get_bet(bet_id)
     if not bet or bet["status"] != "voting":
         return False, "Bet is not in voting phase."
 
+    entries = get_entries(bet_id)
+    votes = get_votes(bet_id)
+
+    # Count votes
     counts: dict[str, int] = {o: 0 for o in bet["options"]}
     for v in votes:
         counts[v["option"]] = counts.get(v["option"], 0) + 1
+
     total_v = sum(counts.values())
 
-    if total_v < MIN_VOTES:
-        return False, f"Need at least {MIN_VOTES} votes. ({total_v} so far)"
+    if total_v == 0:
+        # No votes at all → pick the option with most money bet (fallback)
+        pot_per_option = {o: sum(e["amount"] for e in entries if e["option"] == o) for o in bet["options"]}
+        winner = max(pot_per_option, key=pot_per_option.get)
+        fallback_msg = f"No votes cast. Resolved by highest pot: {winner}"
+    else:
+        winner = max(counts, key=counts.get)
+        # Simple majority: most votes wins (even if not >50%)
+        # You can change to strict majority if you prefer: if counts[winner] > total_v / 2
 
-    winner = max(counts, key=counts.get)
-    if counts[winner] <= total_v / 2:
-        return False, "No clear majority yet."
-
-    pot           = sum(e["amount"] for e in entries)
+    # === Resolution logic (same as before) ===
+    pot = sum(e["amount"] for e in entries)
     distributable = int(pot * (1 - HOUSE_CUT))
-    winners       = [e for e in entries if e["option"] == winner]
-    winner_stake  = sum(e["amount"] for e in winners)
+    winners = [e for e in entries if e["option"] == winner]
+    winner_stake = sum(e["amount"] for e in winners)
 
     for e in winners:
-        share = int(distributable * e["amount"] / winner_stake) if winner_stake else 0
-        user  = get_user(e["username"])
+        share = int(distributable * e["amount"] / winner_stake) if winner_stake > 0 else 0
+        user = get_user(e["username"])
         if user:
             update_user(e["username"], {
-                "coins":        user["coins"] + share,
-                "total_won":    user["total_won"] + share,
+                "coins": user["coins"] + share,
+                "total_won": user["total_won"] + share,
                 "bets_correct": user["bets_correct"] + 1,
             })
 
+    # Mark as closed
     db().table("bets").update({
-        "status": "closed", "result": winner
+        "status": "closed",
+        "result": winner
     }).eq("id", bet_id).execute()
+
     return True, winner
 
 # ─────────────────────────────────────────────
