@@ -102,7 +102,7 @@ h1, h2, h3 {
 }
 @keyframes gradient-text {
     0%   { background-position: 0% 100%; }
-    100% { background-position: 100% 0%; }
+    100% { background-position: 100% 50%; }
 }
 @keyframes pulse-glow {
     0%, 100% { opacity: 0.6; }
