@@ -172,7 +172,7 @@ h1, h2, h3 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: gradient-text 4.3s linear infinite;
+    animation: gradient-text 6s ease-in-out infinite;
     display: inline;
 }
 .hero-sub {
