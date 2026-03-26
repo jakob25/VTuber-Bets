@@ -98,16 +98,9 @@ h1, h2, h3 {
 @keyframes gradient-border {
     0%   { background-position: 0% 50%; }
     50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    100% { background-position: 0% 50%; }  
 }
-/* ── IMPROVED GRADIENT TEXT ANIMATION ── */
-@keyframes gradient-text {
-    0% { background-position: 0% 50%;}
-    50% { background-position: 100% 50%;}
-    100% { background-position: 200% 50%; }
-}
-   
-}
+
 @keyframes pulse-glow {
     0%, 100% { opacity: 0.6; }
     50%       { opacity: 1; }
@@ -167,12 +160,11 @@ h1, h2, h3 {
     font-size: 2rem;
     font-weight: 800;
     font-style: italic;
-    background: linear-gradient(45deg, #44ddff, #aa00ff, #00aaff, #0066ff, #00ccff, #44ddff,  #aa00ff, #00aaff, #0066ff, #00ccff);
+    background: linear-gradient(45deg, #44ddff, #aa00ff, #00aaff, #0066ff, #00ccff);
     background-size: 300% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: gradient-text 6s ease-in-out infinite;
     display: inline;
 }
 .hero-sub {
