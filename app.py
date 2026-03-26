@@ -103,6 +103,7 @@ h1, h2, h3 {
 /* ── IMPROVED GRADIENT TEXT ANIMATION ── */
 @keyframes gradient-text {
     0% { background-position: 0% 50%;}
+    50% { background-position: 100% 50%;}
     100% { background-position: 200% 50%; }
 }
    
@@ -167,7 +168,7 @@ h1, h2, h3 {
     font-weight: 800;
     font-style: italic;
     background: linear-gradient(45deg, #44ddff, #aa00ff, #00aaff, #0066ff, #00ccff, #44ddff,  #aa00ff, #00aaff, #0066ff, #00ccff);
-    background-size: 400% 100%;
+    background-size: 300% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
