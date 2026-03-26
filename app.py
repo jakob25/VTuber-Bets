@@ -164,12 +164,12 @@ h1, h2, h3 {
     font-size: 2rem;
     font-weight: 800;
     font-style: italic;
-    background: linear-gradient(45deg, #44ddff, #aa00ff, #00aaff, #0066ff, #00ccff);
+    background: linear-gradient(45deg, #44ddff, #aa00ff, #00aaff, #0066ff, #00ccff, #44ddff,  #aa00ff, #00aaff, #0066ff, #00ccff);
     background-size: 400% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: gradient-text 4.5s linear infinite;
+    animation: gradient-text 4.1s linear infinite;
     display: inline;
 }
 .hero-sub {
