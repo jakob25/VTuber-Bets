@@ -100,9 +100,11 @@ h1, h2, h3 {
     50%  { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
+/* ── IMPROVED GRADIENT TEXT ANIMATION ── */
 @keyframes gradient-text {
-    0%   { background-position: -4%, 50%; }
-    100%  { background-position: 100% 50%; }
+    0% { background-position: 0% 50%;}
+    100% { background-position: 200% 50%; }
+}
    
 }
 @keyframes pulse-glow {
@@ -158,14 +160,14 @@ h1, h2, h3 {
     margin-bottom: 4px;
     line-height: 1.2;
 }
-/* The gradient username — like "Sweet 16" in the reference */
+/* The gradient username */
 .hero-name {
     font-family: 'Syne', sans-serif;
     font-size: 2rem;
     font-weight: 800;
     font-style: italic;
     background: linear-gradient(45deg, #44ddff, #aa00ff, #00aaff, #0066ff, #00ccff, #44ddff,  #aa00ff, #00aaff, #0066ff, #00ccff);
-    background-size: 400% auto;
+    background-size: 400% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
