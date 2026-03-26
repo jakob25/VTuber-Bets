@@ -101,8 +101,9 @@ h1, h2, h3 {
     100% { background-position: 0% 50%; }
 }
 @keyframes gradient-text {
-    0%   { background-position: 0% 100%; }
-    100% { background-position: 100% 50%; }
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 @keyframes pulse-glow {
     0%, 100% { opacity: 0.6; }
@@ -163,12 +164,12 @@ h1, h2, h3 {
     font-size: 2rem;
     font-weight: 800;
     font-style: italic;
-    background: linear-gradient(45deg, #0066ff, #aa00ff, #00aaff, #44ddff, #00ccff,, #0066ff, #aa00ff, #00aaff, #44ddff, #00ccff);
+    background: linear-gradient(90deg, #00aaff, #44ddff, #0066ff, #00ccff);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: gradient-text 5s linear infinite;
+    animation: gradient-text 3s linear infinite;
     display: inline;
 }
 .hero-sub {
