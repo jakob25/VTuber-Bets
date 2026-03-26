@@ -736,7 +736,25 @@ def resolve_bet(bet_id: str) -> tuple[bool, str]:
     }).eq("id", bet_id).execute()
 
     return True, winner
+# ─────────────────────────────────────────────
+#  DB — Autoresolve Old Bets
+# ─────────────────────────────────────────────
+def auto_resolve_old_voting_bets():
+    """Called by cron job - resolves voting bets older than 24 hours"""
+    cutoff = (datetime.utcnow() - timedelta(hours=24)).isoformat()
+    
+    old_bets = db().table("bets") \
+        .select("id") \
+        .eq("status", "voting") \
+        .lt("created_at", cutoff) \
+        .execute().data or []
 
+    results = []
+    for bet in old_bets:
+        success, msg = resolve_bet(bet["id"])
+        results.append((bet["id"], success, msg))
+    
+    return len(old_bets), results
 # ─────────────────────────────────────────────
 #  DB — LEADERBOARD
 # ─────────────────────────────────────────────
