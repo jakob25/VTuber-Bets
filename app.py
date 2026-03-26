@@ -101,8 +101,8 @@ h1, h2, h3 {
     100% { background-position: 0% 50%; }
 }
 @keyframes gradient-text {
-    0%   { background-position: 0% 50%; }
-    100% { background-position: -100% 50%; }
+    0%   { background-position: 0% 100%; }
+    100% { background-position: 100% 0%; }
 }
 @keyframes pulse-glow {
     0%, 100% { opacity: 0.6; }
@@ -163,8 +163,8 @@ h1, h2, h3 {
     font-size: 2rem;
     font-weight: 800;
     font-style: italic;
-    background: linear-gradient(90deg, #0066ff, #00aaff, #44ddff, #00ccff, #aa00ff, #0066ff, #00aaff, #44ddff, #00ccff, #aa00ff);
-    background-size: 200% auto;
+    background: linear-gradient(45deg, #0066ff, #aa00ff, #00aaff, #44ddff, #00ccff,, #0066ff, #aa00ff, #00aaff, #44ddff, #00ccff);
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
