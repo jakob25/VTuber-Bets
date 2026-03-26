@@ -160,8 +160,8 @@ h1, h2, h3 {
     font-size: 2rem;
     font-weight: 800;
     font-style: italic;
-    background: linear-gradient(45deg, #44ddff, #aa00ff, #00aaff, #0066ff, #00ccff);
-    background-size: 300% 100%;
+    background: linear-gradient(45deg, #44ddff, #aa00ff, #0066ff, #00aaff, #00ccff);
+    background-size: 100% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
