@@ -53,31 +53,45 @@ h1, h2, h3 {
 
 /* ── CARDS ── */
 .card {
-    background: linear-gradient(135deg, #0d1428 0%, #0f1830 100%);
-    border: 1px solid #1e3060;
-    border-radius: 14px;
-    padding: 20px 22px;
-    margin-bottom: 14px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #0066ff, #00d4ff, #0066ff);
-    background-size: 200% 100%;
-    animation: shimmer 3s linear infinite;
-}
-@keyframes shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    background: #0b0f1e;
+    border: 1px solid #151e33;
+    border-left: 3px solid #1e3060;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    transition: border-left-color 0.2s, box-shadow 0.2s;
 }
 .card:hover {
-    border-color: #0066ff;
-    box-shadow: 0 0 24px rgba(0, 102, 255, 0.12);
+    border-left-color: #0066ff;
+    box-shadow: -2px 0 12px rgba(0, 102, 255, 0.15);
+}
+
+/* Live bets get the cyan accent */
+.card-live {
+    border-left-color: #00c8ff;
+    box-shadow: -2px 0 10px rgba(0, 200, 255, 0.1);
+}
+.card-live:hover {
+    border-left-color: #00e5ff;
+    box-shadow: -2px 0 16px rgba(0, 200, 255, 0.2);
+}
+
+/* Voting bets get amber */
+.card-voting {
+    border-left-color: #ffaa00;
+    box-shadow: -2px 0 10px rgba(255, 170, 0, 0.1);
+}
+.card-voting:hover {
+    border-left-color: #ffcc00;
+    box-shadow: -2px 0 16px rgba(255, 204, 0, 0.2);
+}
+
+/* Resolved bets get muted purple */
+.card-closed {
+    border-left-color: #4433aa;
+}
+.card-closed:hover {
+    border-left-color: #6655cc;
 }
 
 /* ── BET CARD TEXT ── */
@@ -694,6 +708,12 @@ def render_bet_card(bet: dict, show_btn=False):
     entries = get_entries(bet["id"])
     pot     = pot_total(entries)
 
+    card_class = {
+        "open":   "card card-live",
+        "voting": "card card-voting",
+        "closed": "card card-closed",
+    }.get(bet["status"], "card")
+
     status_html = {
         "open":   '<span class="pill pill-open">Live</span>',
         "voting": '<span class="pill pill-voting">Voting</span>',
@@ -711,7 +731,7 @@ def render_bet_card(bet: dict, show_btn=False):
     game_html = f'<div class="bet-game">{game}</div>' if game else ""
 
     st.markdown(f"""
-    <div class="card">
+    <div class="{card_class}">
         <div class="vtag">{name_html}&nbsp;&nbsp;·&nbsp;&nbsp;{bet.get('category','')}</div>
         <div class="bet-title">{bet['title']}</div>
         {game_html}
