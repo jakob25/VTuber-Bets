@@ -377,13 +377,14 @@ hr { border-color: #192035 !important; }
 .stRadio label { color: #7a9acc !important; font-size: 0.88rem !important; }
 .stTextInput label, .stTextArea label, .stSelectbox label, .stNumberInput label, .stMultiSelect label { color: #5577aa !important; font-size: 0.84rem !important; font-weight: 500 !important; }
 p, li, div { line-height: 1.6; }
-</style>
 
 /* ── HIDE STREAMLIT HUD ── */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 .stApp header {display: none;}
 .stDeployButton {display: none;}
+
+</style>
 
 """, unsafe_allow_html=True)
 
