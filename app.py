@@ -376,7 +376,14 @@ p, li, div { line-height: 1.6; }
 .auth-container {
     display: flex;
     justify-content: center;    /* keeps it horizontally centered */
-
+}
+/* Force Streamlit to remove its own top gap on auth page */
+[data-testid="stAppViewContainer"] > div:first-child {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+[data-testid="stAppViewContainer"] {
+    padding-top: 0 !important;
 }
 .auth-tabs .stTabs [data-baseweb="tab-list"] {
     background: #0b0f1e !important;
