@@ -374,7 +374,7 @@ p, li, div { line-height: 1.6; }
 
 /* AUTH PAGE IMPROVEMENTS */
 .auth-container {
-    padding-top: 60px;          /* nice breathing room at the top */
+    padding-top: 10px;          /* nice breathing room at the top */
     padding-bottom: 40px;
     display: flex;
     justify-content: center;    /* keeps it horizontally centered */
