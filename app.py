@@ -1099,7 +1099,6 @@ def page_auth():
                             st.session_state.page = "role_select"
                         else:
                             st.session_state.page = "home"
-                        st.session_state.show_onboarding = True
                         st.rerun()
                     else:
                         set_toast("error", msg)
@@ -1223,48 +1222,65 @@ def page_role_select():
 def show_onboarding_popup():
     if not st.session_state.get("show_onboarding"):
         return
+
+    # Use st.dialog-style layout — centered column, no CSS overlay so button is clickable
     st.markdown("""
-    <div class="onboarding-modal">
-        <div class="onboarding-content">
+    <style>
+    .onboarding-wrap {
+        background: #0b0f1e;
+        border: 1px solid #1e3060;
+        border-radius: 16px;
+        padding: 28px 32px;
+        margin: 0 auto 24px auto;
+        max-width: 560px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    _, mid, _ = st.columns([1, 3, 1])
+    with mid:
+        st.markdown("""
+        <div class="onboarding-wrap">
             <div style="text-align:center;margin-bottom:20px;">
                 <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#e8f0ff;">
-                    Welcome to VTuberBets!
+                    Welcome to VTuberBets! 🎲
                 </div>
-                <div style="color:#00aaff;font-size:0.9rem;">Here's how it works</div>
+                <div style="color:#00aaff;font-size:0.9rem;margin-top:4px;">Here's how it works</div>
             </div>
-            <div style="display:flex;flex-direction:column;gap:16px;">
-                <div style="display:flex;gap:14px;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">01</span>
-                    <div><strong>Create account</strong> — username + password only.</div>
+            <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:4px;">
+                <div style="display:flex;gap:14px;align-items:flex-start;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;flex-shrink:0;">01</span>
+                    <div style="color:#c8d8f0;"><strong>Create account</strong> — username + password only.</div>
                 </div>
-                <div style="display:flex;gap:14px;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">02</span>
-                    <div><strong>Pick your role</strong> — Viewer, Streamer, or Clipper.</div>
+                <div style="display:flex;gap:14px;align-items:flex-start;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;flex-shrink:0;">02</span>
+                    <div style="color:#c8d8f0;"><strong>Pick your role</strong> — Viewer, Streamer, or Clipper.</div>
                 </div>
-                <div style="display:flex;gap:14px;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">03</span>
-                    <div><strong>Browse open bets</strong> on indie VTuber streams.</div>
+                <div style="display:flex;gap:14px;align-items:flex-start;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;flex-shrink:0;">03</span>
+                    <div style="color:#c8d8f0;"><strong>Browse open bets</strong> on indie VTuber streams.</div>
                 </div>
-                <div style="display:flex;gap:14px;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">04</span>
-                    <div><strong>Place V-Coins</strong> on what you think will happen.</div>
+                <div style="display:flex;gap:14px;align-items:flex-start;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;flex-shrink:0;">04</span>
+                    <div style="color:#c8d8f0;"><strong>Place V-Coins</strong> on what you think will happen.</div>
                 </div>
-                <div style="display:flex;gap:14px;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">05</span>
-                    <div><strong>Vote after the stream</strong> — 3 votes = auto-resolution.</div>
+                <div style="display:flex;gap:14px;align-items:flex-start;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;flex-shrink:0;">05</span>
+                    <div style="color:#c8d8f0;"><strong>Vote after the stream</strong> — 3 votes = auto-resolution.</div>
                 </div>
-                <div style="display:flex;gap:14px;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">06</span>
-                    <div><strong>Earn badges &amp; coins</strong> — achievements pay real V-Coins.</div>
+                <div style="display:flex;gap:14px;align-items:flex-start;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;flex-shrink:0;">06</span>
+                    <div style="color:#c8d8f0;"><strong>Earn badges &amp; coins</strong> — achievements pay real V-Coins.</div>
                 </div>
             </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    if st.button("✅ Got it! Let's go", use_container_width=True, key="dismiss_onboarding"):
-        st.session_state.show_onboarding = False
-        st.rerun()
+        if st.button("✅ Got it! Let's go", use_container_width=True, key="dismiss_onboarding"):
+            st.session_state.show_onboarding = False
+            st.rerun()
+
+        st.markdown("---")
        
 # ─────────────────────────────────────────────
 #  SIDEBAR
@@ -1296,14 +1312,17 @@ def render_sidebar():
         role  = user.get("role","")
         r_css = {"Viewer":"role-watcher","Streamer":"role-streamer",
                  "Clipper":"role-clipper"}.get(role,"role-watcher")
+        role_html = (f'<span class="profile-role {r_css}" style="margin-top:8px;display:inline-block;">{role}</span>'
+                     if role else "")
+        coins_fmt = f"{user['coins']:,}"
 
         st.markdown(f"""
         <div class="coin-box">
             {title_html}
             <div class="coin-label">{username}</div>
-            <div class="coin-amount">{user['coins']:,}</div>
+            <div class="coin-amount">{coins_fmt}</div>
             <div class="coin-sub">V-COINS</div>
-            {f'<span class="profile-role {r_css}" style="margin-top:8px;display:inline-block;">{role}</span>' if role else ''}
+            {role_html}
         </div>
         """, unsafe_allow_html=True)
 
