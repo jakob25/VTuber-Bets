@@ -384,8 +384,74 @@ footer {visibility: hidden;}
 .stApp header {display: none;}
 .stDeployButton {display: none;}
 
-</style>
+# ─────────────────────────────────────────────
+# STYLES
+# ─────────────────────────────────────────────
+st.markdown("""
+<style>
+... (your existing styles remain unchanged) ...
 
+/* ── AUTH PAGE IMPROVEMENTS ── */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.auth-card {
+    background: #0b0f1e;
+    border: 1px solid #1e3060;
+    border-radius: 16px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.1);
+}
+
+/* Better tabs */
+.auth-tabs .stTabs [data-baseweb="tab-list"] {
+    background: #0b0f1e !important;
+    border: 1px solid #1e3060 !important;
+    border-radius: 12px;
+    padding: 6px;
+    gap: 6px;
+}
+.auth-tabs .stTabs [data-baseweb="tab"] {
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    padding: 14px 28px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s;
+}
+.auth-tabs .stTabs [data-baseweb="tab"]:hover {
+    background: #1a2540 !important;
+}
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, #0044ff, #00aaff) !important;
+    color: #e8f4ff !important;
+    box-shadow: 0 4px 15px rgba(0, 170, 255, 0.3);
+}
+
+/* ── ONBOARDING POPUP ── */
+.onboarding-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(8, 12, 24, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+.onboarding-content {
+    background: #0b0f1e;
+    border: 1px solid #1e3060;
+    border-radius: 16px;
+    max-width: 520px;
+    width: 90%;
+    padding: 32px;
+}
+</style>
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
