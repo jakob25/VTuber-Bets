@@ -378,15 +378,7 @@ p, li, div { line-height: 1.6; }
     align-items: center;
     justify-content: center;
     padding: 20px;
-}
-.auth-card {
-    background: #0b0f1e;
-    border: 1px solid #1e3060;
-    border-radius: 16px;
-    padding: 28px 32px;   /* tightened so it fits without scroll */
-    width: 100%;
-    max-width: 460px;
-    box-shadow: 0 10px 30px rgba(0, 102, 255, 0.1);
+
 }
 .auth-tabs .stTabs [data-baseweb="tab-list"] {
     background: #0b0f1e !important;
