@@ -384,9 +384,9 @@ p, li, div { line-height: 1.6; }
     background: #0b0f1e;
     border: 1px solid #1e3060;
     border-radius: 16px;
-    padding: 40px 36px;
+    padding: 28px 32px;   /* tightened so it fits without scroll */
     width: 100%;
-    max-width: 480px;
+    max-width: 460px;
     box-shadow: 0 10px 30px rgba(0, 102, 255, 0.1);
 }
 .auth-tabs .stTabs [data-baseweb="tab-list"] {
@@ -397,9 +397,9 @@ p, li, div { line-height: 1.6; }
     gap: 6px;
 }
 .auth-tabs .stTabs [data-baseweb="tab"] {
-    font-size: 1.1rem !important;
+    font-size: 1.05rem !important;
     font-weight: 600 !important;
-    padding: 14px 28px !important;
+    padding: 12px 24px !important;
     border-radius: 8px !important;
     transition: all 0.2s;
 }
