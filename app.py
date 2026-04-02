@@ -1056,7 +1056,7 @@ def page_auth():
     # Logo / header
     st.markdown("""
     <div style="text-align:center;padding-bottom:28px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;
                     color:#1e3a6e;letter-spacing:0.25em;text-transform:uppercase;
                     margin-bottom:14px;">PREDICTION PLATFORM</div>
         <div style="font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;
