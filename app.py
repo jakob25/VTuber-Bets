@@ -1046,7 +1046,7 @@ def render_bet_card(bet: dict, show_btn=False):
             nav("bet_detail", bet_id=bet["id"])
 
 # ─────────────────────────────────────────────
-# AUTH PAGE  ←  REPLACE THE ENTIRE def page_auth(): 
+# AUTH PAGE 
 # ─────────────────────────────────────────────
 def page_auth():
     # Vertical centering + improved layout
@@ -1280,7 +1280,7 @@ def render_sidebar():
         <div style="padding:12px 0 18px;">
             <div style="font-family:'Syne',sans-serif;font-size:1.2rem;
                         font-weight:800;color:#e8f0ff;">VTuberBets</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;
                         color:#0066ff;letter-spacing:0.1em;margin-top:2px;">
                 PREDICTION PLATFORM
             </div>
