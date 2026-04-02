@@ -385,6 +385,20 @@ p, li, div { line-height: 1.6; }
 [data-testid="stAppViewContainer"] {
     padding-top: 0 !important;
 }
+/* Bigger, better padding on the actual Login / Create Account buttons */
+.stButton > button {
+    padding: 16px 0 !important;     /* more vertical height */
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+}
+
+/* Slightly larger tab headers too */
+.auth-tabs .stTabs [data-baseweb="tab"] {
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    padding: 16px 28px !important;   /* more padding on tabs */
+    border-radius: 8px !important;
+}
 .auth-tabs .stTabs [data-baseweb="tab-list"] {
     background: #0b0f1e !important;
     border: 1px solid #1e3060 !important;
