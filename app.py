@@ -384,13 +384,6 @@ footer {visibility: hidden;}
 .stApp header {display: none;}
 .stDeployButton {display: none;}
 
-# ─────────────────────────────────────────────
-# STYLES
-# ─────────────────────────────────────────────
-st.markdown("""
-<style>
-... (your existing styles remain unchanged) ...
-
 /* ── AUTH PAGE IMPROVEMENTS ── */
 .auth-container {
     min-height: 100vh;
