@@ -1046,17 +1046,21 @@ def render_bet_card(bet: dict, show_btn=False):
             nav("bet_detail", bet_id=bet["id"])
 
 # ─────────────────────────────────────────────
-# AUTH PAGE 
+# AUTH PAGE  ←  REPLACE THE ENTIRE def page_auth(): 
 # ─────────────────────────────────────────────
 def page_auth():
     # Vertical centering + improved layout
     st.markdown('<div class="auth-container">', unsafe_allow_html=True)
     st.markdown('<div class="auth-card">', unsafe_allow_html=True)
 
+    # Show toast at top only if one exists
+    if st.session_state.toast:
+        show_toast()
+
     # Logo / header
     st.markdown("""
     <div style="text-align:center;padding-bottom:28px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
                     color:#1e3a6e;letter-spacing:0.25em;text-transform:uppercase;
                     margin-bottom:14px;">PREDICTION PLATFORM</div>
         <div style="font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;
@@ -1067,8 +1071,6 @@ def page_auth():
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    show_toast()
 
     st.markdown('<div class="auth-tabs">', unsafe_allow_html=True)
     tab_login, tab_register = st.tabs([" Login ", " Create Account "])
@@ -1280,7 +1282,7 @@ def render_sidebar():
         <div style="padding:12px 0 18px;">
             <div style="font-family:'Syne',sans-serif;font-size:1.2rem;
                         font-weight:800;color:#e8f0ff;">VTuberBets</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;
                         color:#0066ff;letter-spacing:0.1em;margin-top:2px;">
                 PREDICTION PLATFORM
             </div>
