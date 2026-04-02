@@ -1316,15 +1316,21 @@ def render_sidebar():
                      if role else "")
         coins_fmt = f"{user['coins']:,}"
 
-        st.markdown(f"""
-        <div class="coin-box">
-            {title_html}
-            <div class="coin-label">{username}</div>
-            <div class="coin-amount">{coins_fmt}</div>
-            <div class="coin-sub">V-COINS</div>
-            {role_html}
-        </div>
-        """, unsafe_allow_html=True)
+        role_color = {"Viewer":"#00aaff","Streamer":"#cc44ff","Clipper":"#00ee88"}.get(role,"#00aaff")
+        role_bg    = {"Viewer":"#001a2e","Streamer":"#1a0028","Clipper":"#001a0d"}.get(role,"#001a2e")
+        title_part = f'<div style="font-size:0.7rem;color:#4499ff;font-family:JetBrains Mono,monospace;margin-bottom:2px;">{title_item["value"]}</div>' if title_item else ""
+        role_part  = f'<div style="margin-top:8px;display:inline-block;background:{role_bg};color:{role_color};border:1px solid {role_color}44;border-radius:4px;padding:2px 10px;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;">{role}</div>' if role else ""
+        coins_fmt  = f"{user['coins']:,}"
+        st.markdown(
+            f'''<div style="background:linear-gradient(160deg,#0c1428,#091020);border:1px solid #1a3060;border-radius:12px;padding:16px 18px;text-align:center;margin-bottom:10px;">
+{title_part}
+<div style="font-size:0.68rem;color:#2a4a7a;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:4px;font-family:JetBrains Mono,monospace;">{username}</div>
+<div style="font-family:Syne,sans-serif;font-size:2rem;font-weight:800;background:linear-gradient(45deg,#44ddff,#aa00ff,#00aaff,#0066ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">{coins_fmt}</div>
+<div style="font-size:0.68rem;color:#1e3060;margin-top:2px;font-family:JetBrains Mono,monospace;letter-spacing:0.1em;">V-COINS</div>
+{role_part}
+</div>''',
+            unsafe_allow_html=True
+        )
 
         if st.button("Claim Daily Bonus  +250", use_container_width=True):
             ok, msg = claim_daily_bonus(username)
