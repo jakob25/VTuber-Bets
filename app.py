@@ -1049,112 +1049,114 @@ def render_bet_card(bet: dict, show_btn=False):
 # AUTH PAGE  ←  REPLACE THE ENTIRE def page_auth(): 
 # ─────────────────────────────────────────────
 def page_auth():
-    # Vertical centering + improved layout
-    st.markdown('<div class="auth-container">', unsafe_allow_html=True)
-    st.markdown('<div class="auth-card">', unsafe_allow_html=True)
-
-    # Show toast at top only if one exists
-    if st.session_state.toast:
-        show_toast()
-
-    # Logo / header
+    # Hide sidebar on auth page
     st.markdown("""
-    <div style="text-align:center;padding-bottom:28px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
-                    color:#1e3a6e;letter-spacing:0.25em;text-transform:uppercase;
-                    margin-bottom:14px;">PREDICTION PLATFORM</div>
-        <div style="font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;
-                    color:#e8f0ff;line-height:1;margin-bottom:12px;">VTuberBets</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;
-                    color:#0055cc;letter-spacing:0.12em;">
-            INDIE VTUBER &nbsp;·&nbsp; COMMUNITY PREDICTIONS &nbsp;·&nbsp; FAKE MONEY ONLY
-        </div>
-    </div>
+    <style>
+    [data-testid="stSidebar"] { display: none !important; }
+    [data-testid="collapsedControl"] { display: none !important; }
+    </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="auth-tabs">', unsafe_allow_html=True)
-    tab_login, tab_register = st.tabs([" Login ", " Create Account "])
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        # Show toast if one exists
+        if st.session_state.toast:
+            show_toast()
 
-    with tab_login:
-        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-        l_user = st.text_input("Username", key="login_user", placeholder="Enter your username")
-        l_pass = st.text_input("Password", key="login_pass", type="password", placeholder="Enter your password")
-        if st.button("Login", use_container_width=True, key="btn_login"):
-            if not l_user.strip():
-                set_toast("error", "Please enter your username.")
-                st.rerun()
-            elif not l_pass:
-                set_toast("error", "Please enter your password.")
-                st.rerun()
-            else:
-                ok, msg = login_user(l_user.strip(), l_pass)
-                if ok:
-                    st.session_state.username = l_user.strip()
-                    if needs_role_selection(l_user.strip()):
-                        st.session_state.page = "role_select"
+        # Logo / header
+        st.markdown("""
+        <div style="text-align:center;padding:32px 0 28px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
+                        color:#1e3a6e;letter-spacing:0.25em;text-transform:uppercase;
+                        margin-bottom:14px;">PREDICTION PLATFORM</div>
+            <div style="font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;
+                        color:#e8f0ff;line-height:1;margin-bottom:12px;">VTuberBets</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;
+                        color:#0055cc;letter-spacing:0.12em;">
+                INDIE VTUBER &nbsp;·&nbsp; COMMUNITY PREDICTIONS &nbsp;·&nbsp; FAKE MONEY ONLY
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        tab_login, tab_register = st.tabs([" Login ", " Create Account "])
+
+        with tab_login:
+            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+            l_user = st.text_input("Username", key="login_user", placeholder="Enter your username")
+            l_pass = st.text_input("Password", key="login_pass", type="password", placeholder="Enter your password")
+            if st.button("Login", use_container_width=True, key="btn_login"):
+                if not l_user.strip():
+                    set_toast("error", "Please enter your username.")
+                    st.rerun()
+                elif not l_pass:
+                    set_toast("error", "Please enter your password.")
+                    st.rerun()
+                else:
+                    ok, msg = login_user(l_user.strip(), l_pass)
+                    if ok:
+                        st.session_state.username = l_user.strip()
+                        if needs_role_selection(l_user.strip()):
+                            st.session_state.page = "role_select"
+                        else:
+                            st.session_state.page = "home"
+                        st.session_state.show_onboarding = True
+                        st.rerun()
                     else:
-                        st.session_state.page = "home"
-                    st.session_state.show_onboarding = True  # trigger popup after role
+                        set_toast("error", msg)
+                        st.rerun()
+
+        with tab_register:
+            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+            r_user = st.text_input("Username", key="reg_user", placeholder="2\u201324 characters, no spaces")
+            r_pass = st.text_input("Password", key="reg_pass", type="password", placeholder="At least 6 characters")
+            r_pass2 = st.text_input("Confirm password", key="reg_pass2", type="password", placeholder="Repeat your password")
+            if st.button("Create Account", use_container_width=True, key="btn_register"):
+                un = r_user.strip()
+                errs = []
+                if len(un) < 2: errs.append("Username must be at least 2 characters.")
+                elif len(un) > 24: errs.append("Username must be 24 characters or fewer.")
+                elif " " in un: errs.append("Username cannot contain spaces.")
+                if len(r_pass) < 6: errs.append("Password must be at least 6 characters.")
+                elif r_pass != r_pass2: errs.append("Passwords do not match.")
+                if errs:
+                    set_toast("error", errs[0])
                     st.rerun()
                 else:
-                    set_toast("error", msg)
-                    st.rerun()
+                    ok, msg = register_user(un, r_pass)
+                    if ok:
+                        st.session_state.username = un
+                        st.session_state.page = "role_select"
+                        st.session_state.show_onboarding = True
+                        st.rerun()
+                    else:
+                        set_toast("error", msg)
+                        st.rerun()
 
-    with tab_register:
-        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-        r_user = st.text_input("Username", key="reg_user", placeholder="2–24 characters, no spaces")
-        r_pass = st.text_input("Password", key="reg_pass", type="password", placeholder="At least 6 characters")
-        r_pass2 = st.text_input("Confirm password", key="reg_pass2", type="password", placeholder="Repeat your password")
-        if st.button("Create Account", use_container_width=True, key="btn_register"):
-            un = r_user.strip()
-            errs = []
-            if len(un) < 2: errs.append("Username must be at least 2 characters.")
-            elif len(un) > 24: errs.append("Username must be 24 characters or fewer.")
-            elif " " in un: errs.append("Username cannot contain spaces.")
-            if len(r_pass) < 6: errs.append("Password must be at least 6 characters.")
-            elif r_pass != r_pass2: errs.append("Passwords do not match.")
-            if errs:
-                set_toast("error", errs[0])
-                st.rerun()
-            else:
-                ok, msg = register_user(un, r_pass)
-                if ok:
-                    st.session_state.username = un
-                    st.session_state.page = "role_select"
-                    st.session_state.show_onboarding = True
-                    st.rerun()
-                else:
-                    set_toast("error", msg)
-                    st.rerun()
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # Stats row
-    st.markdown("""
-    <div style="display:flex;gap:0;margin-top:24px;
-                border:1px solid #1a2a44;border-radius:12px;overflow:hidden;">
-        <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
-                        font-weight:700;color:#00aaff;">5,000</div>
-            <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
-                        letter-spacing:0.08em;margin-top:2px;">Starting Coins</div>
+        # Stats row
+        st.markdown("""
+        <div style="display:flex;gap:0;margin-top:24px;
+                    border:1px solid #1a2a44;border-radius:12px;overflow:hidden;">
+            <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+                            font-weight:700;color:#00aaff;">5,000</div>
+                <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
+                            letter-spacing:0.08em;margin-top:2px;">Starting Coins</div>
+            </div>
+            <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+                            font-weight:700;color:#00aaff;">+250</div>
+                <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
+                            letter-spacing:0.08em;margin-top:2px;">Daily Bonus</div>
+            </div>
+            <div style="flex:1;padding:14px;text-align:center;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+                            font-weight:700;color:#00ee88;">$0</div>
+                <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
+                            letter-spacing:0.08em;margin-top:2px;">Real Money</div>
+            </div>
         </div>
-        <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
-                        font-weight:700;color:#00aaff;">+250</div>
-            <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
-                        letter-spacing:0.08em;margin-top:2px;">Daily Bonus</div>
-        </div>
-        <div style="flex:1;padding:14px;text-align:center;">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
-                        font-weight:700;color:#00ee88;">$0</div>
-            <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
-                        letter-spacing:0.08em;margin-top:2px;">Real Money</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    st.markdown('</div></div>', unsafe_allow_html=True)  # close auth-card + container
 # ─────────────────────────────────────────────
 #  ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
