@@ -374,10 +374,10 @@ p, li, div { line-height: 1.6; }
 
 /* AUTH PAGE IMPROVEMENTS */
 .auth-container {
+    padding-top: 60px;          /* nice breathing room at the top */
+    padding-bottom: 40px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    justify-content: center;    /* keeps it horizontally centered */
 
 }
 .auth-tabs .stTabs [data-baseweb="tab-list"] {
