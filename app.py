@@ -279,7 +279,7 @@ h1, h2, h3 {
     font-family: 'JetBrains Mono', monospace;
     margin-bottom: 10px;
 }
-.role-watcher  { background: #001a2e; color: #00aaff; border: 1px solid #00aaff44; }
+.role-Viewer  { background: #001a2e; color: #00aaff; border: 1px solid #00aaff44; }
 .role-streamer { background: #1a0028; color: #cc44ff; border: 1px solid #cc44ff44; }
 .role-clipper  { background: #001a0d; color: #00ee88; border: 1px solid #00ee8844; }
 
@@ -472,7 +472,7 @@ CATEGORIES = [
     "Follower / Sub Goal", "Raid / Shoutout", "Chaos Moment", "Other"
 ]
 
-ROLES = ["Watcher", "Streamer", "Clipper"]
+ROLES = ["Viewer", "Streamer", "Clipper"]
 
 BADGE_STYLES = {
     "gem_hunter":     "badge-gem",
@@ -1172,7 +1172,7 @@ def page_role_select():
         """, unsafe_allow_html=True)
 
         roles = [
-            ("Watcher",  "role-watcher",  "You watch streams, follow indie VTubers, and bet on the chaos.",           "Bet on streams, vote on outcomes, climb the leaderboard."),
+            ("Viewer",  "role-Viewer",  "You watch streams, follow indie VTubers, and bet on the chaos.",           "Bet on streams, vote on outcomes, climb the leaderboard."),
             ("Streamer", "role-streamer", "You are a VTuber or streamer — your community might bet on your streams.", "Get discovered through community bets featuring your content."),
             ("Clipper",  "role-clipper",  "You create clips and highlight reels of indie VTubers.",                   "Compete in Clip Showdown events and earn the Clipper Legend badge."),
         ]
@@ -1196,12 +1196,11 @@ def page_role_select():
 
         st.markdown("""
         <div style="text-align:center;margin-top:16px;color:#1e3060;font-size:0.75rem;">
-            Not sure? Pick Watcher — you can update it later in your profile.
+            Not sure? Pick Viewer — you can update it later in your profile.
         </div>
         """, unsafe_allow_html=True)
         
 def page_role_select():
-    ... (your existing code stays exactly the same) ...
             if st.button(f"I am a {role}", key=f"role_{role}", use_container_width=True):
                 set_user_role(st.session_state.username, role)
                 st.session_state.page = "home"
@@ -1230,7 +1229,7 @@ def show_onboarding_popup():
                 </div>
                 <div style="display:flex;gap:14px;">
                     <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">02</span>
-                    <div><strong>Pick your role</strong> — Watcher, Streamer, or Clipper.</div>
+                    <div><strong>Pick your role</strong> — Viewer, Streamer, or Clipper.</div>
                 </div>
                 <div style="display:flex;gap:14px;">
                     <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">03</span>
@@ -1293,8 +1292,8 @@ def render_sidebar():
         title_html = (f'<div class="user-title">{title_item["value"]}</div>'
                       if title_item else "")
         role  = user.get("role","")
-        r_css = {"Watcher":"role-watcher","Streamer":"role-streamer",
-                 "Clipper":"role-clipper"}.get(role,"role-watcher")
+        r_css = {"Viewer":"role-Viewer","Streamer":"role-streamer",
+                 "Clipper":"role-clipper"}.get(role,"role-Viewer")
 
         st.markdown(f"""
         <div class="coin-box">
@@ -1860,8 +1859,8 @@ def page_my_profile():
     st.markdown("## My Profile")
 
     role  = user.get("role","")
-    r_css = {"Watcher":"role-watcher","Streamer":"role-streamer",
-             "Clipper":"role-clipper"}.get(role,"role-watcher")
+    r_css = {"Viewer":"role-Viewer","Streamer":"role-streamer",
+             "Clipper":"role-clipper"}.get(role,"role-Viewer")
     title_item = get_equipped(username, "title")
     title_str  = f' — {title_item["value"]}' if title_item else ""
 
