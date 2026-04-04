@@ -1,7 +1,7 @@
 import streamlit as st
 import uuid
 import bcrypt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from supabase import create_client, Client
 
 # ─────────────────────────────────────────────
@@ -372,19 +372,10 @@ hr { border-color: #192035 !important; }
 .stTextInput label, .stTextArea label, .stSelectbox label, .stNumberInput label, .stMultiSelect label { color: #5577aa !important; font-size: 0.84rem !important; font-weight: 500 !important; }
 p, li, div { line-height: 1.6; }
 
-/* AUTH CARD */
-.auth-card {
-    background: #0b0f1e;
-    border: 1px solid #1e3060;
-    border-radius: 16px;
-    padding: 36px 40px;
-    max-width: 480px;
-    width: 100%;
-    margin: 0 auto;
-}
+/* AUTH PAGE IMPROVEMENTS */
 .auth-container {
     display: flex;
-    justify-content: center;
+    justify-content: center;    /* keeps it horizontally centered */
 }
 /* Force Streamlit to remove its own top gap on auth page */
 [data-testid="stAppViewContainer"] > div:first-child {
@@ -516,7 +507,7 @@ def register_user(username: str, password: str) -> tuple[bool, str]:
         "username":      username,
         "password_hash": pw_hash,
         "coins":         STARTING_COINS,
-        "joined_at":     datetime.utcnow().isoformat(),
+        "joined_at":     datetime.now(UTC).isoformat(),
         "last_bonus":    None,
         "total_won":     0,
         "total_lost":    0,
@@ -553,7 +544,7 @@ def update_user(username: str, fields: dict):
 
 def claim_daily_bonus(username: str) -> tuple[bool, str]:
     user = get_user(username)
-    now  = datetime.utcnow()
+    now  = datetime.now(UTC)
     last = user.get("last_bonus")
     if last:
         last_dt = datetime.fromisoformat(last.replace("Z", ""))
@@ -612,7 +603,7 @@ def create_bet(vtuber_name, stream_link, game_or_activity,
         "description":      description.strip(),
         "options":          options,
         "status":           "open",
-        "created_at":       datetime.utcnow().isoformat(),
+        "created_at":       datetime.now(UTC).isoformat(),
         "created_by":       created_by,
         "category":         category,
         "result":           None,
@@ -639,7 +630,7 @@ def place_entry(bet_id: str, username: str, option: str, amount: int):
         "username":   username,
         "option":     option,
         "amount":     amount,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
     }).execute()
     user = get_user(username)
     update_user(username, {
@@ -665,7 +656,7 @@ def cast_vote(bet_id: str, username: str, option: str) -> bool:
         "bet_id":     bet_id,
         "username":   username,
         "option":     option,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
     }).execute()
     # Check if this was the deciding vote
     votes   = get_votes(bet_id)
@@ -750,7 +741,7 @@ def resolve_bet(bet_id: str) -> tuple[bool, str]:
 def check_fallback_resolutions():
     """Call this on page load to auto-resolve stale voting bets."""
     voting_bets = get_bets("voting")
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     for bet in voting_bets:
         created = datetime.fromisoformat(bet["created_at"].replace("Z",""))
         if now - created > timedelta(days=FALLBACK_DAYS):
@@ -778,7 +769,7 @@ def award_badge(username: str, achievement_id: str, reward_coins: int = 0):
         "id":             str(uuid.uuid4()),
         "username":       username,
         "achievement_id": achievement_id,
-        "earned_at":      datetime.utcnow().isoformat(),
+        "earned_at":      datetime.now(UTC).isoformat(),
     }).execute()
     if reward_coins > 0:
         user = get_user(username)
@@ -910,7 +901,7 @@ def purchase_item(username: str, item_id: str, cost: int) -> tuple[bool, str]:
         "username":     username,
         "item_id":      item_id,
         "equipped":     False,
-        "purchased_at": datetime.utcnow().isoformat(),
+        "purchased_at": datetime.now(UTC).isoformat(),
     }).execute()
     update_user(username, {"coins": user["coins"] - cost})
     return True, "Purchased!"
@@ -963,8 +954,7 @@ def leaderboard_losers(n=10) -> list:
 #  SESSION STATE
 # ─────────────────────────────────────────────
 for k, v in [("username", None), ("page", "home"), ("auth_tab", "login"),
-             ("selected_bet", None), ("selected_profile", None), ("toast", None),
-             ("show_onboarding", False)]:
+             ("selected_bet", None), ("selected_profile", None), ("toast", None)]:
     if k not in st.session_state:
         st.session_state[k] = v
 
@@ -1049,113 +1039,110 @@ def render_bet_card(bet: dict, show_btn=False):
 # AUTH PAGE  ←  REPLACE THE ENTIRE def page_auth(): 
 # ─────────────────────────────────────────────
 def page_auth():
-    # Hide sidebar on auth page
+    # Vertical centering + improved layout
+    st.markdown('<div class="auth-container">', unsafe_allow_html=True)
+    st.markdown('<div class="auth-card">', unsafe_allow_html=True)
+
+    # Logo / header
     st.markdown("""
-    <style>
-    [data-testid="stSidebar"] { display: none !important; }
-    [data-testid="collapsedControl"] { display: none !important; }
-    </style>
+    <div style="text-align:center;padding-bottom:28px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
+                    color:#1e3a6e;letter-spacing:0.25em;text-transform:uppercase;
+                    margin-bottom:14px;">PREDICTION PLATFORM</div>
+        <div style="font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;
+                    color:#e8f0ff;line-height:1;margin-bottom:12px;">VTuberBets</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;
+                    color:#0055cc;letter-spacing:0.12em;">
+            INDIE VTUBER &nbsp;·&nbsp; COMMUNITY PREDICTIONS &nbsp;·&nbsp; FAKE MONEY ONLY
+        </div>
+    </div>
     """, unsafe_allow_html=True)
 
-    _, col, _ = st.columns([1, 2, 1])
-    with col:
-        # Show toast if one exists
-        if st.session_state.toast:
-            show_toast()
+    show_toast()
 
-        # Logo / header
-        st.markdown("""
-        <div style="text-align:center;padding:32px 0 28px;">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
-                        color:#1e3a6e;letter-spacing:0.25em;text-transform:uppercase;
-                        margin-bottom:14px;">PREDICTION PLATFORM</div>
-            <div style="font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;
-                        color:#e8f0ff;line-height:1;margin-bottom:12px;">VTuberBets</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;
-                        color:#0055cc;letter-spacing:0.12em;">
-                INDIE VTUBER &nbsp;·&nbsp; COMMUNITY PREDICTIONS &nbsp;·&nbsp; FAKE MONEY ONLY
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown('<div class="auth-tabs">', unsafe_allow_html=True)
+    tab_login, tab_register = st.tabs([" Login ", " Create Account "])
 
-        tab_login, tab_register = st.tabs([" Login ", " Create Account "])
-
-        with tab_login:
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-            l_user = st.text_input("Username", key="login_user", placeholder="Enter your username")
-            l_pass = st.text_input("Password", key="login_pass", type="password", placeholder="Enter your password")
-            if st.button("Login", use_container_width=True, key="btn_login"):
-                if not l_user.strip():
-                    set_toast("error", "Please enter your username.")
-                    st.rerun()
-                elif not l_pass:
-                    set_toast("error", "Please enter your password.")
-                    st.rerun()
-                else:
-                    ok, msg = login_user(l_user.strip(), l_pass)
-                    if ok:
-                        st.session_state.username = l_user.strip()
-                        if needs_role_selection(l_user.strip()):
-                            st.session_state.page = "role_select"
-                        else:
-                            st.session_state.page = "home"
-                        st.rerun()
-                    else:
-                        set_toast("error", msg)
-                        st.rerun()
-
-        with tab_register:
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-            r_user = st.text_input("Username", key="reg_user", placeholder="2\u201324 characters, no spaces")
-            r_pass = st.text_input("Password", key="reg_pass", type="password", placeholder="At least 6 characters")
-            r_pass2 = st.text_input("Confirm password", key="reg_pass2", type="password", placeholder="Repeat your password")
-            if st.button("Create Account", use_container_width=True, key="btn_register"):
-                un = r_user.strip()
-                errs = []
-                if len(un) < 2: errs.append("Username must be at least 2 characters.")
-                elif len(un) > 24: errs.append("Username must be 24 characters or fewer.")
-                elif " " in un: errs.append("Username cannot contain spaces.")
-                if len(r_pass) < 6: errs.append("Password must be at least 6 characters.")
-                elif r_pass != r_pass2: errs.append("Passwords do not match.")
-                if errs:
-                    set_toast("error", errs[0])
-                    st.rerun()
-                else:
-                    ok, msg = register_user(un, r_pass)
-                    if ok:
-                        st.session_state.username = un
+    with tab_login:
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        l_user = st.text_input("Username", key="login_user", placeholder="Enter your username")
+        l_pass = st.text_input("Password", key="login_pass", type="password", placeholder="Enter your password")
+        if st.button("Login", use_container_width=True, key="btn_login"):
+            if not l_user.strip():
+                set_toast("error", "Please enter your username.")
+                st.rerun()
+            elif not l_pass:
+                set_toast("error", "Please enter your password.")
+                st.rerun()
+            else:
+                ok, msg = login_user(l_user.strip(), l_pass)
+                if ok:
+                    st.session_state.username = l_user.strip()
+                    if needs_role_selection(l_user.strip()):
                         st.session_state.page = "role_select"
-                        st.session_state.show_onboarding = True
-                        st.rerun()
                     else:
-                        set_toast("error", msg)
-                        st.rerun()
+                        st.session_state.page = "home"
+                    st.session_state.show_onboarding = True  # trigger popup after role
+                    st.rerun()
+                else:
+                    set_toast("error", msg)
+                    st.rerun()
 
-        # Stats row
-        st.markdown("""
-        <div style="display:flex;gap:0;margin-top:24px;
-                    border:1px solid #1a2a44;border-radius:12px;overflow:hidden;">
-            <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
-                <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
-                            font-weight:700;color:#00aaff;">5,000</div>
-                <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
-                            letter-spacing:0.08em;margin-top:2px;">Starting Coins</div>
-            </div>
-            <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
-                <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
-                            font-weight:700;color:#00aaff;">+250</div>
-                <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
-                            letter-spacing:0.08em;margin-top:2px;">Daily Bonus</div>
-            </div>
-            <div style="flex:1;padding:14px;text-align:center;">
-                <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
-                            font-weight:700;color:#00ee88;">$0</div>
-                <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
-                            letter-spacing:0.08em;margin-top:2px;">Real Money</div>
-            </div>
+    with tab_register:
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        r_user = st.text_input("Username", key="reg_user", placeholder="2–24 characters, no spaces")
+        r_pass = st.text_input("Password", key="reg_pass", type="password", placeholder="At least 6 characters")
+        r_pass2 = st.text_input("Confirm password", key="reg_pass2", type="password", placeholder="Repeat your password")
+        if st.button("Create Account", use_container_width=True, key="btn_register"):
+            un = r_user.strip()
+            errs = []
+            if len(un) < 2: errs.append("Username must be at least 2 characters.")
+            elif len(un) > 24: errs.append("Username must be 24 characters or fewer.")
+            elif " " in un: errs.append("Username cannot contain spaces.")
+            if len(r_pass) < 6: errs.append("Password must be at least 6 characters.")
+            elif r_pass != r_pass2: errs.append("Passwords do not match.")
+            if errs:
+                set_toast("error", errs[0])
+                st.rerun()
+            else:
+                ok, msg = register_user(un, r_pass)
+                if ok:
+                    st.session_state.username = un
+                    st.session_state.page = "role_select"
+                    st.session_state.show_onboarding = True
+                    st.rerun()
+                else:
+                    set_toast("error", msg)
+                    st.rerun()
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Stats row
+    st.markdown("""
+    <div style="display:flex;gap:0;margin-top:24px;
+                border:1px solid #1a2a44;border-radius:12px;overflow:hidden;">
+        <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+                        font-weight:700;color:#00aaff;">5,000</div>
+            <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
+                        letter-spacing:0.08em;margin-top:2px;">Starting Coins</div>
         </div>
-        """, unsafe_allow_html=True)
+        <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+                        font-weight:700;color:#00aaff;">+250</div>
+            <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
+                        letter-spacing:0.08em;margin-top:2px;">Daily Bonus</div>
+        </div>
+        <div style="flex:1;padding:14px;text-align:center;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+                        font-weight:700;color:#00ee88;">$0</div>
+            <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
+                        letter-spacing:0.08em;margin-top:2px;">Real Money</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
+    st.markdown('</div></div>', unsafe_allow_html=True)  # close auth-card + container
 # ─────────────────────────────────────────────
 #  ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
@@ -1188,9 +1175,9 @@ def page_role_select():
         """, unsafe_allow_html=True)
 
         roles = [
-            ("Viewer",   "role-watcher",   "You watch streams, follow indie VTubers, and bet on the chaos.",           "Bet on streams, vote on outcomes, climb the leaderboard."),
-            ("Streamer", "role-streamer",  "You are a VTuber or streamer — your community might bet on your streams.", "Get discovered through community bets featuring your content."),
-            ("Clipper",  "role-clipper",   "You create clips and highlight reels of indie VTubers.",                   "Compete in Clip Showdown events and earn the Clipper Legend badge."),
+            ("Viewer",  "role-Viewer",  "You watch streams, follow indie VTubers, and bet on the chaos.",           "Bet on streams, vote on outcomes, climb the leaderboard."),
+            ("Streamer", "role-streamer", "You are a VTuber or streamer — your community might bet on your streams.", "Get discovered through community bets featuring your content."),
+            ("Clipper",  "role-clipper",  "You create clips and highlight reels of indie VTubers.",                   "Compete in Clip Showdown events and earn the Clipper Legend badge."),
         ]
 
         for role, css, short_desc, detail in roles:
@@ -1207,7 +1194,6 @@ def page_role_select():
             if st.button(f"I am a {role}", key=f"role_{role}", use_container_width=True):
                 set_user_role(st.session_state.username, role)
                 st.session_state.page = "home"
-                st.session_state.show_onboarding = True
                 set_toast("success", f"Welcome! Your account is ready. You start with 5,000 V-Coins.")
                 st.rerun()
 
@@ -1216,71 +1202,70 @@ def page_role_select():
             Not sure? Pick Viewer — you can update it later in your profile.
         </div>
         """, unsafe_allow_html=True)
+        
+def page_role_select():
+            if st.button(f"I am a {role}", key=f"role_{role}", use_container_width=True):
+                set_user_role(st.session_state.username, role)
+                st.session_state.page = "home"
+                st.session_state.show_onboarding = True   # ← ADD THIS LINE
+                set_toast("success", f"Welcome! Your account is ready. You start with 5,000 V-Coins.")
+                st.rerun()
 # ─────────────────────────────────────────────
 # ONBOARDING PAGE
 # ─────────────────────────────────────────────
 def show_onboarding_popup():
     if not st.session_state.get("show_onboarding"):
         return
-
-    # Use st.dialog-style layout — centered column, no CSS overlay so button is clickable
     st.markdown("""
-    <style>
-    .onboarding-wrap {
-        background: #0b0f1e;
-        border: 1px solid #1e3060;
-        border-radius: 16px;
-        padding: 28px 32px;
-        margin: 0 auto 24px auto;
-        max-width: 560px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    _, mid, _ = st.columns([1, 3, 1])
-    with mid:
-        st.markdown("""
-        <div class="onboarding-wrap">
+    <div class="onboarding-modal">
+        <div class="onboarding-content">
             <div style="text-align:center;margin-bottom:20px;">
                 <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#e8f0ff;">
-                    Welcome to VTuberBets! 🎲
+                    Welcome to VTuberBets!
                 </div>
-                <div style="color:#00aaff;font-size:0.9rem;margin-top:4px;">Here's how it works</div>
+                <div style="color:#00aaff;font-size:0.9rem;">Here's how it works</div>
             </div>
-            <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:4px;">
-                <div style="display:flex;gap:14px;align-items:flex-start;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;flex-shrink:0;">01</span>
-                    <div style="color:#c8d8f0;"><strong>Create account</strong> — username + password only.</div>
+            <div style="display:flex;flex-direction:column;gap:16px;">
+                <div style="display:flex;gap:14px;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">01</span>
+                    <div><strong>Create account</strong> — username + password only.</div>
                 </div>
-                <div style="display:flex;gap:14px;align-items:flex-start;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;flex-shrink:0;">02</span>
-                    <div style="color:#c8d8f0;"><strong>Pick your role</strong> — Viewer, Streamer, or Clipper.</div>
+                <div style="display:flex;gap:14px;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">02</span>
+                    <div><strong>Pick your role</strong> — Viewer, Streamer, or Clipper.</div>
                 </div>
-                <div style="display:flex;gap:14px;align-items:flex-start;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;flex-shrink:0;">03</span>
-                    <div style="color:#c8d8f0;"><strong>Browse open bets</strong> on indie VTuber streams.</div>
+                <div style="display:flex;gap:14px;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">03</span>
+                    <div><strong>Browse open bets</strong> on indie VTuber streams.</div>
                 </div>
-                <div style="display:flex;gap:14px;align-items:flex-start;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;flex-shrink:0;">04</span>
-                    <div style="color:#c8d8f0;"><strong>Place V-Coins</strong> on what you think will happen.</div>
+                <div style="display:flex;gap:14px;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">04</span>
+                    <div><strong>Place V-Coins</strong> on what you think will happen.</div>
                 </div>
-                <div style="display:flex;gap:14px;align-items:flex-start;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;flex-shrink:0;">05</span>
-                    <div style="color:#c8d8f0;"><strong>Vote after the stream</strong> — 3 votes = auto-resolution.</div>
+                <div style="display:flex;gap:14px;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">05</span>
+                    <div><strong>Vote after the stream</strong> — 3 votes = auto-resolution.</div>
                 </div>
-                <div style="display:flex;gap:14px;align-items:flex-start;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;flex-shrink:0;">06</span>
-                    <div style="color:#c8d8f0;"><strong>Earn badges &amp; coins</strong> — achievements pay real V-Coins.</div>
+                <div style="display:flex;gap:14px;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">06</span>
+                    <div><strong>Earn badges &amp; coins</strong> — achievements pay real V-Coins.</div>
                 </div>
+            </div>
+            <div style="text-align:center;margin-top:28px;">
+                <button onclick="window.parent.location.reload()" 
+                        style="background:linear-gradient(135deg,#0044ff,#00aaff);color:white;border:none;
+                               padding:12px 32px;border-radius:8px;font-weight:600;cursor:pointer;">
+                    Got it! Let's go
+                </button>
             </div>
         </div>
-        """, unsafe_allow_html=True)
-
-        if st.button("✅ Got it! Let's go", use_container_width=True, key="dismiss_onboarding"):
-            st.session_state.show_onboarding = False
-            st.rerun()
-
-        st.markdown("---")
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Close popup when user clicks button (Streamlit can't do native JS click easily, so we use rerun trick)
+    if st.button("✅ Got it! Let's go", use_container_width=True):
+        st.session_state.show_onboarding = False
+        st.rerun()
        
 # ─────────────────────────────────────────────
 #  SIDEBAR
@@ -1310,27 +1295,18 @@ def render_sidebar():
         title_html = (f'<div class="user-title">{title_item["value"]}</div>'
                       if title_item else "")
         role  = user.get("role","")
-        r_css = {"Viewer":"role-watcher","Streamer":"role-streamer",
-                 "Clipper":"role-clipper"}.get(role,"role-watcher")
-        role_html = (f'<span class="profile-role {r_css}" style="margin-top:8px;display:inline-block;">{role}</span>'
-                     if role else "")
-        coins_fmt = f"{user['coins']:,}"
+        r_css = {"Viewer":"role-Viewer","Streamer":"role-streamer",
+                 "Clipper":"role-clipper"}.get(role,"role-Viewer")
 
-        role_color = {"Viewer":"#00aaff","Streamer":"#cc44ff","Clipper":"#00ee88"}.get(role,"#00aaff")
-        role_bg    = {"Viewer":"#001a2e","Streamer":"#1a0028","Clipper":"#001a0d"}.get(role,"#001a2e")
-        title_part = f'<div style="font-size:0.7rem;color:#4499ff;font-family:JetBrains Mono,monospace;margin-bottom:2px;">{title_item["value"]}</div>' if title_item else ""
-        role_part  = f'<div style="margin-top:8px;display:inline-block;background:{role_bg};color:{role_color};border:1px solid {role_color}44;border-radius:4px;padding:2px 10px;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;">{role}</div>' if role else ""
-        coins_fmt  = f"{user['coins']:,}"
-        st.markdown(
-            f'''<div style="background:linear-gradient(160deg,#0c1428,#091020);border:1px solid #1a3060;border-radius:12px;padding:16px 18px;text-align:center;margin-bottom:10px;">
-{title_part}
-<div style="font-size:0.68rem;color:#2a4a7a;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:4px;font-family:JetBrains Mono,monospace;">{username}</div>
-<div style="font-family:Syne,sans-serif;font-size:2rem;font-weight:800;background:linear-gradient(45deg,#44ddff,#aa00ff,#00aaff,#0066ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">{coins_fmt}</div>
-<div style="font-size:0.68rem;color:#1e3060;margin-top:2px;font-family:JetBrains Mono,monospace;letter-spacing:0.1em;">V-COINS</div>
-{role_part}
-</div>''',
-            unsafe_allow_html=True
-        )
+        st.markdown(f"""
+        <div class="coin-box">
+            {title_html}
+            <div class="coin-label">{username}</div>
+            <div class="coin-amount">{user['coins']:,}</div>
+            <div class="coin-sub">V-COINS</div>
+            {f'<span class="profile-role {r_css}" style="margin-top:8px;display:inline-block;">{role}</span>' if role else ''}
+        </div>
+        """, unsafe_allow_html=True)
 
         if st.button("Claim Daily Bonus  +250", use_container_width=True):
             ok, msg = claim_daily_bonus(username)
@@ -1789,7 +1765,6 @@ def page_shop():
                 </div>
                 """, unsafe_allow_html=True)
             with col2:
-                st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
                 if owned:
                     if not is_equip:
                         if st.button("Equip", key=f"equip_{item['id']}"):
@@ -1886,8 +1861,8 @@ def page_my_profile():
     st.markdown("## My Profile")
 
     role  = user.get("role","")
-    r_css = {"Viewer":"role-watcher","Streamer":"role-streamer",
-             "Clipper":"role-clipper"}.get(role,"role-watcher")
+    r_css = {"Viewer":"role-Viewer","Streamer":"role-streamer",
+             "Clipper":"role-clipper"}.get(role,"role-Viewer")
     title_item = get_equipped(username, "title")
     title_str  = f' — {title_item["value"]}' if title_item else ""
 
@@ -2042,7 +2017,6 @@ def main():
         return
 
     render_sidebar()
-    show_onboarding_popup()
 
     p = st.session_state.page
     if   p == "home":         page_home()
