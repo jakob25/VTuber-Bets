@@ -1,7 +1,7 @@
 import streamlit as st
 import uuid
 import bcrypt
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta
 from supabase import create_client, Client
 
 # ─────────────────────────────────────────────
@@ -13,8 +13,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
 # ─────────────────────────────────────────────
-# STYLES
+#  STYLES
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -37,7 +38,7 @@ h1, h2, h3 {
     color: #e8f0ff !important;
 }
 
-/* ANIMATIONS */
+/* ── ANIMATIONS ── */
 @keyframes gradient-border {
     0%   { background-position: 0% 50%; }
     50%  { background-position: 100% 50%; }
@@ -48,7 +49,7 @@ h1, h2, h3 {
     100% { background-position: 100% 50%; }
 }
 
-/* HERO */
+/* ── HERO ── */
 .hero-wrap {
     padding: 2px;
     border-radius: 18px;
@@ -108,7 +109,7 @@ h1, h2, h3 {
     margin-top: 10px;
 }
 
-/* CARDS */
+/* ── CARDS ── */
 .card {
     background: #0b0f1e;
     border: 1px solid #151e33;
@@ -149,7 +150,7 @@ h1, h2, h3 {
     font-style: italic;
 }
 
-/* PILLS */
+/* ── PILLS ── */
 .pill {
     display: inline-block;
     padding: 3px 10px;
@@ -163,9 +164,10 @@ h1, h2, h3 {
 .pill-open   { background: #001a0d; color: #00ee88; border: 1px solid #00ee8855; }
 .pill-voting { background: #1a1000; color: #ffcc00; border: 1px solid #ffcc0055; }
 .pill-closed { background: #0a001a; color: #9977ff; border: 1px solid #9977ff55; }
+
 .pot { font-size: 0.78rem; color: #4499ff; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
 
-/* BARS */
+/* ── BARS ── */
 .bar-wrap { margin: 10px 0; }
 .bar-label { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 5px; color: #7a9acc; }
 .bar-label .bar-pct { font-family: 'JetBrains Mono', monospace; color: #4499ff; font-size: 0.78rem; }
@@ -173,7 +175,7 @@ h1, h2, h3 {
 .bar-fill { height: 7px; border-radius: 3px; background: linear-gradient(90deg, #0044cc, #00aaff); box-shadow: 0 0 10px rgba(0,170,255,0.5); }
 .bar-fill-vote { height: 7px; border-radius: 3px; background: linear-gradient(90deg, #aa7700, #ffcc00); box-shadow: 0 0 10px rgba(255,204,0,0.5); }
 
-/* COIN BOX */
+/* ── COIN BOX ── */
 .coin-box {
     background: linear-gradient(160deg, #0c1428 0%, #091020 100%);
     border: 1px solid #1a3060;
@@ -205,14 +207,14 @@ h1, h2, h3 {
 }
 .coin-sub { font-size: 0.68rem; color: #1e3060; margin-top: 2px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; }
 
-/* NOTICES */
+/* ── NOTICES ── */
 .notice { border-radius: 8px; padding: 13px 16px; font-size: 0.88rem; margin: 10px 0; font-weight: 500; line-height: 1.5; }
 .notice-success { background: #001a0d; border: 1px solid #00ee8844; color: #00cc77; }
 .notice-warn    { background: #1a1000; border: 1px solid #ffcc0044; color: #ddaa00; }
 .notice-error   { background: #140008; border: 1px solid #ff334455; color: #ff5577; }
 .notice-info    { background: #000d1a; border: 1px solid #0066ff44; color: #5599ff; }
 
-/* LEADERBOARD */
+/* ── LEADERBOARD ── */
 .lb-row {
     display: flex; align-items: center; padding: 12px 16px;
     border-radius: 10px; margin-bottom: 6px; background: #0b1020;
@@ -225,7 +227,7 @@ h1, h2, h3 {
 .lb-stat { color: #00aaff; font-weight: 700; font-size: 0.85rem; text-align: right; font-family: 'JetBrains Mono', monospace; }
 .lb-stat-loss { color: #ff5577; font-weight: 700; font-size: 0.85rem; text-align: right; font-family: 'JetBrains Mono', monospace; }
 
-/* BADGE */
+/* ── BADGE ── */
 .badge {
     display: inline-block;
     background: #0d1428;
@@ -238,14 +240,18 @@ h1, h2, h3 {
     margin: 3px;
     font-family: 'JetBrains Mono', monospace;
 }
-.badge-earned { background: linear-gradient(135deg, #0a1428, #0d1e3a); border-color: #0066ff55; color: #44aaff; }
+.badge-earned {
+    background: linear-gradient(135deg, #0a1428, #0d1e3a);
+    border-color: #0066ff55;
+    color: #44aaff;
+}
 .badge-gem    { border-color: #00ee8855; color: #00ee88; }
 .badge-roller { border-color: #ffcc0055; color: #ffcc00; }
 .badge-vote   { border-color: #aa00ff55; color: #cc44ff; }
 .badge-scout  { border-color: #00c8ff55; color: #00c8ff; }
 .badge-raid   { border-color: #ff558855; color: #ff5588; }
 
-/* TITLE PREFIX */
+/* ── TITLE PREFIX ── */
 .user-title {
     font-size: 0.7rem;
     font-family: 'JetBrains Mono', monospace;
@@ -254,7 +260,7 @@ h1, h2, h3 {
     margin-bottom: 2px;
 }
 
-/* PROFILE CARD */
+/* ── PROFILE CARD ── */
 .profile-card {
     background: #0b0f1e;
     border: 1px solid #1e3060;
@@ -277,7 +283,7 @@ h1, h2, h3 {
 .role-streamer { background: #1a0028; color: #cc44ff; border: 1px solid #cc44ff44; }
 .role-clipper  { background: #001a0d; color: #00ee88; border: 1px solid #00ee8844; }
 
-/* SHOP */
+/* ── SHOP ── */
 .shop-item {
     background: #0b0f1e;
     border: 1px solid #1e3060;
@@ -292,7 +298,7 @@ h1, h2, h3 {
 .shop-item-cost { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #4499ff; font-weight: 700; }
 .shop-owned { border-color: #00ee8844; }
 
-/* HOW IT WORKS */
+/* ── HOW IT WORKS ── */
 .hiw-section {
     background: #0b0f1e;
     border: 1px solid #1e3060;
@@ -312,7 +318,7 @@ h1, h2, h3 {
 .hiw-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: #e8f0ff; margin-bottom: 8px; }
 .hiw-body { font-size: 0.88rem; color: #6a88aa; line-height: 1.7; }
 
-/* BUTTONS */
+/* ── BUTTONS ── */
 .stButton > button {
     background: linear-gradient(135deg, #0044cc, #0077ff) !important;
     color: #e8f4ff !important; border: none !important; border-radius: 8px !important;
@@ -321,7 +327,7 @@ h1, h2, h3 {
 }
 .stButton > button:hover { box-shadow: 0 0 20px rgba(0,119,255,0.35) !important; }
 
-/* INPUTS */
+/* ── INPUTS ── */
 .stTextInput > div > div > input,
 .stNumberInput > div > div > input,
 .stTextArea > div > div > textarea,
@@ -338,7 +344,7 @@ h1, h2, h3 {
     box-shadow: 0 0 0 2px rgba(0,102,255,0.2) !important;
 }
 
-/* TABS */
+/* ── TABS ── */
 .stTabs [data-baseweb="tab-list"] {
     background: #080d1a !important; border-radius: 8px; gap: 2px;
     padding: 3px; border: 1px solid #182035;
@@ -353,7 +359,7 @@ h1, h2, h3 {
     color: #e8f4ff !important;
 }
 
-/* METRICS */
+/* ── METRICS ── */
 [data-testid="metric-container"] {
     background: #0b1020; border: 1px solid #192035; border-radius: 10px; padding: 12px 16px;
 }
@@ -371,84 +377,15 @@ hr { border-color: #192035 !important; }
 .stRadio label { color: #7a9acc !important; font-size: 0.88rem !important; }
 .stTextInput label, .stTextArea label, .stSelectbox label, .stNumberInput label, .stMultiSelect label { color: #5577aa !important; font-size: 0.84rem !important; font-weight: 500 !important; }
 p, li, div { line-height: 1.6; }
+</style>
 
-/* AUTH PAGE IMPROVEMENTS */
-.auth-container {
-    display: flex;
-    justify-content: center;    /* keeps it horizontally centered */
-}
-/* Force Streamlit to remove its own top gap on auth page */
-[data-testid="stAppViewContainer"] > div:first-child {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-[data-testid="stAppViewContainer"] {
-    padding-top: 0 !important;
-}
-/* Bigger, better padding on the actual Login / Create Account buttons */
-.stButton > button {
-    padding: 16px 0 !important;     /* more vertical height */
-    font-size: 1.1rem !important;
-    font-weight: 600 !important;
-}
-
-/* Slightly larger tab headers too */
-.auth-tabs .stTabs [data-baseweb="tab"] {
-    font-size: 1.05rem !important;
-    font-weight: 600 !important;
-    padding: 16px 28px !important;   /* more padding on tabs */
-    border-radius: 8px !important;
-}
-.auth-tabs .stTabs [data-baseweb="tab-list"] {
-    background: #0b0f1e !important;
-    border: 1px solid #1e3060 !important;
-    border-radius: 12px;
-    padding: 6px;
-    gap: 6px;
-}
-.auth-tabs .stTabs [data-baseweb="tab"] {
-    font-size: 1.05rem !important;
-    font-weight: 600 !important;
-    padding: 12px 24px !important;
-    border-radius: 8px !important;
-    transition: all 0.2s;
-}
-.auth-tabs .stTabs [data-baseweb="tab"]:hover {
-    background: #1a2540 !important;
-}
-.stTabs [aria-selected="true"] {
-    background: linear-gradient(135deg, #0044ff, #00aaff) !important;
-    color: #e8f4ff !important;
-    box-shadow: 0 4px 15px rgba(0, 170, 255, 0.3);
-}
-
-/* ONBOARDING POPUP */
-.onboarding-modal {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(8, 12, 24, 0.95);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-.onboarding-content {
-    background: #0b0f1e;
-    border: 1px solid #1e3060;
-    border-radius: 16px;
-    max-width: 520px;
-    width: 90%;
-    padding: 32px;
-}
-
-/* HIDE STREAMLIT HUD */
+/* ── HIDE STREAMLIT HUD ── */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 .stApp header {display: none;}
 .stDeployButton {display: none;}
-</style>
-""", unsafe_allow_html=True)
 
+""", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 #  SUPABASE
@@ -475,7 +412,7 @@ CATEGORIES = [
     "Follower / Sub Goal", "Raid / Shoutout", "Chaos Moment", "Other"
 ]
 
-ROLES = ["Viewer", "Streamer", "Clipper"]
+ROLES = ["Watcher", "Streamer", "Clipper"]
 
 BADGE_STYLES = {
     "gem_hunter":     "badge-gem",
@@ -507,7 +444,7 @@ def register_user(username: str, password: str) -> tuple[bool, str]:
         "username":      username,
         "password_hash": pw_hash,
         "coins":         STARTING_COINS,
-        "joined_at":     datetime.now(UTC).isoformat(),
+        "joined_at":     datetime.utcnow().isoformat(),
         "last_bonus":    None,
         "total_won":     0,
         "total_lost":    0,
@@ -544,7 +481,7 @@ def update_user(username: str, fields: dict):
 
 def claim_daily_bonus(username: str) -> tuple[bool, str]:
     user = get_user(username)
-    now  = datetime.now(UTC)
+    now  = datetime.utcnow()
     last = user.get("last_bonus")
     if last:
         last_dt = datetime.fromisoformat(last.replace("Z", ""))
@@ -603,7 +540,7 @@ def create_bet(vtuber_name, stream_link, game_or_activity,
         "description":      description.strip(),
         "options":          options,
         "status":           "open",
-        "created_at":       datetime.now(UTC).isoformat(),
+        "created_at":       datetime.utcnow().isoformat(),
         "created_by":       created_by,
         "category":         category,
         "result":           None,
@@ -630,7 +567,7 @@ def place_entry(bet_id: str, username: str, option: str, amount: int):
         "username":   username,
         "option":     option,
         "amount":     amount,
-        "created_at": datetime.now(UTC).isoformat(),
+        "created_at": datetime.utcnow().isoformat(),
     }).execute()
     user = get_user(username)
     update_user(username, {
@@ -656,7 +593,7 @@ def cast_vote(bet_id: str, username: str, option: str) -> bool:
         "bet_id":     bet_id,
         "username":   username,
         "option":     option,
-        "created_at": datetime.now(UTC).isoformat(),
+        "created_at": datetime.utcnow().isoformat(),
     }).execute()
     # Check if this was the deciding vote
     votes   = get_votes(bet_id)
@@ -741,7 +678,7 @@ def resolve_bet(bet_id: str) -> tuple[bool, str]:
 def check_fallback_resolutions():
     """Call this on page load to auto-resolve stale voting bets."""
     voting_bets = get_bets("voting")
-    now = datetime.now(UTC)
+    now = datetime.utcnow()
     for bet in voting_bets:
         created = datetime.fromisoformat(bet["created_at"].replace("Z",""))
         if now - created > timedelta(days=FALLBACK_DAYS):
@@ -769,7 +706,7 @@ def award_badge(username: str, achievement_id: str, reward_coins: int = 0):
         "id":             str(uuid.uuid4()),
         "username":       username,
         "achievement_id": achievement_id,
-        "earned_at":      datetime.now(UTC).isoformat(),
+        "earned_at":      datetime.utcnow().isoformat(),
     }).execute()
     if reward_coins > 0:
         user = get_user(username)
@@ -901,7 +838,7 @@ def purchase_item(username: str, item_id: str, cost: int) -> tuple[bool, str]:
         "username":     username,
         "item_id":      item_id,
         "equipped":     False,
-        "purchased_at": datetime.now(UTC).isoformat(),
+        "purchased_at": datetime.utcnow().isoformat(),
     }).execute()
     update_user(username, {"coins": user["coins"] - cost})
     return True, "Purchased!"
@@ -1036,113 +973,239 @@ def render_bet_card(bet: dict, show_btn=False):
             nav("bet_detail", bet_id=bet["id"])
 
 # ─────────────────────────────────────────────
-# AUTH PAGE  ←  REPLACE THE ENTIRE def page_auth(): 
+#  AUTH PAGE
 # ─────────────────────────────────────────────
 def page_auth():
-    # Vertical centering + improved layout
-    st.markdown('<div class="auth-container">', unsafe_allow_html=True)
-    st.markdown('<div class="auth-card">', unsafe_allow_html=True)
-
-    # Logo / header
+    # Full-page centering — hide sidebar on auth page
     st.markdown("""
-    <div style="text-align:center;padding-bottom:28px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
-                    color:#1e3a6e;letter-spacing:0.25em;text-transform:uppercase;
-                    margin-bottom:14px;">PREDICTION PLATFORM</div>
-        <div style="font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;
-                    color:#e8f0ff;line-height:1;margin-bottom:12px;">VTuberBets</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;
-                    color:#0055cc;letter-spacing:0.12em;">
-            INDIE VTUBER &nbsp;·&nbsp; COMMUNITY PREDICTIONS &nbsp;·&nbsp; FAKE MONEY ONLY
-        </div>
-    </div>
+    <style>
+    [data-testid="stSidebar"] { display: none !important; }
+    [data-testid="collapsedControl"] { display: none !important; }
+
+    /* Auth-specific tab polish */
+    .auth-tabs .stTabs [data-baseweb="tab-list"] {
+        background: #0b0f1e !important;
+        border: 1px solid #1e3060 !important;
+        border-radius: 10px;
+        padding: 4px;
+    }
+    .auth-tabs .stTabs [data-baseweb="tab"] {
+        font-size: 0.88rem !important;
+        padding: 8px 20px !important;
+    }
+
+    /* Auth card */
+    .auth-card {
+        background: #0b0f1e;
+        border: 1px solid #1e3060;
+        border-radius: 16px;
+        padding: 32px 36px;
+        margin-top: 8px;
+    }
+
+    /* Getting started steps */
+    .gs-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid #111a2e;
+    }
+    .gs-step:last-child { border-bottom: none; }
+    .gs-num {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #0066ff;
+        background: #001a44;
+        border: 1px solid #0044aa44;
+        border-radius: 4px;
+        padding: 3px 8px;
+        white-space: nowrap;
+        margin-top: 2px;
+    }
+    .gs-text { font-size: 0.85rem; color: #5577aa; line-height: 1.5; }
+    .gs-text strong { color: #99bbdd; font-weight: 600; }
+    </style>
     """, unsafe_allow_html=True)
 
-    show_toast()
+    # Outer centering with max-width
+    _, col, _ = st.columns([1, 3, 1])
+    with col:
+        # Logo / header
+        st.markdown("""
+        <div style="text-align:center;padding:40px 0 28px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
+                        color:#1e3a6e;letter-spacing:0.25em;text-transform:uppercase;
+                        margin-bottom:14px;">PREDICTION PLATFORM</div>
+            <div style="font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;
+                        color:#e8f0ff;line-height:1;margin-bottom:12px;">VTuberBets</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;
+                        color:#0055cc;letter-spacing:0.12em;">
+                INDIE VTUBER &nbsp;·&nbsp; COMMUNITY PREDICTIONS &nbsp;·&nbsp; FAKE MONEY ONLY
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.markdown('<div class="auth-tabs">', unsafe_allow_html=True)
-    tab_login, tab_register = st.tabs([" Login ", " Create Account "])
+        show_toast()
 
-    with tab_login:
-        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-        l_user = st.text_input("Username", key="login_user", placeholder="Enter your username")
-        l_pass = st.text_input("Password", key="login_pass", type="password", placeholder="Enter your password")
-        if st.button("Login", use_container_width=True, key="btn_login"):
-            if not l_user.strip():
-                set_toast("error", "Please enter your username.")
-                st.rerun()
-            elif not l_pass:
-                set_toast("error", "Please enter your password.")
-                st.rerun()
-            else:
-                ok, msg = login_user(l_user.strip(), l_pass)
-                if ok:
-                    st.session_state.username = l_user.strip()
-                    if needs_role_selection(l_user.strip()):
-                        st.session_state.page = "role_select"
+        # ── Two-column layout: login/register left, getting started right ──
+        left, right = st.columns([1, 1], gap="large")
+
+        with left:
+            st.markdown('<div class="auth-tabs">', unsafe_allow_html=True)
+            tab_login, tab_register = st.tabs(["  Login  ", "  Create Account  "])
+
+            with tab_login:
+                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+                l_user = st.text_input("Username", key="login_user",
+                                       placeholder="Enter your username")
+                l_pass = st.text_input("Password", key="login_pass",
+                                       type="password", placeholder="Enter your password")
+                st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+
+                if st.button("Login", use_container_width=True, key="btn_login"):
+                    if not l_user.strip():
+                        set_toast("error", "Please enter your username.")
+                        st.rerun()
+                    elif not l_pass:
+                        set_toast("error", "Please enter your password.")
+                        st.rerun()
                     else:
-                        st.session_state.page = "home"
-                    st.session_state.show_onboarding = True  # trigger popup after role
-                    st.rerun()
-                else:
-                    set_toast("error", msg)
-                    st.rerun()
+                        ok, msg = login_user(l_user.strip(), l_pass)
+                        if ok:
+                            st.session_state.username = l_user.strip()
+                            # Check if role still needs setting
+                            if needs_role_selection(l_user.strip()):
+                                st.session_state.page = "role_select"
+                            else:
+                                st.session_state.page = "home"
+                            st.rerun()
+                        else:
+                            set_toast("error", msg)
+                            st.rerun()
 
-    with tab_register:
-        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-        r_user = st.text_input("Username", key="reg_user", placeholder="2–24 characters, no spaces")
-        r_pass = st.text_input("Password", key="reg_pass", type="password", placeholder="At least 6 characters")
-        r_pass2 = st.text_input("Confirm password", key="reg_pass2", type="password", placeholder="Repeat your password")
-        if st.button("Create Account", use_container_width=True, key="btn_register"):
-            un = r_user.strip()
-            errs = []
-            if len(un) < 2: errs.append("Username must be at least 2 characters.")
-            elif len(un) > 24: errs.append("Username must be 24 characters or fewer.")
-            elif " " in un: errs.append("Username cannot contain spaces.")
-            if len(r_pass) < 6: errs.append("Password must be at least 6 characters.")
-            elif r_pass != r_pass2: errs.append("Passwords do not match.")
-            if errs:
-                set_toast("error", errs[0])
-                st.rerun()
-            else:
-                ok, msg = register_user(un, r_pass)
-                if ok:
-                    st.session_state.username = un
-                    st.session_state.page = "role_select"
-                    st.session_state.show_onboarding = True
-                    st.rerun()
-                else:
-                    set_toast("error", msg)
-                    st.rerun()
+            with tab_register:
+                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+                r_user  = st.text_input("Username", key="reg_user",
+                                        placeholder="2–24 characters, no spaces")
+                r_pass  = st.text_input("Password", key="reg_pass",
+                                        type="password", placeholder="At least 6 characters")
+                r_pass2 = st.text_input("Confirm password", key="reg_pass2",
+                                        type="password", placeholder="Repeat your password")
+                st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
 
-    st.markdown("</div>", unsafe_allow_html=True)
+                if st.button("Create Account", use_container_width=True, key="btn_register"):
+                    un = r_user.strip()
+                    errs = []
+                    if len(un) < 2:
+                        errs.append("Username must be at least 2 characters.")
+                    elif len(un) > 24:
+                        errs.append("Username must be 24 characters or fewer.")
+                    elif " " in un:
+                        errs.append("Username cannot contain spaces.")
+                    if len(r_pass) < 6:
+                        errs.append("Password must be at least 6 characters.")
+                    elif r_pass != r_pass2:
+                        errs.append("Passwords do not match.")
+                    if errs:
+                        set_toast("error", errs[0])
+                        st.rerun()
+                    else:
+                        ok, msg = register_user(un, r_pass)
+                        if ok:
+                            st.session_state.username = un
+                            st.session_state.page = "role_select"
+                            st.rerun()
+                        else:
+                            set_toast("error", msg)
+                            st.rerun()
 
-    # Stats row
-    st.markdown("""
-    <div style="display:flex;gap:0;margin-top:24px;
-                border:1px solid #1a2a44;border-radius:12px;overflow:hidden;">
-        <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
-                        font-weight:700;color:#00aaff;">5,000</div>
-            <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
-                        letter-spacing:0.08em;margin-top:2px;">Starting Coins</div>
-        </div>
-        <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
-                        font-weight:700;color:#00aaff;">+250</div>
-            <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
-                        letter-spacing:0.08em;margin-top:2px;">Daily Bonus</div>
-        </div>
-        <div style="flex:1;padding:14px;text-align:center;">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
-                        font-weight:700;color:#00ee88;">$0</div>
-            <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
-                        letter-spacing:0.08em;margin-top:2px;">Real Money</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('</div></div>', unsafe_allow_html=True)  # close auth-card + container
+            # Stats row under the form
+            st.markdown("""
+            <div style="display:flex;gap:0;margin-top:20px;
+                        border:1px solid #1a2a44;border-radius:10px;overflow:hidden;">
+                <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+                                font-weight:700;color:#00aaff;">5,000</div>
+                    <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
+                                letter-spacing:0.08em;margin-top:2px;">Starting Coins</div>
+                </div>
+                <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+                                font-weight:700;color:#00aaff;">+250</div>
+                    <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
+                                letter-spacing:0.08em;margin-top:2px;">Daily Bonus</div>
+                </div>
+                <div style="flex:1;padding:14px;text-align:center;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+                                font-weight:700;color:#00ee88;">$0</div>
+                    <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
+                                letter-spacing:0.08em;margin-top:2px;">Real Money</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with right:
+            st.markdown("""
+            <div style="padding:4px 0 12px;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
+                            color:#0055cc;letter-spacing:0.15em;text-transform:uppercase;
+                            margin-bottom:12px;">Getting Started</div>
+
+                <div class="gs-step">
+                    <span class="gs-num">01</span>
+                    <div class="gs-text">
+                        <strong>Create an account</strong> with just a username and password.
+                        No email, no linked accounts needed.
+                    </div>
+                </div>
+
+                <div class="gs-step">
+                    <span class="gs-num">02</span>
+                    <div class="gs-text">
+                        <strong>Pick your role</strong> — Watcher, Streamer, or Clipper.
+                        You start with 5,000 V-Coins instantly.
+                    </div>
+                </div>
+
+                <div class="gs-step">
+                    <span class="gs-num">03</span>
+                    <div class="gs-text">
+                        <strong>Browse open bets</strong> on indie VTuber stream moments —
+                        boss fights, yap sessions, tech scuff, chaos moments.
+                    </div>
+                </div>
+
+                <div class="gs-step">
+                    <span class="gs-num">04</span>
+                    <div class="gs-text">
+                        <strong>Place your V-Coins</strong> on the outcome you think will happen.
+                        Winner takes the pot, split proportionally.
+                    </div>
+                </div>
+
+                <div class="gs-step">
+                    <span class="gs-num">05</span>
+                    <div class="gs-text">
+                        <strong>Vote after the stream</strong> to confirm what happened.
+                        3 votes resolves the bet automatically.
+                    </div>
+                </div>
+
+                <div class="gs-step">
+                    <span class="gs-num">06</span>
+                    <div class="gs-text">
+                        <strong>Earn achievements</strong> for predicting correctly, discovering
+                        hidden gems, and casting deciding votes. Most pay out bonus V-Coins.
+                    </div>
+                </div>
+
+            </div>
+            """, unsafe_allow_html=True)
+
 # ─────────────────────────────────────────────
 #  ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
@@ -1175,7 +1238,7 @@ def page_role_select():
         """, unsafe_allow_html=True)
 
         roles = [
-            ("Viewer",  "role-Viewer",  "You watch streams, follow indie VTubers, and bet on the chaos.",           "Bet on streams, vote on outcomes, climb the leaderboard."),
+            ("Watcher",  "role-watcher",  "You watch streams, follow indie VTubers, and bet on the chaos.",           "Bet on streams, vote on outcomes, climb the leaderboard."),
             ("Streamer", "role-streamer", "You are a VTuber or streamer — your community might bet on your streams.", "Get discovered through community bets featuring your content."),
             ("Clipper",  "role-clipper",  "You create clips and highlight reels of indie VTubers.",                   "Compete in Clip Showdown events and earn the Clipper Legend badge."),
         ]
@@ -1199,74 +1262,10 @@ def page_role_select():
 
         st.markdown("""
         <div style="text-align:center;margin-top:16px;color:#1e3060;font-size:0.75rem;">
-            Not sure? Pick Viewer — you can update it later in your profile.
+            Not sure? Pick Watcher — you can update it later in your profile.
         </div>
         """, unsafe_allow_html=True)
-        
-def page_role_select():
-            if st.button(f"I am a {role}", key=f"role_{role}", use_container_width=True):
-                set_user_role(st.session_state.username, role)
-                st.session_state.page = "home"
-                st.session_state.show_onboarding = True   # ← ADD THIS LINE
-                set_toast("success", f"Welcome! Your account is ready. You start with 5,000 V-Coins.")
-                st.rerun()
-# ─────────────────────────────────────────────
-# ONBOARDING PAGE
-# ─────────────────────────────────────────────
-def show_onboarding_popup():
-    if not st.session_state.get("show_onboarding"):
-        return
-    st.markdown("""
-    <div class="onboarding-modal">
-        <div class="onboarding-content">
-            <div style="text-align:center;margin-bottom:20px;">
-                <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#e8f0ff;">
-                    Welcome to VTuberBets!
-                </div>
-                <div style="color:#00aaff;font-size:0.9rem;">Here's how it works</div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:16px;">
-                <div style="display:flex;gap:14px;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">01</span>
-                    <div><strong>Create account</strong> — username + password only.</div>
-                </div>
-                <div style="display:flex;gap:14px;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">02</span>
-                    <div><strong>Pick your role</strong> — Viewer, Streamer, or Clipper.</div>
-                </div>
-                <div style="display:flex;gap:14px;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">03</span>
-                    <div><strong>Browse open bets</strong> on indie VTuber streams.</div>
-                </div>
-                <div style="display:flex;gap:14px;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">04</span>
-                    <div><strong>Place V-Coins</strong> on what you think will happen.</div>
-                </div>
-                <div style="display:flex;gap:14px;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">05</span>
-                    <div><strong>Vote after the stream</strong> — 3 votes = auto-resolution.</div>
-                </div>
-                <div style="display:flex;gap:14px;">
-                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">06</span>
-                    <div><strong>Earn badges &amp; coins</strong> — achievements pay real V-Coins.</div>
-                </div>
-            </div>
-            <div style="text-align:center;margin-top:28px;">
-                <button onclick="window.parent.location.reload()" 
-                        style="background:linear-gradient(135deg,#0044ff,#00aaff);color:white;border:none;
-                               padding:12px 32px;border-radius:8px;font-weight:600;cursor:pointer;">
-                    Got it! Let's go
-                </button>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Close popup when user clicks button (Streamlit can't do native JS click easily, so we use rerun trick)
-    if st.button("✅ Got it! Let's go", use_container_width=True):
-        st.session_state.show_onboarding = False
-        st.rerun()
-       
+
 # ─────────────────────────────────────────────
 #  SIDEBAR
 # ─────────────────────────────────────────────
@@ -1295,8 +1294,8 @@ def render_sidebar():
         title_html = (f'<div class="user-title">{title_item["value"]}</div>'
                       if title_item else "")
         role  = user.get("role","")
-        r_css = {"Viewer":"role-Viewer","Streamer":"role-streamer",
-                 "Clipper":"role-clipper"}.get(role,"role-Viewer")
+        r_css = {"Watcher":"role-watcher","Streamer":"role-streamer",
+                 "Clipper":"role-clipper"}.get(role,"role-watcher")
 
         st.markdown(f"""
         <div class="coin-box">
@@ -1765,6 +1764,7 @@ def page_shop():
                 </div>
                 """, unsafe_allow_html=True)
             with col2:
+                st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
                 if owned:
                     if not is_equip:
                         if st.button("Equip", key=f"equip_{item['id']}"):
@@ -1861,8 +1861,8 @@ def page_my_profile():
     st.markdown("## My Profile")
 
     role  = user.get("role","")
-    r_css = {"Viewer":"role-Viewer","Streamer":"role-streamer",
-             "Clipper":"role-clipper"}.get(role,"role-Viewer")
+    r_css = {"Watcher":"role-watcher","Streamer":"role-streamer",
+             "Clipper":"role-clipper"}.get(role,"role-watcher")
     title_item = get_equipped(username, "title")
     title_str  = f' — {title_item["value"]}' if title_item else ""
 
