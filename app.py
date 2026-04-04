@@ -1,11 +1,9 @@
-
 import streamlit as st
 import uuid
-from datetime import datetime, timedelta
+import bcrypt
+from datetime import datetime, timedelta, UTC
 from supabase import create_client, Client
-import requests
-import re
-# testing testing 123
+
 # ─────────────────────────────────────────────
 #  PAGE CONFIG
 # ─────────────────────────────────────────────
@@ -15,15 +13,13 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
 # ─────────────────────────────────────────────
-#  DESIGN SYSTEM  —  deep navy / electric blue / neon cyan
+# STYLES
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500&display=swap');
 
-/* ── BASE ── */
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body, [data-testid="stAppViewContainer"] {
@@ -41,79 +37,22 @@ h1, h2, h3 {
     color: #e8f0ff !important;
 }
 
-/* ── GRID BACKGROUND on main area ── */
-[data-testid="stAppViewContainer"]::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-        linear-gradient(rgba(30,60,120,0.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(30,60,120,0.07) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-}
-
-/* ── CARDS ── */
-.card {
-    background: #0b0f1e;
-    border: 1px solid #151e33;
-    border-left: 3px solid #1e3060;
-    border-radius: 10px;
-    padding: 18px 20px;
-    margin-bottom: 12px;
-    transition: border-left-color 0.2s, box-shadow 0.2s;
-}
-.card:hover {
-    border-left-color: #0066ff;
-    box-shadow: -2px 0 12px rgba(0, 102, 255, 0.15);
-}
-
-/* Live bets get the cyan accent */
-.card-live {
-    border-left-color: #00c8ff;
-    box-shadow: -2px 0 10px rgba(0, 200, 255, 0.1);
-}
-.card-live:hover {
-    border-left-color: #00e5ff;
-    box-shadow: -2px 0 16px rgba(0, 200, 255, 0.2);
-}
-
-/* Voting bets get amber */
-.card-voting {
-    border-left-color: #ffaa00;
-    box-shadow: -2px 0 10px rgba(255, 170, 0, 0.1);
-}
-.card-voting:hover {
-    border-left-color: #ffcc00;
-    box-shadow: -2px 0 16px rgba(255, 204, 0, 0.2);
-}
-
-/* Resolved bets get muted purple */
-.card-closed {
-    border-left-color: #4433aa;
-}
-.card-closed:hover {
-    border-left-color: #6655cc;
-}
-
-/* ── ANIMATIONS ── */
+/* ANIMATIONS */
 @keyframes gradient-border {
     0%   { background-position: 0% 50%; }
     50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }  
+    100% { background-position: 0% 50%; }
+}
+@keyframes gradient-text {
+    0%   { background-position: -4% 50%; }
+    100% { background-position: 100% 50%; }
 }
 
-@keyframes pulse-glow {
-    0%, 100% { opacity: 0.6; }
-    50%       { opacity: 1; }
-}
-
-/* ── HERO ── */
+/* HERO */
 .hero-wrap {
     padding: 2px;
     border-radius: 18px;
-    background: linear-gradient(135deg, #0044ff, #00ccff, #0044ff, #7700ff);
+    background: linear-gradient(135deg, #0044ff, #00ccff, #aa00ff, #0044ff);
     background-size: 300% 300%;
     animation: gradient-border 4s ease infinite;
     margin-bottom: 24px;
@@ -133,14 +72,6 @@ h1, h2, h3 {
     background: radial-gradient(circle, rgba(0,120,255,0.08) 0%, transparent 65%);
     pointer-events: none;
 }
-.hero::after {
-    content: '';
-    position: absolute;
-    bottom: -40%; left: -10%;
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(0,200,255,0.05) 0%, transparent 65%);
-    pointer-events: none;
-}
 .hero-eyebrow {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.65rem;
@@ -157,17 +88,17 @@ h1, h2, h3 {
     margin-bottom: 4px;
     line-height: 1.2;
 }
-/* The gradient username */
 .hero-name {
     font-family: 'Syne', sans-serif;
     font-size: 2rem;
     font-weight: 800;
     font-style: italic;
-    background: linear-gradient(135deg, #aa00ff, #aa00ff, #0066ff, #00aaff, #00ccff);
-    background-size: 100% auto;
+    background: linear-gradient(45deg, #44ddff, #aa00ff, #00aaff, #0066ff, #00ccff, #44ddff, #aa00ff, #00aaff, #0066ff, #00ccff);
+    background-size: 400% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: gradient-text 4.3s linear infinite;
     display: inline;
 }
 .hero-sub {
@@ -177,7 +108,24 @@ h1, h2, h3 {
     margin-top: 10px;
 }
 
-/* ── BET CARD TEXT ── */
+/* CARDS */
+.card {
+    background: #0b0f1e;
+    border: 1px solid #151e33;
+    border-left: 3px solid #1e3060;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    transition: border-left-color 0.2s, box-shadow 0.2s;
+}
+.card:hover { border-left-color: #0066ff; box-shadow: -2px 0 12px rgba(0,102,255,0.15); }
+.card-live   { border-left-color: #00c8ff; box-shadow: -2px 0 10px rgba(0,200,255,0.1); }
+.card-live:hover { border-left-color: #00e5ff; box-shadow: -2px 0 16px rgba(0,200,255,0.2); }
+.card-voting { border-left-color: #ffaa00; box-shadow: -2px 0 10px rgba(255,170,0,0.1); }
+.card-voting:hover { border-left-color: #ffcc00; box-shadow: -2px 0 16px rgba(255,204,0,0.2); }
+.card-closed { border-left-color: #4433aa; }
+.card-closed:hover { border-left-color: #6655cc; }
+
 .vtag {
     font-size: 0.72rem;
     font-weight: 600;
@@ -201,7 +149,7 @@ h1, h2, h3 {
     font-style: italic;
 }
 
-/* ── STATUS PILLS ── */
+/* PILLS */
 .pill {
     display: inline-block;
     padding: 3px 10px;
@@ -215,893 +163,1480 @@ h1, h2, h3 {
 .pill-open   { background: #001a0d; color: #00ee88; border: 1px solid #00ee8855; }
 .pill-voting { background: #1a1000; color: #ffcc00; border: 1px solid #ffcc0055; }
 .pill-closed { background: #0a001a; color: #9977ff; border: 1px solid #9977ff55; }
+.pot { font-size: 0.78rem; color: #4499ff; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
 
-.pot {
-    font-size: 0.78rem;
-    color: #4499ff;
-    font-weight: 600;
-    font-family: 'JetBrains Mono', monospace;
-}
-
-/* ── PROGRESS BARS ── */
+/* BARS */
 .bar-wrap { margin: 10px 0; }
-.bar-label {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: #aaccff;
-}
-.bar-pct {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    color: #3366aa;
-}
-.bar-bg {
-    background: #111828;
-    border-radius: 6px;
-    height: 8px;
-    overflow: hidden;
-    border: 1px solid #1a2540;
-}
-.bar-fill {
-    background: linear-gradient(90deg, #0066ff, #0088ff);
-    height: 100%;
-    border-radius: 6px;
-    transition: width 0.5s ease;
-}
-.bar-fill-vote {
-    background: linear-gradient(90deg, #ffaa00, #ffcc00);
-    height: 100%;
-    border-radius: 6px;
-    transition: width 0.5s ease;
-}
+.bar-label { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 5px; color: #7a9acc; }
+.bar-label .bar-pct { font-family: 'JetBrains Mono', monospace; color: #4499ff; font-size: 0.78rem; }
+.bar-bg { background: #0a1020; border-radius: 3px; height: 7px; border: 1px solid #1a2a44; overflow: hidden; }
+.bar-fill { height: 7px; border-radius: 3px; background: linear-gradient(90deg, #0044cc, #00aaff); box-shadow: 0 0 10px rgba(0,170,255,0.5); }
+.bar-fill-vote { height: 7px; border-radius: 3px; background: linear-gradient(90deg, #aa7700, #ffcc00); box-shadow: 0 0 10px rgba(255,204,0,0.5); }
 
-/* ── NOTICES ── */
-.notice {
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    line-height: 1.5;
-    margin: 10px 0;
-}
-.notice-info {
-    background: #001530;
-    color: #4499ff;
-    border: 1px solid #00337755;
-}
-.notice-success {
-    background: #001a0d;
-    color: #00ee88;
-    border: 1px solid #00ee8833;
-}
-.notice-error {
-    background: #200008;
-    color: #ff4466;
-    border: 1px solid #ff446633;
-}
-
-/* ── DUPLICATE WARNING ── */
-.dup-warn {
-    background: #1a1000;
-    color: #ffaa00;
-    border: 1px solid #ffaa0044;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 0.82rem;
-    line-height: 1.5;
-    margin: 12px 0;
-}
-
-/* ── LEADERBOARD ── */
-.lb-row {
-    display: flex;
-    align-items: center;
-    background: #0a0e1c;
-    border: 1px solid #151e33;
-    border-radius: 10px;
-    padding: 14px 18px;
+/* COIN BOX */
+.coin-box {
+    background: linear-gradient(160deg, #0c1428 0%, #091020 100%);
+    border: 1px solid #1a3060;
+    border-radius: 12px;
+    padding: 16px 18px;
+    text-align: center;
     margin-bottom: 10px;
-    gap: 16px;
+    position: relative;
+    overflow: hidden;
 }
-.lb-rank {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    color: #334466;
-    min-width: 40px;
+.coin-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #0066ff66, transparent);
 }
-.lb-rank-top {
-    color: #ffcc00;
-    font-weight: 700;
+.coin-label { font-size: 0.68rem; color: #2a4a7a; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+.coin-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(45deg, #44ddff, #aa00ff, #00aaff, #0066ff, #00ccff, #44ddff, #aa00ff, #00aaff, #0066ff, #00ccff);
+    background-size: 400% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-text 4.3s linear infinite;
 }
-.lb-name {
-    flex: 1;
-    font-size: 0.95rem;
-    color: #b8ccee;
-}
-.lb-stat {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.88rem;
-    color: #00ccff;
-    font-weight: 600;
-    text-align: right;
-}
+.coin-sub { font-size: 0.68rem; color: #1e3060; margin-top: 2px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; }
 
-/* ── SECTIONS ── */
-.section-label {
+/* NOTICES */
+.notice { border-radius: 8px; padding: 13px 16px; font-size: 0.88rem; margin: 10px 0; font-weight: 500; line-height: 1.5; }
+.notice-success { background: #001a0d; border: 1px solid #00ee8844; color: #00cc77; }
+.notice-warn    { background: #1a1000; border: 1px solid #ffcc0044; color: #ddaa00; }
+.notice-error   { background: #140008; border: 1px solid #ff334455; color: #ff5577; }
+.notice-info    { background: #000d1a; border: 1px solid #0066ff44; color: #5599ff; }
+
+/* LEADERBOARD */
+.lb-row {
+    display: flex; align-items: center; padding: 12px 16px;
+    border-radius: 10px; margin-bottom: 6px; background: #0b1020;
+    border: 1px solid #192540; gap: 14px; transition: border-color 0.15s, background 0.15s;
+}
+.lb-row:hover { border-color: #0066ff55; background: #0d1428; }
+.lb-rank { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 700; width: 32px; color: #2a3a55; }
+.lb-rank-top { color: #00aaff; }
+.lb-name { flex: 1; font-weight: 600; font-size: 0.9rem; color: #b8ccee; }
+.lb-stat { color: #00aaff; font-weight: 700; font-size: 0.85rem; text-align: right; font-family: 'JetBrains Mono', monospace; }
+.lb-stat-loss { color: #ff5577; font-weight: 700; font-size: 0.85rem; text-align: right; font-family: 'JetBrains Mono', monospace; }
+
+/* BADGE */
+.badge {
+    display: inline-block;
+    background: #0d1428;
+    border: 1px solid #1e3060;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #5599ff;
+    margin: 3px;
+    font-family: 'JetBrains Mono', monospace;
+}
+.badge-earned { background: linear-gradient(135deg, #0a1428, #0d1e3a); border-color: #0066ff55; color: #44aaff; }
+.badge-gem    { border-color: #00ee8855; color: #00ee88; }
+.badge-roller { border-color: #ffcc0055; color: #ffcc00; }
+.badge-vote   { border-color: #aa00ff55; color: #cc44ff; }
+.badge-scout  { border-color: #00c8ff55; color: #00c8ff; }
+.badge-raid   { border-color: #ff558855; color: #ff5588; }
+
+/* TITLE PREFIX */
+.user-title {
     font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #1e4080;
-    margin-bottom: 8px;
-    margin-top: 12px;
     font-family: 'JetBrains Mono', monospace;
+    color: #4499ff;
+    letter-spacing: 0.06em;
+    margin-bottom: 2px;
 }
 
-/* ── BUTTONS (Streamlit overrides) ── */
+/* PROFILE CARD */
+.profile-card {
+    background: #0b0f1e;
+    border: 1px solid #1e3060;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+}
+.profile-role {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 10px;
+}
+.role-watcher  { background: #001a2e; color: #00aaff; border: 1px solid #00aaff44; }
+.role-streamer { background: #1a0028; color: #cc44ff; border: 1px solid #cc44ff44; }
+.role-clipper  { background: #001a0d; color: #00ee88; border: 1px solid #00ee8844; }
+
+/* SHOP */
+.shop-item {
+    background: #0b0f1e;
+    border: 1px solid #1e3060;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+}
+.shop-item:hover { border-color: #0066ff55; }
+.shop-item-name { font-weight: 700; font-size: 0.95rem; color: #ddeaff; margin-bottom: 4px; }
+.shop-item-desc { font-size: 0.8rem; color: #4a6a99; margin-bottom: 10px; }
+.shop-item-cost { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #4499ff; font-weight: 700; }
+.shop-owned { border-color: #00ee8844; }
+
+/* HOW IT WORKS */
+.hiw-section {
+    background: #0b0f1e;
+    border: 1px solid #1e3060;
+    border-left: 3px solid #0066ff;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 14px;
+}
+.hiw-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: #0066ff;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+.hiw-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: #e8f0ff; margin-bottom: 8px; }
+.hiw-body { font-size: 0.88rem; color: #6a88aa; line-height: 1.7; }
+
+/* BUTTONS */
 .stButton > button {
-    background: linear-gradient(135deg, #0055dd, #0077ff);
-    color: white !important;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.88rem;
-    padding: 10px 20px;
+    background: linear-gradient(135deg, #0044cc, #0077ff) !important;
+    color: #e8f4ff !important; border: none !important; border-radius: 8px !important;
+    font-family: 'Inter', sans-serif !important; font-weight: 600 !important;
+    transition: box-shadow 0.15s !important;
+}
+.stButton > button:hover { box-shadow: 0 0 20px rgba(0,119,255,0.35) !important; }
+
+/* INPUTS */
+.stTextInput > div > div > input,
+.stNumberInput > div > div > input,
+.stTextArea > div > div > textarea,
+.stSelectbox > div > div {
+    background: #0b1020 !important; border: 1px solid #1e3060 !important;
+    border-radius: 8px !important; color: #c8d8f0 !important;
+    font-family: 'Inter', sans-serif !important; font-size: 0.9rem !important;
+}
+.stTextInput > div > div > input::placeholder,
+.stTextArea > div > div > textarea::placeholder { color: #2a4060 !important; }
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+    border-color: #0066ff !important;
+    box-shadow: 0 0 0 2px rgba(0,102,255,0.2) !important;
+}
+
+/* TABS */
+.stTabs [data-baseweb="tab-list"] {
+    background: #080d1a !important; border-radius: 8px; gap: 2px;
+    padding: 3px; border: 1px solid #182035;
+}
+.stTabs [data-baseweb="tab"] {
+    background: transparent !important; color: #2a4060 !important;
+    border-radius: 6px !important; font-weight: 600 !important;
+    font-size: 0.84rem !important; font-family: 'Inter', sans-serif !important;
+}
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, #003399, #0055cc) !important;
+    color: #e8f4ff !important;
+}
+
+/* METRICS */
+[data-testid="metric-container"] {
+    background: #0b1020; border: 1px solid #192035; border-radius: 10px; padding: 12px 16px;
+}
+[data-testid="metric-container"] label { color: #2a4060 !important; font-size: 0.78rem !important; text-transform: uppercase; letter-spacing: 0.07em; }
+[data-testid="metric-container"] [data-testid="stMetricValue"] { color: #00aaff !important; font-family: 'JetBrains Mono', monospace !important; font-size: 1.4rem !important; }
+
+hr { border-color: #192035 !important; }
+[data-testid="stExpander"] { background: #0b1020; border: 1px solid #1e3060; border-radius: 10px; }
+
+.dup-warn { background: #160c00; border: 1px solid #ff880044; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #ffaa44; margin: 8px 0; line-height: 1.5; }
+.stream-link { font-size: 0.72rem; color: #2277cc; text-decoration: none; font-family: 'JetBrains Mono', monospace; transition: color 0.15s; }
+.stream-link:hover { color: #44aaff; }
+.section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: #1e3a66; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #162030; }
+.stCaption, [data-testid="stCaptionContainer"] { color: #3a5578 !important; font-size: 0.8rem !important; }
+.stRadio label { color: #7a9acc !important; font-size: 0.88rem !important; }
+.stTextInput label, .stTextArea label, .stSelectbox label, .stNumberInput label, .stMultiSelect label { color: #5577aa !important; font-size: 0.84rem !important; font-weight: 500 !important; }
+p, li, div { line-height: 1.6; }
+
+/* AUTH PAGE IMPROVEMENTS */
+.auth-container {
+    display: flex;
+    justify-content: center;    /* keeps it horizontally centered */
+}
+/* Force Streamlit to remove its own top gap on auth page */
+[data-testid="stAppViewContainer"] > div:first-child {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+[data-testid="stAppViewContainer"] {
+    padding-top: 0 !important;
+}
+/* Bigger, better padding on the actual Login / Create Account buttons */
+.stButton > button {
+    padding: 16px 0 !important;     /* more vertical height */
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+}
+
+/* Slightly larger tab headers too */
+.auth-tabs .stTabs [data-baseweb="tab"] {
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    padding: 16px 28px !important;   /* more padding on tabs */
+    border-radius: 8px !important;
+}
+.auth-tabs .stTabs [data-baseweb="tab-list"] {
+    background: #0b0f1e !important;
+    border: 1px solid #1e3060 !important;
+    border-radius: 12px;
+    padding: 6px;
+    gap: 6px;
+}
+.auth-tabs .stTabs [data-baseweb="tab"] {
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
     transition: all 0.2s;
 }
-.stButton > button:hover {
-    background: linear-gradient(135deg, #0066ff, #0088ff);
-    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+.auth-tabs .stTabs [data-baseweb="tab"]:hover {
+    background: #1a2540 !important;
+}
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, #0044ff, #00aaff) !important;
+    color: #e8f4ff !important;
+    box-shadow: 0 4px 15px rgba(0, 170, 255, 0.3);
 }
 
-/* ── FORMS ── */
-.stTextInput input, .stTextArea textarea, .stSelectbox select {
-    background: #0a0e1c !important;
-    border: 1px solid #1a2540 !important;
-    color: #c8d8f0 !important;
-    border-radius: 6px;
+/* ONBOARDING POPUP */
+.onboarding-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(8, 12, 24, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
 }
-.stTextInput input:focus, .stTextArea textarea:focus, .stSelectbox select:focus {
-    border-color: #0066ff !important;
-    box-shadow: 0 0 0 1px #0066ff !important;
+.onboarding-content {
+    background: #0b0f1e;
+    border: 1px solid #1e3060;
+    border-radius: 16px;
+    max-width: 520px;
+    width: 90%;
+    padding: 32px;
 }
+
+/* HIDE STREAMLIT HUD */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+.stApp header {display: none;}
+.stDeployButton {display: none;}
 </style>
 """, unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────
-#  SUPABASE CONNECTION
-# ─────────────────────────────────────────────
-SUPABASE_URL = st.secrets.get("SUPABASE_URL", "")
-SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", "")
 
-if not SUPABASE_URL or not SUPABASE_KEY:
-    st.error("Missing Supabase credentials in secrets.")
-    st.stop()
+# ─────────────────────────────────────────────
+#  SUPABASE
+# ─────────────────────────────────────────────
+@st.cache_resource
+def get_supabase() -> Client:
+    return create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+def db() -> Client:
+    return get_supabase()
 
 # ─────────────────────────────────────────────
 #  CONSTANTS
 # ─────────────────────────────────────────────
-STARTING_COINS    = 10000
-DEFAULT_BET       = 100
-MIN_BET           = 10
-HOUSE_CUT         = 0.05
-MIN_VOTES         = 3
-VOTE_WINDOW_HOURS = 24
+STARTING_COINS = 5_000
+DAILY_BONUS    = 250
+HOUSE_CUT      = 0.05
+MIN_VOTES      = 3
+FALLBACK_DAYS  = 6
 
 CATEGORIES = [
-    "Game Mastery",
-    "Rage & Tilt",
-    "Just Chatting",
-    "Singing / Karaoke",
-    "Misc",
+    "Hidden Gem", "Boss Fight", "Death Count", "Game Completion",
+    "Yap Session / Just Chatting", "Tech Scuff", "Karaoke Arc",
+    "Follower / Sub Goal", "Raid / Shoutout", "Chaos Moment", "Other"
 ]
+
+ROLES = ["Viewer", "Streamer", "Clipper"]
+
+BADGE_STYLES = {
+    "gem_hunter":     "badge-gem",
+    "high_roller":    "badge-roller",
+    "first_vote":     "badge-vote",
+    "indie_scout":    "badge-scout",
+    "raid_master":    "badge-raid",
+    "clipper_legend": "badge-scout",
+}
+
+# ─────────────────────────────────────────────
+#  AUTH HELPERS
+# ─────────────────────────────────────────────
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+def verify_password(password: str, hashed: str) -> bool:
+    try:
+        return bcrypt.checkpw(password.encode(), hashed.encode())
+    except Exception:
+        return False
+
+def register_user(username: str, password: str) -> tuple[bool, str]:
+    existing = db().table("users").select("username").eq("username", username).execute()
+    if existing.data:
+        return False, "Username already taken."
+    pw_hash = hash_password(password)
+    db().table("users").insert({
+        "username":      username,
+        "password_hash": pw_hash,
+        "coins":         STARTING_COINS,
+        "joined_at":     datetime.now(UTC).isoformat(),
+        "last_bonus":    None,
+        "total_won":     0,
+        "total_lost":    0,
+        "biggest_win":   0,
+        "biggest_loss":  0,
+        "bets_correct":  0,
+        "bets_placed":   0,
+        "role":          None,
+        "bio":           "",
+        "favorite_vtubers": "",
+    }).execute()
+    return True, "Account created."
+
+def login_user(username: str, password: str) -> tuple[bool, str]:
+    r = db().table("users").select("*").eq("username", username).execute()
+    if not r.data:
+        return False, "Username not found."
+    user = r.data[0]
+    if not user.get("password_hash"):
+        return False, "This account was created before passwords were added. Please contact support."
+    if not verify_password(password, user["password_hash"]):
+        return False, "Incorrect password."
+    return True, "OK"
+
+# ─────────────────────────────────────────────
+#  DB — USERS
+# ─────────────────────────────────────────────
+def get_user(username: str) -> dict | None:
+    r = db().table("users").select("*").eq("username", username).execute()
+    return r.data[0] if r.data else None
+
+def update_user(username: str, fields: dict):
+    db().table("users").update(fields).eq("username", username).execute()
+
+def claim_daily_bonus(username: str) -> tuple[bool, str]:
+    user = get_user(username)
+    now  = datetime.now(UTC)
+    last = user.get("last_bonus")
+    if last:
+        last_dt = datetime.fromisoformat(last.replace("Z", ""))
+        if now - last_dt < timedelta(hours=20):
+            rem  = timedelta(hours=20) - (now - last_dt)
+            h, m = divmod(int(rem.total_seconds() / 60), 60)
+            return False, f"Already claimed. Next bonus in {h}h {m}m."
+    update_user(username, {
+        "coins":      user["coins"] + DAILY_BONUS,
+        "last_bonus": now.isoformat(),
+    })
+    return True, f"+{DAILY_BONUS} V-Coins claimed."
+
+def needs_role_selection(username: str) -> bool:
+    user = get_user(username)
+    return not user.get("role")
+
+def set_user_role(username: str, role: str):
+    update_user(username, {"role": role})
+
+# ─────────────────────────────────────────────
+#  DB — BETS
+# ─────────────────────────────────────────────
+def get_bets(status: str | None = None) -> list:
+    q = db().table("bets").select("*").order("created_at", desc=True)
+    if status:
+        q = q.eq("status", status)
+    return q.execute().data or []
+
+def get_bet(bet_id: str) -> dict | None:
+    r = db().table("bets").select("*").eq("id", bet_id).execute()
+    return r.data[0] if r.data else None
+
+def check_duplicate(vtuber_name: str, title: str) -> list:
+    existing = db().table("bets").select("id,title,status") \
+                   .eq("status", "open") \
+                   .ilike("vtuber_name", f"%{vtuber_name.strip()}%").execute().data or []
+    title_lower = title.lower().strip()
+    stop = {"the","a","an","is","will","they","on","of","or","and","in","for","their","this","does"}
+    dupes = []
+    for b in existing:
+        b_words = set(b["title"].lower().split()) - stop
+        t_words  = set(title_lower.split()) - stop
+        if len(b_words & t_words) >= 3:
+            dupes.append(b)
+    return dupes
+
+def create_bet(vtuber_name, stream_link, game_or_activity,
+               title, description, options, category, created_by):
+    db().table("bets").insert({
+        "id":               str(uuid.uuid4()),
+        "vtuber_name":      vtuber_name.strip(),
+        "stream_link":      stream_link.strip(),
+        "game_or_activity": game_or_activity.strip(),
+        "title":            title.strip(),
+        "description":      description.strip(),
+        "options":          options,
+        "status":           "open",
+        "created_at":       datetime.now(UTC).isoformat(),
+        "created_by":       created_by,
+        "category":         category,
+        "result":           None,
+    }).execute()
+
+def close_bet_for_voting(bet_id: str):
+    db().table("bets").update({"status": "voting"}).eq("id", bet_id).execute()
+
+def delete_bet(bet_id: str) -> tuple[bool, str]:
+    """
+    Delete a bet and all associated entries and votes.
+    Returns (success: bool, message: str)
+    """
+    bet = get_bet(bet_id)
+    if not bet:
+        return False, "Bet not found."
+    
+    # Refund all bet entries if the bet hasn't been resolved
+    if bet["status"] != "closed":
+        entries = get_entries(bet_id)
+        for entry in entries:
+            user = get_user(entry["username"])
+            if user:
+                # Refund the coins
+                update_user(entry["username"], {
+                    "coins": user["coins"] + entry["amount"],
+                    "bets_placed": max(0, user["bets_placed"] - 1)  # Decrement bet count
+                })
+    
+    # Delete all votes for this bet
+    db().table("votes").delete().eq("bet_id", bet_id).execute()
+    
+    # Delete all bet entries
+    db().table("bet_entries").delete().eq("bet_id", bet_id).execute()
+    
+    # Delete the bet itself
+    db().table("bets").delete().eq("id", bet_id).execute()
+    
+    return True, "Bet and all associated data deleted successfully."
+
+# ─────────────────────────────────────────────
+#  DB — BET ENTRIES
+# ─────────────────────────────────────────────
+def get_entries(bet_id: str) -> list:
+    return db().table("bet_entries").select("*").eq("bet_id", bet_id).execute().data or []
+
+def user_entry(bet_id: str, username: str) -> dict | None:
+    r = db().table("bet_entries").select("*") \
+            .eq("bet_id", bet_id).eq("username", username).execute()
+    return r.data[0] if r.data else None
+
+def place_entry(bet_id: str, username: str, option: str, amount: int):
+    db().table("bet_entries").insert({
+        "id":         str(uuid.uuid4()),
+        "bet_id":     bet_id,
+        "username":   username,
+        "option":     option,
+        "amount":     amount,
+        "created_at": datetime.now(UTC).isoformat(),
+    }).execute()
+    user = get_user(username)
+    update_user(username, {
+        "coins":       user["coins"] - amount,
+        "bets_placed": user["bets_placed"] + 1,
+    })
+
+# ─────────────────────────────────────────────
+#  DB — VOTES
+# ─────────────────────────────────────────────
+def get_votes(bet_id: str) -> list:
+    return db().table("votes").select("*").eq("bet_id", bet_id).execute().data or []
+
+def user_vote(bet_id: str, username: str) -> dict | None:
+    r = db().table("votes").select("*") \
+            .eq("bet_id", bet_id).eq("username", username).execute()
+    return r.data[0] if r.data else None
+
+def cast_vote(bet_id: str, username: str, option: str) -> bool:
+    """Returns True if this vote triggered auto-resolution."""
+    db().table("votes").insert({
+        "id":         str(uuid.uuid4()),
+        "bet_id":     bet_id,
+        "username":   username,
+        "option":     option,
+        "created_at": datetime.now(UTC).isoformat(),
+    }).execute()
+    # Check if this was the deciding vote
+    votes   = get_votes(bet_id)
+    bet     = get_bet(bet_id)
+    counts  = {o: sum(1 for v in votes if v["option"] == o) for o in bet["options"]}
+    total_v = sum(counts.values())
+    if total_v >= MIN_VOTES:
+        winner = max(counts, key=counts.get)
+        if counts[winner] > total_v / 2:
+            ok, _ = resolve_bet(bet_id)
+            if ok:
+                # Award First to Vote achievement
+                check_and_award_first_vote(username)
+                return True
+    return False
+
+# ─────────────────────────────────────────────
+#  DB — RESOLUTION
+# ─────────────────────────────────────────────
+def pot_total(entries: list) -> int:
+    return sum(e["amount"] for e in entries)
+
+def resolve_bet(bet_id: str) -> tuple[bool, str]:
+    bet     = get_bet(bet_id)
+    entries = get_entries(bet_id)
+    votes   = get_votes(bet_id)
+
+    if not bet or bet["status"] not in ("voting", "open"):
+        return False, "Bet cannot be resolved."
+
+    counts  = {o: 0 for o in bet["options"]}
+    for v in votes:
+        counts[v["option"]] = counts.get(v["option"], 0) + 1
+    total_v = sum(counts.values())
+
+    if total_v == 0:
+        return False, "No votes cast yet."
+
+    winner = max(counts, key=counts.get)
+
+    # Check majority (unless fallback)
+    if counts[winner] <= total_v / 2 and total_v < MIN_VOTES:
+        return False, "No clear majority yet."
+
+    pot           = pot_total(entries)
+    distributable = int(pot * (1 - HOUSE_CUT))
+    winners       = [e for e in entries if e["option"] == winner]
+    winner_stake  = sum(e["amount"] for e in winners)
+
+    for e in winners:
+        share = int(distributable * e["amount"] / winner_stake) if winner_stake else 0
+        user  = get_user(e["username"])
+        if user:
+            new_total_won = user.get("total_won", 0) + share
+            new_biggest   = max(user.get("biggest_win", 0), share)
+            update_user(e["username"], {
+                "coins":        user["coins"] + share,
+                "total_won":    new_total_won,
+                "biggest_win":  new_biggest,
+                "bets_correct": user.get("bets_correct", 0) + 1,
+            })
+            # Re-fetch user so achievement checks see updated total_won
+            check_and_award_achievements(e["username"], bet, share)
+
+    # Track losses for losing bettors
+    for e in entries:
+        if e["option"] != winner:
+            user = get_user(e["username"])
+            if user:
+                new_lost     = user.get("total_lost", 0) + e["amount"]
+                new_big_loss = max(user.get("biggest_loss", 0), e["amount"])
+                update_user(e["username"], {
+                    "total_lost":   new_lost,
+                    "biggest_loss": new_big_loss,
+                })
+
+    db().table("bets").update({
+        "status": "closed", "result": winner
+    }).eq("id", bet_id).execute()
+    return True, winner
+
+def check_fallback_resolutions():
+    """Call this on page load to auto-resolve stale voting bets."""
+    voting_bets = get_bets("voting")
+    now = datetime.now(UTC)
+    for bet in voting_bets:
+        created = datetime.fromisoformat(bet["created_at"].replace("Z",""))
+        if now - created > timedelta(days=FALLBACK_DAYS):
+            resolve_bet(bet["id"])
+
+# ─────────────────────────────────────────────
+#  DB — ACHIEVEMENTS
+# ─────────────────────────────────────────────
+def get_all_achievements() -> list:
+    return db().table("achievements").select("*").execute().data or []
+
+def get_user_badges(username: str) -> list:
+    return db().table("user_badges").select("*") \
+               .eq("username", username).execute().data or []
+
+def has_badge(username: str, achievement_id: str) -> bool:
+    r = db().table("user_badges").select("id") \
+            .eq("username", username).eq("achievement_id", achievement_id).execute()
+    return bool(r.data)
+
+def award_badge(username: str, achievement_id: str, reward_coins: int = 0):
+    if has_badge(username, achievement_id):
+        return
+    db().table("user_badges").insert({
+        "id":             str(uuid.uuid4()),
+        "username":       username,
+        "achievement_id": achievement_id,
+        "earned_at":      datetime.now(UTC).isoformat(),
+    }).execute()
+    if reward_coins > 0:
+        user = get_user(username)
+        if user:
+            update_user(username, {"coins": user["coins"] + reward_coins})
+
+def check_and_award_achievements(username: str, bet: dict, payout: int):
+    """
+    Called after a bet resolves for a winning bettor.
+    bet = the resolved bet dict, payout = coins they received.
+    """
+    user = get_user(username)
+    if not user:
+        return
+
+    newly_earned = []
+
+    # ── High Roller — 10,000+ V-Coins won lifetime ──
+    if not has_badge(username, "high_roller"):
+        if user.get("total_won", 0) >= 10_000:
+            award_badge(username, "high_roller", 2000)
+            newly_earned.append("High Roller")
+
+    # ── Gem Hunter — 5+ correct Hidden Gem bets ──
+    if not has_badge(username, "gem_hunter"):
+        if bet.get("category") == "Hidden Gem":
+            # Only count closed Hidden Gem bets this user entered correctly
+            gem_entries = db().table("bet_entries") \
+                              .select("bet_id,option") \
+                              .eq("username", username).execute().data or []
+            gem_bet_ids = [e["bet_id"] for e in gem_entries]
+            if gem_bet_ids:
+                gem_bets = db().table("bets") \
+                               .select("id,result,category") \
+                               .eq("status", "closed") \
+                               .eq("category", "Hidden Gem") \
+                               .in_("id", gem_bet_ids).execute().data or []
+                correct = sum(
+                    1 for gb in gem_bets
+                    for e in gem_entries
+                    if e["bet_id"] == gb["id"] and e["option"] == gb.get("result")
+                )
+                if correct >= 5:
+                    award_badge(username, "gem_hunter", 800)
+                    newly_earned.append("Gem Hunter")
+
+    # ── Raid Master — 10+ correct Raid/Shoutout bets ──
+    if not has_badge(username, "raid_master"):
+        if bet.get("category") == "Raid / Shoutout":
+            raid_entries = db().table("bet_entries") \
+                               .select("bet_id,option") \
+                               .eq("username", username).execute().data or []
+            raid_bet_ids = [e["bet_id"] for e in raid_entries]
+            if raid_bet_ids:
+                raid_bets = db().table("bets") \
+                                .select("id,result,category") \
+                                .eq("status", "closed") \
+                                .eq("category", "Raid / Shoutout") \
+                                .in_("id", raid_bet_ids).execute().data or []
+                correct = sum(
+                    1 for rb in raid_bets
+                    for e in raid_entries
+                    if e["bet_id"] == rb["id"] and e["option"] == rb.get("result")
+                )
+                if correct >= 10:
+                    award_badge(username, "raid_master", 0)
+                    newly_earned.append("Raid Master")
+
+    # ── Indie Scout — bets on 20+ different VTubers ──
+    if not has_badge(username, "indie_scout"):
+        all_entries = db().table("bet_entries") \
+                          .select("bet_id") \
+                          .eq("username", username).execute().data or []
+        if len(all_entries) >= 20:
+            bet_ids = [e["bet_id"] for e in all_entries]
+            placed  = db().table("bets") \
+                          .select("vtuber_name") \
+                          .in_("id", bet_ids).execute().data or []
+            unique  = len(set(b["vtuber_name"].lower().strip() for b in placed))
+            if unique >= 20:
+                award_badge(username, "indie_scout", 0)
+                newly_earned.append("Indie Scout")
+
+    return newly_earned
+
+def check_and_award_first_vote(username: str):
+    """Called when a user casts the deciding vote."""
+    if has_badge(username, "first_vote"):
+        return
+    # Count how many times this user cast a deciding vote
+    # We track this by checking if their vote was the MIN_VOTES-th vote
+    # Simple approach: store a counter in user record (we'll use bets_correct proxy)
+    # For now we check resolved bets where they voted and were the last vote
+    # This is an approximation — good enough for MVP
+    user = get_user(username)
+    if not user:
+        return
+    deciding_count = user.get("deciding_votes", 0)
+    deciding_count += 1
+    update_user(username, {"deciding_votes": deciding_count})
+    if deciding_count >= 5:
+        award_badge(username, "first_vote", 0)
+
+# ─────────────────────────────────────────────
+#  DB — COSMETIC SHOP
+# ─────────────────────────────────────────────
+def get_shop_items() -> list:
+    return db().table("cosmetic_items").select("*").order("cost").execute().data or []
+
+def get_user_cosmetics(username: str) -> list:
+    return db().table("user_cosmetics").select("*") \
+               .eq("username", username).execute().data or []
+
+def owns_item(username: str, item_id: str) -> bool:
+    r = db().table("user_cosmetics").select("id") \
+            .eq("username", username).eq("item_id", item_id).execute()
+    return bool(r.data)
+
+def purchase_item(username: str, item_id: str, cost: int) -> tuple[bool, str]:
+    user = get_user(username)
+    if not user:
+        return False, "User not found."
+    if owns_item(username, item_id):
+        return False, "You already own this item."
+    if user["coins"] < cost:
+        return False, f"Not enough V-Coins. Need {cost:,}, have {user['coins']:,}."
+    db().table("user_cosmetics").insert({
+        "id":           str(uuid.uuid4()),
+        "username":     username,
+        "item_id":      item_id,
+        "equipped":     False,
+        "purchased_at": datetime.now(UTC).isoformat(),
+    }).execute()
+    update_user(username, {"coins": user["coins"] - cost})
+    return True, "Purchased!"
+
+def equip_item(username: str, item_id: str, item_type: str):
+    # Unequip all of same type first
+    owned = get_user_cosmetics(username)
+    all_items = get_shop_items()
+    same_type_ids = [i["id"] for i in all_items if i["type"] == item_type]
+    for uc in owned:
+        if uc["item_id"] in same_type_ids:
+            db().table("user_cosmetics").update({"equipped": False}) \
+                .eq("username", username).eq("item_id", uc["item_id"]).execute()
+    db().table("user_cosmetics").update({"equipped": True}) \
+        .eq("username", username).eq("item_id", item_id).execute()
+
+def get_equipped(username: str, item_type: str) -> dict | None:
+    owned = get_user_cosmetics(username)
+    equipped_ids = [uc["item_id"] for uc in owned if uc.get("equipped")]
+    if not equipped_ids:
+        return None
+    items = get_shop_items()
+    for item in items:
+        if item["id"] in equipped_ids and item["type"] == item_type:
+            return item
+    return None
+
+# ─────────────────────────────────────────────
+#  DB — LEADERBOARD
+# ─────────────────────────────────────────────
+def leaderboard_rich(n=10) -> list:
+    return db().table("users") \
+               .select("username,coins,total_won,bets_placed,bets_correct") \
+               .order("coins", desc=True).limit(n).execute().data or []
+
+def leaderboard_accurate(n=10) -> list:
+    rows = db().table("users") \
+               .select("username,bets_placed,bets_correct") \
+               .gte("bets_placed", 3).execute().data or []
+    for r in rows:
+        r["pct"] = r["bets_correct"] / r["bets_placed"] if r["bets_placed"] else 0
+    return sorted(rows, key=lambda x: x["pct"], reverse=True)[:n]
+
+def leaderboard_losers(n=10) -> list:
+    return db().table("users") \
+               .select("username,total_lost,biggest_loss") \
+               .order("total_lost", desc=True).limit(n).execute().data or []
 
 # ─────────────────────────────────────────────
 #  SESSION STATE
 # ─────────────────────────────────────────────
-if "username" not in st.session_state:
-    st.session_state.username = None
-if "page" not in st.session_state:
-    st.session_state.page = "home"
-if "bet_id" not in st.session_state:
-    st.session_state.bet_id = None
-if "toast" not in st.session_state:
-    st.session_state.toast = None
+for k, v in [("username", None), ("page", "home"), ("auth_tab", "login"),
+             ("selected_bet", None), ("selected_profile", None), ("toast", None)]:
+    if k not in st.session_state:
+        st.session_state[k] = v
 
-def nav(page_name: str, bet_id=None):
-    st.session_state.page = page_name
-    if bet_id:
-        st.session_state.bet_id = bet_id
+def nav(page: str, bet_id=None, profile=None):
+    st.session_state.page             = page
+    st.session_state.selected_bet     = bet_id
+    st.session_state.selected_profile = profile
+    st.rerun()
 
-def set_toast(kind: str, message: str):
-    st.session_state.toast = {"kind": kind, "message": message}
+def set_toast(kind: str, msg: str):
+    st.session_state.toast = (kind, msg)
 
 def show_toast():
     if st.session_state.toast:
-        t = st.session_state.toast
-        if t["kind"] == "success":
-            st.success(t["message"])
-        elif t["kind"] == "error":
-            st.error(t["message"])
-        elif t["kind"] == "warning":
-            st.warning(t["message"])
-        else:
-            st.info(t["message"])
+        kind, msg = st.session_state.toast
+        css = {"success":"notice-success","warn":"notice-warn",
+               "error":"notice-error","info":"notice-info"}.get(kind,"notice-info")
+        st.markdown(f'<div class="notice {css}">{msg}</div>', unsafe_allow_html=True)
         st.session_state.toast = None
 
 # ─────────────────────────────────────────────
-#  AUTO-PULL FUNCTIONS FOR STREAM LINKS
+#  SHARED COMPONENTS
 # ─────────────────────────────────────────────
-def extract_twitch_username(url: str) -> str:
-    """Extract Twitch username from URL"""
-    patterns = [
-        r'twitch\.tv/([^/\?\#]+)',
-        r'twitch\.tv/videos/\d+\?.*channel=([^&]+)',
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, url, re.IGNORECASE)
-        if match:
-            return match.group(1)
-    return ""
-
-def extract_youtube_channel_id(url: str) -> tuple:
-    """Extract YouTube channel ID or handle from URL"""
-    # Pattern for @handle
-    handle_match = re.search(r'youtube\.com/@([^/\?\#]+)', url, re.IGNORECASE)
-    if handle_match:
-        return ('handle', handle_match.group(1))
-    
-    # Pattern for /c/channelname or /channel/channelid
-    channel_match = re.search(r'youtube\.com/(?:c|channel)/([^/\?\#]+)', url, re.IGNORECASE)
-    if channel_match:
-        return ('channel', channel_match.group(1))
-    
-    return (None, None)
-
-def fetch_twitch_stream_info(username: str) -> dict:
-    """
-    Fetch Twitch stream info using Twitch API
-    Returns dict with 'streamer_name' and 'category'
-    """
-    try:
-        # Note: You'll need to add Twitch Client ID and Secret to Streamlit secrets
-        client_id = st.secrets.get("TWITCH_CLIENT_ID", "")
-        client_secret = st.secrets.get("TWITCH_CLIENT_SECRET", "")
-        
-        if not client_id or not client_secret:
-            return {"error": "Twitch API credentials not configured"}
-        
-        # Get OAuth token
-        token_response = requests.post(
-            "https://id.twitch.tv/oauth2/token",
-            params={
-                "client_id": client_id,
-                "client_secret": client_secret,
-                "grant_type": "client_credentials"
-            }
-        )
-        
-        if token_response.status_code != 200:
-            return {"error": "Failed to get Twitch access token"}
-        
-        access_token = token_response.json()["access_token"]
-        
-        # Get user info
-        user_response = requests.get(
-            "https://api.twitch.tv/helix/users",
-            headers={
-                "Client-ID": client_id,
-                "Authorization": f"Bearer {access_token}"
-            },
-            params={"login": username}
-        )
-        
-        if user_response.status_code != 200 or not user_response.json()["data"]:
-            return {"error": "Twitch user not found"}
-        
-        user_data = user_response.json()["data"][0]
-        user_id = user_data["id"]
-        display_name = user_data["display_name"]
-        
-        # Get current stream info
-        stream_response = requests.get(
-            "https://api.twitch.tv/helix/streams",
-            headers={
-                "Client-ID": client_id,
-                "Authorization": f"Bearer {access_token}"
-            },
-            params={"user_id": user_id}
-        )
-        
-        if stream_response.status_code == 200 and stream_response.json()["data"]:
-            stream_data = stream_response.json()["data"][0]
-            return {
-                "streamer_name": display_name,
-                "category": stream_data["game_name"] or "Just Chatting"
-            }
-        else:
-            # Stream is offline, just return the display name
-            return {
-                "streamer_name": display_name,
-                "category": ""
-            }
-            
-    except Exception as e:
-        return {"error": str(e)}
-
-def fetch_youtube_stream_info(channel_type: str, channel_id: str) -> dict:
-    """
-    Fetch YouTube channel info using YouTube Data API
-    Returns dict with 'streamer_name' and 'category'
-    """
-    try:
-        api_key = st.secrets.get("YOUTUBE_API_KEY", "")
-        
-        if not api_key:
-            return {"error": "YouTube API key not configured"}
-        
-        # Get channel info
-        if channel_type == 'handle':
-            # Search by handle
-            search_response = requests.get(
-                "https://www.googleapis.com/youtube/v3/search",
-                params={
-                    "part": "snippet",
-                    "q": channel_id,
-                    "type": "channel",
-                    "maxResults": 1,
-                    "key": api_key
-                }
-            )
-            
-            if search_response.status_code != 200 or not search_response.json().get("items"):
-                return {"error": "YouTube channel not found"}
-            
-            channel_title = search_response.json()["items"][0]["snippet"]["title"]
-        else:
-            # Get by channel ID
-            channel_response = requests.get(
-                "https://www.googleapis.com/youtube/v3/channels",
-                params={
-                    "part": "snippet",
-                    "id": channel_id,
-                    "key": api_key
-                }
-            )
-            
-            if channel_response.status_code != 200 or not channel_response.json().get("items"):
-                return {"error": "YouTube channel not found"}
-            
-            channel_title = channel_response.json()["items"][0]["snippet"]["title"]
-        
-        return {
-            "streamer_name": channel_title,
-            "category": ""  # YouTube doesn't provide current game/category easily
-        }
-            
-    except Exception as e:
-        return {"error": str(e)}
-
-def auto_pull_stream_info(stream_link: str) -> dict:
-    """
-    Main function to auto-pull stream info from Twitch or YouTube
-    Returns dict with 'streamer_name' and 'category'
-    """
-    if not stream_link:
-        return {}
-    
-    # Check if it's Twitch
-    if 'twitch.tv' in stream_link.lower():
-        username = extract_twitch_username(stream_link)
-        if username:
-            return fetch_twitch_stream_info(username)
-    
-    # Check if it's YouTube
-    elif 'youtube.com' in stream_link.lower():
-        channel_type, channel_id = extract_youtube_channel_id(stream_link)
-        if channel_type and channel_id:
-            return fetch_youtube_stream_info(channel_type, channel_id)
-    
-    return {}
-
-# ─────────────────────────────────────────────
-#  DB HELPERS
-# ─────────────────────────────────────────────
-def get_or_create_user(username: str) -> dict:
-    resp = supabase.table("users").select("*").eq("username", username).execute()
-    if resp.data:
-        return resp.data[0]
-    new_user = {
-        "username": username,
-        "coins": STARTING_COINS,
-        "bets_placed": 0,
-        "bets_correct": 0,
-    }
-    ins = supabase.table("users").insert(new_user).execute()
-    return ins.data[0] if ins.data else new_user
-
-def get_user(username: str):
-    resp = supabase.table("users").select("*").eq("username", username).execute()
-    return resp.data[0] if resp.data else None
-
-def update_user_coins(username: str, delta: int):
-    u = get_user(username)
-    if not u:
+def render_badges(username: str, compact=False):
+    badges    = get_user_badges(username)
+    all_achvs = {a["id"]: a for a in get_all_achievements()}
+    if not badges:
+        if not compact:
+            st.markdown('<div style="color:#2a4060;font-size:0.82rem;">No badges yet.</div>',
+                        unsafe_allow_html=True)
         return
-    new_amt = u["coins"] + delta
-    supabase.table("users").update({"coins": new_amt}).eq("username", username).execute()
+    html = ""
+    for b in badges:
+        achv  = all_achvs.get(b["achievement_id"], {})
+        style = BADGE_STYLES.get(b["achievement_id"], "badge-earned")
+        html += f'<span class="badge {style}">{achv.get("name","Badge")}</span>'
+    st.markdown(html, unsafe_allow_html=True)
 
-def create_bet(vtuber_name: str, stream_link: str, game_or_activity: str,
-               title: str, description: str, options: list, category: str, created_by: str):
-    bet_id = str(uuid.uuid4())
-    bet_data = {
-        "id": bet_id,
-        "vtuber_name": vtuber_name,
-        "stream_link": stream_link,
-        "game_or_activity": game_or_activity,
-        "title": title,
-        "description": description,
-        "options": options,
-        "category": category,
-        "status": "open",
-        "created_by": created_by,
-        "created_at": datetime.utcnow().isoformat(),
-        "result": None,
-    }
-    supabase.table("bets").insert(bet_data).execute()
+def render_bet_card(bet: dict, show_btn=False):
+    entries = get_entries(bet["id"])
+    pot     = pot_total(entries)
 
-def get_all_bets():
-    resp = supabase.table("bets").select("*").order("created_at", desc=True).execute()
-    return resp.data if resp.data else []
+    card_class = {
+        "open":   "card card-live",
+        "voting": "card card-voting",
+        "closed": "card card-closed",
+    }.get(bet["status"], "card")
 
-def get_bet(bet_id: str):
-    resp = supabase.table("bets").select("*").eq("id", bet_id).execute()
-    return resp.data[0] if resp.data else None
+    status_html = {
+        "open":   '<span class="pill pill-open">Live</span>',
+        "voting": '<span class="pill pill-voting">Voting</span>',
+        "closed": '<span class="pill pill-closed">Resolved</span>',
+    }.get(bet["status"], "")
 
-def get_my_entry(bet_id: str, username: str):
-    resp = (supabase.table("bet_entries")
-            .select("*")
-            .eq("bet_id", bet_id)
-            .eq("username", username)
-            .execute())
-    return resp.data[0] if resp.data else None
+    link  = bet.get("stream_link","")
+    name  = bet.get("vtuber_name","")
+    name_html = (f'<a href="{link}" target="_blank" class="stream-link">{name}</a>'
+                 if link else f'<span style="color:#4499ff">{name}</span>')
 
-def place_bet_entry(bet_id: str, username: str, option: str, amount: int):
-    u = get_user(username)
-    if u["coins"] < amount:
-        return False, "Not enough V-Coins."
-    update_user_coins(username, -amount)
-    entry = {
-        "bet_id": bet_id,
-        "username": username,
-        "option": option,
-        "amount": amount,
-        "placed_at": datetime.utcnow().isoformat(),
-    }
-    supabase.table("bet_entries").insert(entry).execute()
-    supabase.table("users").update({"bets_placed": u["bets_placed"] + 1}).eq("username", username).execute()
-    return True, "Bet placed."
+    game      = bet.get("game_or_activity","")
+    game_html = f'<div class="bet-game">{game}</div>' if game else ""
+    opts_str  = "  /  ".join(bet["options"][:2])
 
-def get_bet_pool(bet_id: str):
-    resp = supabase.table("bet_entries").select("*").eq("bet_id", bet_id).execute()
-    entries = resp.data if resp.data else []
-    option_totals = {}
-    for e in entries:
-        opt = e["option"]
-        option_totals[opt] = option_totals.get(opt, 0) + e["amount"]
-    total_pot = sum(option_totals.values())
-    return entries, option_totals, total_pot
-
-def move_to_voting(bet_id: str):
-    supabase.table("bets").update({
-        "status": "voting",
-        "voting_opened_at": datetime.utcnow().isoformat()
-    }).eq("id", bet_id).execute()
-
-def create_vote(bet_id: str, username: str, chosen_option: str):
-    v = {
-        "bet_id": bet_id,
-        "username": username,
-        "chosen_option": chosen_option,
-        "voted_at": datetime.utcnow().isoformat(),
-    }
-    supabase.table("votes").insert(v).execute()
-
-def get_votes(bet_id: str):
-    resp = supabase.table("votes").select("*").eq("bet_id", bet_id).execute()
-    data = resp.data if resp.data else []
-    counts = {}
-    for v in data:
-        opt = v["chosen_option"]
-        counts[opt] = counts.get(opt, 0) + 1
-    return data, counts
-
-def has_voted(bet_id: str, username: str) -> bool:
-    resp = (supabase.table("votes")
-            .select("*")
-            .eq("bet_id", bet_id)
-            .eq("username", username)
-            .execute())
-    return bool(resp.data)
-
-def resolve_bet(bet_id: str):
-    bet = get_bet(bet_id)
-    if not bet or bet["status"] != "voting":
-        return False, "Bet not in voting state."
-    
-    _, vote_counts = get_votes(bet_id)
-    if not vote_counts:
-        return False, "No votes recorded."
-    
-    winner_opt = max(vote_counts, key=vote_counts.get)
-    entries, option_totals, total_pot = get_bet_pool(bet_id)
-    
-    house_take = int(total_pot * HOUSE_CUT)
-    payout_pool = total_pot - house_take
-    
-    winning_pool = option_totals.get(winner_opt, 0)
-    if winning_pool == 0:
-        supabase.table("bets").update({"status": "closed", "result": winner_opt}).eq("id", bet_id).execute()
-        return True, winner_opt
-    
-    for e in entries:
-        if e["option"] == winner_opt:
-            share = e["amount"] / winning_pool
-            payout = int(share * payout_pool)
-            update_user_coins(e["username"], payout)
-            
-            u = get_user(e["username"])
-            supabase.table("users").update({
-                "bets_correct": u["bets_correct"] + 1
-            }).eq("username", e["username"]).execute()
-    
-    supabase.table("bets").update({"status": "closed", "result": winner_opt}).eq("id", bet_id).execute()
-    return True, winner_opt
-
-def check_duplicate(vtuber_name: str, title: str):
-    all_bets = get_all_bets()
-    dupes = []
-    for b in all_bets:
-        if b["status"] == "open" and b["vtuber_name"].lower() == vtuber_name.lower():
-            if title.lower() in b["title"].lower() or b["title"].lower() in title.lower():
-                dupes.append(b)
-    return dupes
-
-def leaderboard_rich():
-    resp = supabase.table("users").select("*").order("coins", desc=True).limit(10).execute()
-    return resp.data if resp.data else []
-
-def leaderboard_accurate():
-    resp = supabase.table("users").select("*").gte("bets_placed", 3).execute()
-    users = resp.data if resp.data else []
-    for u in users:
-        u["pct"] = u["bets_correct"] / u["bets_placed"] if u["bets_placed"] else 0
-    users.sort(key=lambda x: x["pct"], reverse=True)
-    return users[:10]
-
-# ─────────────────────────────────────────────
-#  SIDEBAR
-# ─────────────────────────────────────────────
-def render_sidebar():
-    with st.sidebar:
-        st.markdown('<div class="hero-eyebrow">VTuber Betting</div>', unsafe_allow_html=True)
-        st.markdown('<div class="hero-title" style="font-size:1.6rem;">VTuberBets</div>', unsafe_allow_html=True)
-        st.markdown('<div style="color:#1e4080;font-size:0.75rem;margin-bottom:24px;">Community prediction platform</div>',
-                    unsafe_allow_html=True)
-
-        u = get_user(st.session_state.username)
-        if u:
-            st.markdown(f"""
-            <div style="background:#0a0e1c;border:1px solid #151e33;border-radius:10px;
-                        padding:14px 18px;margin-bottom:20px;">
-                <div style="color:#334466;font-size:0.7rem;text-transform:uppercase;
-                            letter-spacing:0.1em;margin-bottom:6px;">Your Wallet</div>
-                <div style="font-family:'Syne',sans-serif;font-size:1.5rem;
-                            font-weight:800;color:#00ccff;">{u['coins']:,}</div>
-                <div style="color:#1e4080;font-size:0.72rem;">V-Coins</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        if st.button("🏠  Home", use_container_width=True):
-            nav("home")
-        if st.button("🎲  All Bets", use_container_width=True):
-            nav("bets")
-        if st.button("➕  Create Bet", use_container_width=True):
-            nav("create_bet")
-        if st.button("🏆  Leaderboard", use_container_width=True):
-            nav("leaderboard")
-
-        st.markdown("---")
-        if st.button("Logout"):
-            st.session_state.username = None
-            st.session_state.page = "home"
-            st.rerun()
-
-# ─────────────────────────────────────────────
-#  LOGIN PAGE
-# ─────────────────────────────────────────────
-def page_login():
-    st.markdown("""
-    <div class="hero-wrap">
-        <div class="hero">
-            <div class="hero-eyebrow">Welcome to</div>
-            <div class="hero-title">VTuberBets</div>
-            <div class="hero-sub">
-                Predict stream outcomes, climb the leaderboard, and earn V-Coins.
-                No real money — just pure prediction skill.
-            </div>
+    st.markdown(f"""
+    <div class="{card_class}">
+        <div class="vtag">{name_html}&nbsp;&nbsp;·&nbsp;&nbsp;{bet.get('category','')}</div>
+        <div class="bet-title">{bet['title']}</div>
+        {game_html}
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;">
+            {status_html}
+            <span class="pot">{pot:,} V-Coins</span>
+            <span style="font-size:0.73rem;color:#2a3a55;">{opts_str}</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### Enter your username to continue")
-    username_input = st.text_input("Username", placeholder="Enter a unique username...", label_visibility="collapsed")
-    if st.button("Continue", use_container_width=True):
-        if username_input.strip():
-            get_or_create_user(username_input.strip())
-            st.session_state.username = username_input.strip()
+    if show_btn:
+        if st.button("View", key=f"view_{bet['id']}"):
+            nav("bet_detail", bet_id=bet["id"])
+
+# ─────────────────────────────────────────────
+# AUTH PAGE  ←  REPLACE THE ENTIRE def page_auth(): 
+# ─────────────────────────────────────────────
+def page_auth():
+    # Vertical centering + improved layout
+    st.markdown('<div class="auth-container">', unsafe_allow_html=True)
+    st.markdown('<div class="auth-card">', unsafe_allow_html=True)
+
+    # Logo / header
+    st.markdown("""
+    <div style="text-align:center;padding-bottom:28px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
+                    color:#1e3a6e;letter-spacing:0.25em;text-transform:uppercase;
+                    margin-bottom:14px;">PREDICTION PLATFORM</div>
+        <div style="font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;
+                    color:#e8f0ff;line-height:1;margin-bottom:12px;">VTuberBets</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;
+                    color:#0055cc;letter-spacing:0.12em;">
+            INDIE VTUBER &nbsp;·&nbsp; COMMUNITY PREDICTIONS &nbsp;·&nbsp; FAKE MONEY ONLY
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    show_toast()
+
+    st.markdown('<div class="auth-tabs">', unsafe_allow_html=True)
+    tab_login, tab_register = st.tabs([" Login ", " Create Account "])
+
+    with tab_login:
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        l_user = st.text_input("Username", key="login_user", placeholder="Enter your username")
+        l_pass = st.text_input("Password", key="login_pass", type="password", placeholder="Enter your password")
+        if st.button("Login", use_container_width=True, key="btn_login"):
+            if not l_user.strip():
+                set_toast("error", "Please enter your username.")
+                st.rerun()
+            elif not l_pass:
+                set_toast("error", "Please enter your password.")
+                st.rerun()
+            else:
+                ok, msg = login_user(l_user.strip(), l_pass)
+                if ok:
+                    st.session_state.username = l_user.strip()
+                    if needs_role_selection(l_user.strip()):
+                        st.session_state.page = "role_select"
+                    else:
+                        st.session_state.page = "home"
+                    st.session_state.show_onboarding = True  # trigger popup after role
+                    st.rerun()
+                else:
+                    set_toast("error", msg)
+                    st.rerun()
+
+    with tab_register:
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        r_user = st.text_input("Username", key="reg_user", placeholder="2–24 characters, no spaces")
+        r_pass = st.text_input("Password", key="reg_pass", type="password", placeholder="At least 6 characters")
+        r_pass2 = st.text_input("Confirm password", key="reg_pass2", type="password", placeholder="Repeat your password")
+        if st.button("Create Account", use_container_width=True, key="btn_register"):
+            un = r_user.strip()
+            errs = []
+            if len(un) < 2: errs.append("Username must be at least 2 characters.")
+            elif len(un) > 24: errs.append("Username must be 24 characters or fewer.")
+            elif " " in un: errs.append("Username cannot contain spaces.")
+            if len(r_pass) < 6: errs.append("Password must be at least 6 characters.")
+            elif r_pass != r_pass2: errs.append("Passwords do not match.")
+            if errs:
+                set_toast("error", errs[0])
+                st.rerun()
+            else:
+                ok, msg = register_user(un, r_pass)
+                if ok:
+                    st.session_state.username = un
+                    st.session_state.page = "role_select"
+                    st.session_state.show_onboarding = True
+                    st.rerun()
+                else:
+                    set_toast("error", msg)
+                    st.rerun()
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Stats row
+    st.markdown("""
+    <div style="display:flex;gap:0;margin-top:24px;
+                border:1px solid #1a2a44;border-radius:12px;overflow:hidden;">
+        <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+                        font-weight:700;color:#00aaff;">5,000</div>
+            <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
+                        letter-spacing:0.08em;margin-top:2px;">Starting Coins</div>
+        </div>
+        <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+                        font-weight:700;color:#00aaff;">+250</div>
+            <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
+                        letter-spacing:0.08em;margin-top:2px;">Daily Bonus</div>
+        </div>
+        <div style="flex:1;padding:14px;text-align:center;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
+                        font-weight:700;color:#00ee88;">$0</div>
+            <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
+                        letter-spacing:0.08em;margin-top:2px;">Real Money</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('</div></div>', unsafe_allow_html=True)  # close auth-card + container
+# ─────────────────────────────────────────────
+#  ROLE SELECTION PAGE
+# ─────────────────────────────────────────────
+def page_role_select():
+    # Also hide sidebar on role select
+    st.markdown("""
+    <style>
+    [data-testid="stSidebar"] { display: none !important; }
+    [data-testid="collapsedControl"] { display: none !important; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        show_toast()
+        st.markdown(f"""
+        <div style="text-align:center;padding:40px 0 28px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
+                        color:#0055cc;letter-spacing:0.2em;text-transform:uppercase;
+                        margin-bottom:12px;">ALMOST READY</div>
+            <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
+                        color:#e8f0ff;margin-bottom:8px;">One last thing</div>
+            <div style="color:#3a5580;font-size:0.9rem;line-height:1.6;">
+                How do you primarily engage with indie VTubers?<br>
+                <span style="color:#2a4060;font-size:0.82rem;">
+                    This personalises your experience. You can change it in your profile later.
+                </span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        roles = [
+            ("Viewer",  "role-Viewer",  "You watch streams, follow indie VTubers, and bet on the chaos.",           "Bet on streams, vote on outcomes, climb the leaderboard."),
+            ("Streamer", "role-streamer", "You are a VTuber or streamer — your community might bet on your streams.", "Get discovered through community bets featuring your content."),
+            ("Clipper",  "role-clipper",  "You create clips and highlight reels of indie VTubers.",                   "Compete in Clip Showdown events and earn the Clipper Legend badge."),
+        ]
+
+        for role, css, short_desc, detail in roles:
+            st.markdown(f"""
+            <div style="background:#0b0f1e;border:1px solid #1e3060;border-radius:12px;
+                        padding:18px 22px;margin-bottom:4px;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                    <span class="profile-role {css}">{role}</span>
+                </div>
+                <div style="color:#6a88aa;font-size:0.85rem;margin-bottom:4px;">{short_desc}</div>
+                <div style="color:#2a4060;font-size:0.78rem;">{detail}</div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"I am a {role}", key=f"role_{role}", use_container_width=True):
+                set_user_role(st.session_state.username, role)
+                st.session_state.page = "home"
+                set_toast("success", f"Welcome! Your account is ready. You start with 5,000 V-Coins.")
+                st.rerun()
+
+        st.markdown("""
+        <div style="text-align:center;margin-top:16px;color:#1e3060;font-size:0.75rem;">
+            Not sure? Pick Viewer — you can update it later in your profile.
+        </div>
+        """, unsafe_allow_html=True)
+        
+def page_role_select():
+            if st.button(f"I am a {role}", key=f"role_{role}", use_container_width=True):
+                set_user_role(st.session_state.username, role)
+                st.session_state.page = "home"
+                st.session_state.show_onboarding = True   # ← ADD THIS LINE
+                set_toast("success", f"Welcome! Your account is ready. You start with 5,000 V-Coins.")
+                st.rerun()
+# ─────────────────────────────────────────────
+# ONBOARDING PAGE
+# ─────────────────────────────────────────────
+def show_onboarding_popup():
+    if not st.session_state.get("show_onboarding"):
+        return
+    st.markdown("""
+    <div class="onboarding-modal">
+        <div class="onboarding-content">
+            <div style="text-align:center;margin-bottom:20px;">
+                <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#e8f0ff;">
+                    Welcome to VTuberBets!
+                </div>
+                <div style="color:#00aaff;font-size:0.9rem;">Here's how it works</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:16px;">
+                <div style="display:flex;gap:14px;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">01</span>
+                    <div><strong>Create account</strong> — username + password only.</div>
+                </div>
+                <div style="display:flex;gap:14px;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">02</span>
+                    <div><strong>Pick your role</strong> — Viewer, Streamer, or Clipper.</div>
+                </div>
+                <div style="display:flex;gap:14px;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">03</span>
+                    <div><strong>Browse open bets</strong> on indie VTuber streams.</div>
+                </div>
+                <div style="display:flex;gap:14px;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">04</span>
+                    <div><strong>Place V-Coins</strong> on what you think will happen.</div>
+                </div>
+                <div style="display:flex;gap:14px;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">05</span>
+                    <div><strong>Vote after the stream</strong> — 3 votes = auto-resolution.</div>
+                </div>
+                <div style="display:flex;gap:14px;">
+                    <span style="font-family:'JetBrains Mono',monospace;background:#001a44;color:#00aaff;padding:2px 10px;border-radius:4px;font-size:0.8rem;font-weight:700;">06</span>
+                    <div><strong>Earn badges &amp; coins</strong> — achievements pay real V-Coins.</div>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:28px;">
+                <button onclick="window.parent.location.reload()" 
+                        style="background:linear-gradient(135deg,#0044ff,#00aaff);color:white;border:none;
+                               padding:12px 32px;border-radius:8px;font-weight:600;cursor:pointer;">
+                    Got it! Let's go
+                </button>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Close popup when user clicks button (Streamlit can't do native JS click easily, so we use rerun trick)
+    if st.button("✅ Got it! Let's go", use_container_width=True):
+        st.session_state.show_onboarding = False
+        st.rerun()
+       
+# ─────────────────────────────────────────────
+#  SIDEBAR
+# ─────────────────────────────────────────────
+def render_sidebar():
+    username = st.session_state.username
+    if not username:
+        return
+    user = get_user(username)
+    if not user:
+        return
+
+    title_item = get_equipped(username, "title")
+
+    with st.sidebar:
+        st.markdown("""
+        <div style="padding:12px 0 18px;">
+            <div style="font-family:'Syne',sans-serif;font-size:1.2rem;
+                        font-weight:800;color:#e8f0ff;">VTuberBets</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;
+                        color:#0066ff;letter-spacing:0.1em;margin-top:2px;">
+                PREDICTION PLATFORM
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        title_html = (f'<div class="user-title">{title_item["value"]}</div>'
+                      if title_item else "")
+        role  = user.get("role","")
+        r_css = {"Viewer":"role-Viewer","Streamer":"role-streamer",
+                 "Clipper":"role-clipper"}.get(role,"role-Viewer")
+
+        st.markdown(f"""
+        <div class="coin-box">
+            {title_html}
+            <div class="coin-label">{username}</div>
+            <div class="coin-amount">{user['coins']:,}</div>
+            <div class="coin-sub">V-COINS</div>
+            {f'<span class="profile-role {r_css}" style="margin-top:8px;display:inline-block;">{role}</span>' if role else ''}
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("Claim Daily Bonus  +250", use_container_width=True):
+            ok, msg = claim_daily_bonus(username)
+            set_toast("success" if ok else "warn", msg)
             st.rerun()
-        else:
-            st.error("Please enter a username.")
+
+        st.markdown("---")
+
+        pages = [
+            ("Home",          "home"),
+            ("All Bets",      "bets"),
+            ("Create Bet",    "create_bet"),
+            ("Achievements",  "achievements"),
+            ("Shop",          "shop"),
+            ("Leaderboard",   "leaderboard"),
+            ("My Profile",    "my_profile"),
+            ("How It Works",  "how_it_works"),
+        ]
+        for label, key in pages:
+            if st.button(label, key=f"nav_{key}", use_container_width=True):
+                nav(key)
+
+        st.markdown("---")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.metric("Correct", user.get("bets_correct", 0))
+        with c2:
+            st.metric("Placed",  user.get("bets_placed",  0))
+
+        st.markdown("---")
+        if st.button("Log out", use_container_width=True):
+            st.session_state.username = None
+            st.session_state.page     = "home"
+            st.rerun()
 
 # ─────────────────────────────────────────────
 #  HOME PAGE
 # ─────────────────────────────────────────────
 def page_home():
+    check_fallback_resolutions()
     show_toast()
     username = st.session_state.username
+    user     = get_user(username)
+    bets     = get_bets()
+    open_bets   = [b for b in bets if b["status"] == "open"]
+    voting_bets = [b for b in bets if b["status"] == "voting"]
 
     st.markdown(f"""
     <div class="hero-wrap">
         <div class="hero">
-            <div class="hero-eyebrow">Powered by Community Votes</div>
-            <div class="hero-title">
-                Welcome, <span class="hero-name">{username}</span>
-            </div>
+            <div class="hero-eyebrow">Prediction Platform &nbsp;·&nbsp; Indie VTubers</div>
+            <div class="hero-title">Welcome back, <span class="hero-name">{username}</span></div>
             <div class="hero-sub">
-                Predict VTuber stream outcomes, vote on results, and earn V-Coins for accurate calls.
-                Track live bets, climb the leaderboard, and flex your prediction prowess.
+                Place V-Coins on indie VTuber stream moments.<br>
+                Community-voted outcomes. No real money. Just predictions.
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("## Active Bets")
-    bets = [b for b in get_all_bets() if b["status"] == "open"]
-    if not bets:
-        st.markdown('<div style="color:#334466;padding:20px 0;">No active bets right now. Create the first one!</div>',
-                    unsafe_allow_html=True)
-    else:
-        for bet in bets[:5]:
-            _, option_totals, total_pot = get_bet_pool(bet["id"])
-            existing = get_my_entry(bet["id"], username)
-            
-            card_class = "card card-live"
-            st.markdown(f'<div class="{card_class}">', unsafe_allow_html=True)
-            st.markdown(f'<div class="vtag">{bet["vtuber_name"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="bet-title">{bet["title"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="bet-game">{bet["game_or_activity"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="pot">💰 {total_pot:,} V-Coins in the pot</div>', unsafe_allow_html=True)
-            
-            if existing:
-                st.markdown(f'<div style="color:#00ee88;font-size:0.75rem;margin-top:6px;">✓ You bet {existing["amount"]:,} on "{existing["option"]}"</div>',
-                            unsafe_allow_html=True)
-            
-            if st.button(f"View Bet", key=f"home_bet_{bet['id']}", use_container_width=True):
-                nav("bet_detail", bet_id=bet["id"])
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Open Bets",    len(open_bets))
+    c2.metric("Voting Now",   len(voting_bets))
+    c3.metric("Your Balance", f"{user['coins']:,}")
+    c4.metric("Total Bets",   len(bets))
 
-        if len(bets) > 5:
-            st.markdown(f'<div style="color:#334466;font-size:0.8rem;margin-top:12px;">+ {len(bets)-5} more active bets</div>',
-                        unsafe_allow_html=True)
+    st.markdown("---")
+
+    if open_bets:
+        st.markdown("### Open Bets")
+        for b in open_bets[:5]:
+            render_bet_card(b, show_btn=True)
+        if len(open_bets) > 5:
+            if st.button("View all open bets"):
+                nav("bets")
+    else:
+        st.markdown('<div class="notice notice-info">No open bets right now. Be the first to create one.</div>',
+                    unsafe_allow_html=True)
+        if st.button("Create a bet"):
+            nav("create_bet")
+
+    if voting_bets:
+        st.markdown("---")
+        st.markdown("### Needs Your Vote")
+        st.markdown('<div style="color:#334466;font-size:0.82rem;margin-bottom:12px;">These streams have ended. Vote on the real outcome to resolve the pot.</div>',
+                    unsafe_allow_html=True)
+        for b in voting_bets[:3]:
+            render_bet_card(b, show_btn=True)
 
 # ─────────────────────────────────────────────
 #  ALL BETS PAGE
 # ─────────────────────────────────────────────
 def page_bets():
     show_toast()
+    bets = get_bets()
     st.markdown("## All Bets")
 
     tab_open, tab_voting, tab_closed = st.tabs(["Open", "Voting", "Resolved"])
 
-    username = st.session_state.username
-
     with tab_open:
-        bets = [b for b in get_all_bets() if b["status"] == "open"]
-        if not bets:
-            st.markdown('<div style="color:#334466;padding:12px 0;">No open bets.</div>', unsafe_allow_html=True)
-        for bet in bets:
-            _, option_totals, total_pot = get_bet_pool(bet["id"])
-            existing = get_my_entry(bet["id"], username)
-            
-            card_class = "card card-live"
-            st.markdown(f'<div class="{card_class}">', unsafe_allow_html=True)
-            st.markdown(f'<div class="vtag">{bet["vtuber_name"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="bet-title">{bet["title"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="bet-game">{bet["game_or_activity"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="pot">💰 {total_pot:,} V-Coins</div>', unsafe_allow_html=True)
-            
-            if existing:
-                st.markdown(f'<div style="color:#00ee88;font-size:0.75rem;margin-top:6px;">✓ You bet {existing["amount"]:,} on "{existing["option"]}"</div>',
-                            unsafe_allow_html=True)
-            
-            if st.button(f"View", key=f"open_{bet['id']}", use_container_width=True):
-                nav("bet_detail", bet_id=bet["id"])
-            st.markdown('</div>', unsafe_allow_html=True)
+        ob = [b for b in bets if b["status"] == "open"]
+        if not ob:
+            st.markdown('<div style="color:#334466;padding:12px 0;">No open bets right now.</div>',
+                        unsafe_allow_html=True)
+        for b in ob:
+            render_bet_card(b, show_btn=True)
+        if st.button("Create a new bet", use_container_width=True):
+            nav("create_bet")
 
     with tab_voting:
-        bets = [b for b in get_all_bets() if b["status"] == "voting"]
-        if not bets:
-            st.markdown('<div style="color:#334466;padding:12px 0;">No bets in voting phase.</div>', unsafe_allow_html=True)
-        for bet in bets:
-            card_class = "card card-voting"
-            st.markdown(f'<div class="{card_class}">', unsafe_allow_html=True)
-            st.markdown(f'<div class="vtag">{bet["vtuber_name"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="bet-title">{bet["title"]}</div>', unsafe_allow_html=True)
-            st.markdown('<span class="pill pill-voting">Voting</span>', unsafe_allow_html=True)
-            
-            if st.button(f"Vote", key=f"voting_{bet['id']}", use_container_width=True):
-                nav("bet_detail", bet_id=bet["id"])
-            st.markdown('</div>', unsafe_allow_html=True)
+        vb = [b for b in bets if b["status"] == "voting"]
+        if not vb:
+            st.markdown('<div style="color:#334466;padding:12px 0;">Nothing in voting phase right now.</div>',
+                        unsafe_allow_html=True)
+        for b in vb:
+            render_bet_card(b, show_btn=True)
 
     with tab_closed:
-        bets = [b for b in get_all_bets() if b["status"] == "closed"]
-        if not bets:
-            st.markdown('<div style="color:#334466;padding:12px 0;">No resolved bets yet.</div>', unsafe_allow_html=True)
-        for bet in bets:
-            card_class = "card card-closed"
-            st.markdown(f'<div class="{card_class}">', unsafe_allow_html=True)
-            st.markdown(f'<div class="vtag">{bet["vtuber_name"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="bet-title">{bet["title"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div style="color:#9977ff;font-size:0.8rem;margin-top:6px;">Result: {bet.get("result", "N/A")}</div>',
+        cb = [b for b in bets if b["status"] == "closed"]
+        if not cb:
+            st.markdown('<div style="color:#334466;padding:12px 0;">No resolved bets yet.</div>',
                         unsafe_allow_html=True)
-            
-            if st.button(f"View", key=f"closed_{bet['id']}", use_container_width=True):
-                nav("bet_detail", bet_id=bet["id"])
-            st.markdown('</div>', unsafe_allow_html=True)
+        for b in cb:
+            render_bet_card(b, show_btn=True)
 
 # ─────────────────────────────────────────────
 #  BET DETAIL PAGE
 # ─────────────────────────────────────────────
 def page_bet_detail():
     show_toast()
-    bet_id = st.session_state.bet_id
-    if not bet_id:
-        st.error("No bet selected.")
-        return
+    bet_id = st.session_state.selected_bet
+    bet    = get_bet(bet_id) if bet_id else None
 
-    bet = get_bet(bet_id)
     if not bet:
         st.error("Bet not found.")
+        if st.button("Back"):
+            nav("bets")
         return
 
     username = st.session_state.username
+    user     = get_user(username)
+    entries  = get_entries(bet_id)
+    votes    = get_votes(bet_id)
 
-    st.markdown(f'<div class="vtag">{bet["vtuber_name"]}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="bet-title" style="font-size:1.4rem;">{bet["title"]}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="bet-game" style="margin-bottom:14px;">{bet["game_or_activity"]}</div>', unsafe_allow_html=True)
-
-    if bet["description"]:
-        st.markdown(f'<div style="color:#4a6a99;font-size:0.85rem;line-height:1.6;margin-bottom:14px;">{bet["description"]}</div>',
-                    unsafe_allow_html=True)
-
-    if bet["stream_link"]:
-        st.markdown(f'<div style="margin-bottom:10px;"><a href="{bet["stream_link"]}" target="_blank" style="color:#0088ff;text-decoration:none;">🔗 Stream Link</a></div>',
-                    unsafe_allow_html=True)
-
-    status_pill = {
-        "open": "pill-open",
-        "voting": "pill-voting",
-        "closed": "pill-closed",
-    }.get(bet["status"], "pill-open")
-    st.markdown(f'<span class="pill {status_pill}">{bet["status"].upper()}</span>', unsafe_allow_html=True)
-
-    entries, option_totals, total_pot = get_bet_pool(bet_id)
-    existing = get_my_entry(bet_id, username)
-
-    # ── OPEN ──
-    if bet["status"] == "open":
-        st.markdown(f'<div class="pot" style="margin:12px 0;">💰 Total Pot: {total_pot:,} V-Coins</div>', unsafe_allow_html=True)
-
-        for opt in bet["options"]:
-            amt = option_totals.get(opt, 0)
-            pct = (amt / total_pot * 100) if total_pot else 0
-            st.markdown(f"""
-            <div class="bar-wrap">
-                <div class="bar-label">
-                    <span>{opt}</span>
-                    <span class="bar-pct">{amt:,} VC  ({pct:.0f}%)</span>
-                </div>
-                <div class="bar-bg">
-                    <div class="bar-fill" style="width:{pct}%"></div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        if existing:
-            st.markdown(f"""
-            <div class="notice notice-info">
-                You've already bet {existing['amount']:,} V-Coins on "{existing['option']}".
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown("### Place Your Bet")
-            with st.form(f"place_bet_{bet_id}"):
-                chosen_opt = st.selectbox("Pick an outcome", bet["options"])
-                bet_amount = st.number_input("Bet amount (V-Coins)", min_value=MIN_BET, value=DEFAULT_BET, step=10)
-                submitted = st.form_submit_button("Place Bet", use_container_width=True)
-                if submitted:
-                    ok, msg = place_bet_entry(bet_id, username, chosen_opt, bet_amount)
-                    set_toast("success" if ok else "error", msg)
+    col1, col2 = st.columns([5, 1])
+    with col1:
+        if st.button("← Back to Bets"):
+            nav("bets")
+    with col2:
+        # Only the bet creator can delete, OR admins (add your username here)
+        ADMINS = ["BLUJAYRX"]  # Add admin usernames here
+        is_creator = bet.get("created_by") == username
+        is_admin = username in ADMINS
+        
+        if is_creator or is_admin:
+            if st.button("🗑️ Delete", type="secondary", help="Delete this bet and refund all entries"):
+                ok, msg = delete_bet(bet_id)
+                set_toast("success" if ok else "error", msg)
+                if ok:
+                    nav("bets")
+                else:
                     st.rerun()
 
-        if bet["created_by"] == username:
-            st.markdown("---")
-            st.markdown("### Creator Controls")
-            if st.button("Move to Voting Phase", use_container_width=True):
-                move_to_voting(bet_id)
-                set_toast("success", "Bet moved to voting. Participants can now vote on the outcome.")
-                st.rerun()
+    link = bet.get("stream_link","")
+    name = bet.get("vtuber_name","")
+    name_html = (f'<a href="{link}" target="_blank" style="color:#4499ff;'
+                 f'text-decoration:none;font-weight:700;">{name}</a>'
+                 if link else f'<span style="color:#4499ff;font-weight:700;">{name}</span>')
+    game = bet.get("game_or_activity","")
 
-    # ── VOTING ──
-    elif bet["status"] == "voting":
-        _, vote_counts = get_votes(bet_id)
-        total_v = sum(vote_counts.values())
-        st.markdown(f'<div style="color:#ffaa00;font-size:0.8rem;margin:10px 0;">⏳ Voting phase: {total_v} vote(s) so far</div>',
+    st.markdown(f"""
+    <div class="hero-wrap">
+        <div class="hero">
+            <div class="vtag" style="margin-bottom:8px;">
+                {name_html} &nbsp;·&nbsp; {bet.get('category','')}
+            </div>
+            <div style="font-family:'Syne',sans-serif;font-size:1.5rem;
+                        font-weight:800;color:#ddeaff;margin-bottom:6px;line-height:1.3;">
+                {bet['title']}
+            </div>
+            {f'<div style="font-size:0.85rem;color:#3a5a88;font-style:italic;margin-bottom:8px;">{game}</div>' if game else ''}
+            <div style="color:#2a4466;font-size:0.85rem;line-height:1.6;">{bet.get('description','')}</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    pot    = pot_total(entries)
+    totals = {o: sum(e["amount"] for e in entries if e["option"] == o)
+              for o in bet["options"]}
+
+    st.markdown(f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.8rem;'
+                f'color:#4499ff;margin-bottom:12px;">{pot:,} V-Coins in pot</div>',
+                unsafe_allow_html=True)
+
+    for opt in bet["options"]:
+        pct = (totals[opt] / pot * 100) if pot else 0
+        st.markdown(f"""
+        <div class="bar-wrap">
+            <div class="bar-label">
+                <span>{opt}</span>
+                <span class="bar-pct">{totals[opt]:,}  ({pct:.0f}%)</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" style="width:{pct}%"></div></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    existing = user_entry(bet_id, username)
+    if existing:
+        st.markdown(f'<div class="notice notice-success">You have {existing["amount"]:,} V-Coins on "{existing["option"]}"</div>',
                     unsafe_allow_html=True)
 
-        already_voted = has_voted(bet_id, username)
-        if already_voted:
-            st.markdown('<div class="notice notice-info">You have already voted on this bet.</div>',
+    st.markdown("---")
+
+    # Open
+    if bet["status"] == "open":
+        st.markdown("### Place Your Bet")
+        if existing:
+            st.markdown('<div style="color:#334466;font-size:0.85rem;">You already have a bet on this one.</div>',
                         unsafe_allow_html=True)
         else:
-            st.markdown("### Cast Your Vote")
-            with st.form(f"vote_{bet_id}"):
-                vote_opt = st.selectbox("What was the actual outcome?", bet["options"])
-                vote_submit = st.form_submit_button("Submit Vote", use_container_width=True)
-                if vote_submit:
-                    create_vote(bet_id, username, vote_opt)
-                    set_toast("success", "Vote recorded.")
+            col1, col2 = st.columns([2,1])
+            with col1:
+                chosen = st.selectbox("Your prediction:", bet["options"])
+            with col2:
+                amount = st.number_input("V-Coins:", min_value=10,
+                                         max_value=min(user["coins"], 99_999),
+                                         value=100, step=10)
+            st.caption(f"Balance: {user['coins']:,} V-Coins")
+            if st.button(f"Place {amount:,} V-Coins on \"{chosen}\"", use_container_width=True):
+                if amount > user["coins"]:
+                    set_toast("error", "Insufficient V-Coins.")
+                else:
+                    place_entry(bet_id, username, chosen, amount)
+                    set_toast("success", f"Bet placed — {amount:,} V-Coins on \"{chosen}\"")
                     st.rerun()
+        st.markdown("---")
+        with st.expander("Stream ended? Close this bet for community voting."):
+            st.caption("Move to voting phase once the stream is over.")
+            if st.button("Close and start voting"):
+                close_bet_for_voting(bet_id)
+                set_toast("success", "Voting phase is now open.")
+                st.rerun()
+
+    # Voting
+    elif bet["status"] == "voting":
+        vc      = {o: sum(1 for v in votes if v["option"] == o) for o in bet["options"]}
+        total_v = sum(vc.values())
+
+        st.markdown("### Community Vote")
+        st.markdown(f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.75rem;'
+                    f'color:#334466;margin-bottom:14px;">{total_v} votes cast · resolves at {MIN_VOTES} with majority</div>',
+                    unsafe_allow_html=True)
+
+        my_vote = user_vote(bet_id, username)
+        if my_vote:
+            st.markdown(f'<div class="notice notice-success">You voted: "{my_vote["option"]}"</div>',
+                        unsafe_allow_html=True)
+        else:
+            st.markdown("**What actually happened on stream?**")
+            vcols = st.columns(len(bet["options"]))
+            for i, opt in enumerate(bet["options"]):
+                with vcols[i]:
+                    if st.button(f"{opt}  ({vc[opt]})",
+                                 key=f"v_{bet_id}_{i}", use_container_width=True):
+                        resolved = cast_vote(bet_id, username, opt)
+                        if resolved:
+                            set_toast("success", f"Vote cast — bet resolved automatically!")
+                        else:
+                            set_toast("success", f"Vote cast for \"{opt}\"")
+                        st.rerun()
 
         for opt in bet["options"]:
-            vc = vote_counts.get(opt, 0)
-            pct = (vc / total_v * 100) if total_v else 0
+            pct = (vc[opt] / total_v * 100) if total_v else 0
             st.markdown(f"""
             <div class="bar-wrap">
                 <div class="bar-label">
                     <span>{opt}</span>
-                    <span class="bar-pct" style="color:#ffcc00;">{vc} votes  ({pct:.0f}%)</span>
+                    <span class="bar-pct" style="color:#ffcc00;">{vc[opt]} votes  ({pct:.0f}%)</span>
                 </div>
-                <div class="bar-bg">
-                    <div class="bar-fill-vote" style="width:{pct}%"></div>
-                </div>
+                <div class="bar-bg"><div class="bar-fill-vote" style="width:{pct}%"></div></div>
             </div>
             """, unsafe_allow_html=True)
 
+        # Manual resolve button if majority reached
         if total_v >= MIN_VOTES:
-            winner_opt = max(vote_counts, key=vote_counts.get)
-            if vote_counts[winner_opt] > total_v / 2:
+            winner_opt = max(vc, key=vc.get)
+            if vc[winner_opt] > total_v / 2:
                 st.markdown(f'<div class="notice notice-success">Clear majority — "{winner_opt}"</div>',
                             unsafe_allow_html=True)
                 if st.button("Resolve and distribute winnings", use_container_width=True):
                     ok, msg = resolve_bet(bet_id)
                     set_toast("success" if ok else "error",
-                              f"Resolved: \"{msg}\" — winnings distributed." if ok else msg)
+                              f"Resolved: \"{msg}\"" if ok else msg)
                     st.rerun()
-        else:
-            remain = MIN_VOTES - total_v
-            st.markdown(f'<div style="color:#334466;font-size:0.82rem;">Need {remain} more vote(s) to resolve.</div>',
-                        unsafe_allow_html=True)
 
-    # ── CLOSED ──
+    # Closed
     elif bet["status"] == "closed":
-        result = bet.get("result", "")
+        result = bet.get("result","")
         st.markdown(f"""
         <div style="background:#001a0d;border:1px solid #00ff8833;border-radius:12px;
                     padding:20px 24px;text-align:center;margin:12px 0;">
@@ -1112,11 +1647,10 @@ def page_bet_detail():
                         font-weight:800;color:#00ff88;">{result}</div>
         </div>
         """, unsafe_allow_html=True)
-
         if existing:
             won = existing["option"] == result
             if won:
-                st.markdown('<div class="notice notice-success">You predicted correctly. Winnings have been added to your wallet.</div>',
+                st.markdown('<div class="notice notice-success">You predicted correctly. Winnings added to your wallet.</div>',
                             unsafe_allow_html=True)
             else:
                 st.markdown(f'<div class="notice notice-error">You predicted "{existing["option"]}". Better luck next time.</div>',
@@ -1128,72 +1662,18 @@ def page_bet_detail():
 def page_create_bet():
     show_toast()
     st.markdown("## Create a Bet")
-    st.markdown('<div style="color:#334466;font-size:0.85rem;margin-bottom:20px;">Submit a prediction for a live or upcoming stream. One bet per moment — keep it specific.</div>',
+    st.markdown('<div style="color:#334466;font-size:0.85rem;margin-bottom:20px;">Submit a prediction for a live or upcoming stream.</div>',
                 unsafe_allow_html=True)
-
-    username = st.session_state.username
-
-    # Initialize session state for auto-pulled values
-    if "auto_pulled_data" not in st.session_state:
-        st.session_state.auto_pulled_data = {}
-    
-    # Stream link input with auto-pull button
-    st.markdown('<div class="section-label">Stream Link (Optional but recommended)</div>', unsafe_allow_html=True)
-    col1, col2 = st.columns([4, 1])
-    
-    with col1:
-        stream_link = st.text_input(
-            "Stream link (Twitch / YouTube)",
-            placeholder="https://twitch.tv/... or https://youtube.com/@...",
-            label_visibility="collapsed",
-            key="stream_link_input"
-        )
-    
-    with col2:
-        if st.button("🔄 Auto-Pull", use_container_width=True):
-            if stream_link:
-                with st.spinner("Fetching stream info..."):
-                    info = auto_pull_stream_info(stream_link)
-                    if "error" in info:
-                        set_toast("warning", f"Could not auto-pull: {info['error']}")
-                    else:
-                        st.session_state.auto_pulled_data = info
-                        set_toast("success", "Stream info auto-pulled successfully!")
-                st.rerun()
-            else:
-                set_toast("error", "Please enter a stream link first")
-                st.rerun()
-
-    # Display auto-pulled notification if data exists
-    if st.session_state.auto_pulled_data:
-        st.markdown(f"""
-        <div class="notice notice-success">
-            ✓ Auto-pulled: {st.session_state.auto_pulled_data.get('streamer_name', '')}
-            {f" - {st.session_state.auto_pulled_data.get('category', '')}" if st.session_state.auto_pulled_data.get('category') else ''}
-        </div>
-        """, unsafe_allow_html=True)
 
     with st.form("create_bet", clear_on_submit=True):
         st.markdown('<div class="section-label">VTuber</div>', unsafe_allow_html=True)
-        
-        # Pre-fill with auto-pulled data if available
-        default_vtuber = st.session_state.auto_pulled_data.get("streamer_name", "")
-        default_game = st.session_state.auto_pulled_data.get("category", "")
-        
-        vtuber_name = st.text_input(
-            "VTuber name *",
-            placeholder="e.g. Filian, Chibidoki, your oshi...",
-            label_visibility="collapsed",
-            value=default_vtuber
-        )
+        vtuber_name = st.text_input("VTuber name *", placeholder="e.g. Filian, Chibidoki, your oshi...")
+        stream_link = st.text_input("Stream link", placeholder="https://twitch.tv/...")
 
         st.markdown('<div class="section-label" style="margin-top:16px;">Stream Context</div>',
                     unsafe_allow_html=True)
-        game_or_activity = st.text_input(
-            "Game or activity *",
-            placeholder="e.g. Elden Ring, Minecraft, Just Chatting, Karaoke...",
-            value=default_game
-        )
+        game_or_activity = st.text_input("Game or activity *",
+                                         placeholder="e.g. Elden Ring, Just Chatting, Karaoke...")
 
         st.markdown('<div class="section-label" style="margin-top:16px;">The Bet</div>',
                     unsafe_allow_html=True)
@@ -1206,8 +1686,7 @@ def page_create_bet():
 
         st.markdown('<div class="section-label" style="margin-top:16px;">Options</div>',
                     unsafe_allow_html=True)
-        bet_type = st.radio("Bet type", ["Yes / No", "Over / Under", "Custom"],
-                            horizontal=True)
+        bet_type = st.radio("Bet type", ["Yes / No", "Over / Under", "Custom"], horizontal=True)
 
         opt1 = opt2 = ""
         if bet_type == "Yes / No":
@@ -1218,58 +1697,136 @@ def page_create_bet():
             threshold = st.text_input("Threshold", placeholder="e.g. 15 deaths, 20 minutes")
             opt1 = f"Over {threshold}"  if threshold else "Over ?"
             opt2 = f"Under {threshold}" if threshold else "Under ?"
-            st.markdown(f'<div class="notice notice-info" style="margin-top:4px;">Options: {opt1}  /  {opt2}</div>',
+            st.markdown(f'<div class="notice notice-info">Options: {opt1}  /  {opt2}</div>',
                         unsafe_allow_html=True)
         else:
-            col1, col2 = st.columns(2)
-            with col1:
+            c1, c2 = st.columns(2)
+            with c1:
                 opt1 = st.text_input("Option A *", placeholder="e.g. Finishes the game")
-            with col2:
+            with c2:
                 opt2 = st.text_input("Option B *", placeholder="e.g. Rage quits")
 
         submitted = st.form_submit_button("Submit Bet", use_container_width=True)
 
         if submitted:
             errs = []
-            if not vtuber_name.strip():     errs.append("VTuber name is required.")
+            if not vtuber_name.strip():      errs.append("VTuber name is required.")
             if not game_or_activity.strip(): errs.append("Game or activity is required.")
-            if not title.strip():           errs.append("Bet question is required.")
-            if not opt1.strip():            errs.append("Option A is required.")
-            if not opt2.strip():            errs.append("Option B is required.")
-
+            if not title.strip():            errs.append("Bet question is required.")
+            if not opt1.strip():             errs.append("Option A is required.")
+            if not opt2.strip():             errs.append("Option B is required.")
             if errs:
-                for e in errs:
-                    set_toast("error", e)
+                set_toast("error", errs[0])
                 st.rerun()
             else:
-                # Duplicate check
                 dupes = check_duplicate(vtuber_name, title)
                 if dupes:
-                    dupe_titles = ", ".join(f'"{d["title"][:50]}"' for d in dupes[:2])
-                    st.markdown(f"""
-                    <div class="dup-warn">
-                        Similar bet may already exist: {dupe_titles}<br>
-                        <span style="font-size:0.75rem;color:#886633;">
-                            Check the open bets list before submitting to avoid duplicates.
-                        </span>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    titles = ", ".join(f'"{d["title"][:50]}"' for d in dupes[:2])
+                    st.markdown(f'<div class="dup-warn">Similar bet may already exist: {titles}<br>'
+                                f'<span style="font-size:0.75rem;color:#886633;">Check open bets before submitting.</span></div>',
+                                unsafe_allow_html=True)
                 else:
-                    create_bet(
-                        vtuber_name      = vtuber_name,
-                        stream_link      = stream_link,
-                        game_or_activity = game_or_activity,
-                        title            = title,
-                        description      = desc,
-                        options          = [opt1.strip(), opt2.strip()],
-                        category         = category,
-                        created_by       = username,
-                    )
-                    # Clear auto-pulled data after successful submission
-                    st.session_state.auto_pulled_data = {}
+                    create_bet(vtuber_name, stream_link, game_or_activity,
+                               title, desc, [opt1.strip(), opt2.strip()],
+                               category, st.session_state.username)
                     set_toast("success", "Bet is now live.")
                     nav("bets")
-                    st.rerun()
+
+# ─────────────────────────────────────────────
+#  ACHIEVEMENTS PAGE
+# ─────────────────────────────────────────────
+def page_achievements():
+    show_toast()
+    username  = st.session_state.username
+    all_achvs = get_all_achievements()
+    earned    = {b["achievement_id"] for b in get_user_badges(username)}
+
+    st.markdown("## Achievements")
+    st.markdown('<div style="color:#334466;font-size:0.85rem;margin-bottom:20px;">Earn badges by hitting milestones. Most come with V-Coin rewards.</div>',
+                unsafe_allow_html=True)
+
+    for achv in all_achvs:
+        is_earned = achv["id"] in earned
+        border    = "#00ee8844" if is_earned else "#1e3060"
+        bg        = "#001a0d" if is_earned else "#0b0f1e"
+        status    = '<span style="color:#00ee88;font-family:\'JetBrains Mono\',monospace;font-size:0.72rem;">EARNED</span>' \
+                    if is_earned else \
+                    '<span style="color:#2a4060;font-family:\'JetBrains Mono\',monospace;font-size:0.72rem;">LOCKED</span>'
+        reward    = f'+{achv["reward_coins"]:,} V-Coins' if achv.get("reward_coins") else "Badge only"
+
+        st.markdown(f"""
+        <div style="background:{bg};border:1px solid {border};border-radius:10px;
+                    padding:18px 20px;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+                <div style="font-family:'Syne',sans-serif;font-weight:800;
+                            font-size:1rem;color:#ddeaff;">{achv['name']}</div>
+                {status}
+            </div>
+            <div style="color:#4a6a99;font-size:0.85rem;margin-bottom:8px;">{achv['description']}</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#4499ff;">
+                Reward: {reward}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────
+#  COSMETIC SHOP PAGE
+# ─────────────────────────────────────────────
+def page_shop():
+    show_toast()
+    username = st.session_state.username
+    user     = get_user(username)
+    items    = get_shop_items()
+
+    st.markdown("## Cosmetic Shop")
+    st.markdown('<div style="color:#334466;font-size:0.85rem;margin-bottom:6px;">Spend V-Coins on profile cosmetics. Purely decorative — no gameplay advantage.</div>',
+                unsafe_allow_html=True)
+    st.markdown(f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.82rem;color:#4499ff;margin-bottom:20px;">Your balance: {user["coins"]:,} V-Coins</div>',
+                unsafe_allow_html=True)
+
+    types = sorted(set(i["type"] for i in items))
+    type_labels = {"title":"Title Prefixes","frame":"Badge Frames","theme":"Profile Themes"}
+
+    for t in types:
+        st.markdown(f"### {type_labels.get(t, t.title())}")
+        type_items = [i for i in items if i["type"] == t]
+        for item in type_items:
+            owned    = owns_item(username, item["id"])
+            equipped = get_equipped(username, t)
+            is_equip = equipped and equipped["id"] == item["id"]
+            border   = "#00ee8844" if owned else "#1e3060"
+            bg       = "#001a0d" if owned else "#0b0f1e"
+
+            col1, col2 = st.columns([3,1])
+            with col1:
+                st.markdown(f"""
+                <div style="background:{bg};border:1px solid {border};border-radius:10px;
+                            padding:14px 18px;">
+                    <div style="font-weight:700;font-size:0.95rem;color:#ddeaff;
+                                margin-bottom:4px;">{item['name']}</div>
+                    <div style="font-size:0.8rem;color:#4a6a99;margin-bottom:6px;">{item['description']}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#4499ff;">
+                        {item['cost']:,} V-Coins
+                        {' &nbsp;·&nbsp; <span style="color:#00ee88">OWNED</span>' if owned else ''}
+                        {' &nbsp;·&nbsp; <span style="color:#ffcc00">EQUIPPED</span>' if is_equip else ''}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            with col2:
+                if owned:
+                    if not is_equip:
+                        if st.button("Equip", key=f"equip_{item['id']}"):
+                            equip_item(username, item["id"], t)
+                            set_toast("success", f"Equipped {item['name']}!")
+                            st.rerun()
+                    else:
+                        st.markdown('<div style="color:#ffcc00;font-size:0.75rem;text-align:center;padding-top:8px;">Equipped</div>',
+                                    unsafe_allow_html=True)
+                else:
+                    if st.button("Buy", key=f"buy_{item['id']}"):
+                        ok, msg = purchase_item(username, item["id"], item["cost"])
+                        set_toast("success" if ok else "error", msg)
+                        st.rerun()
 
 # ─────────────────────────────────────────────
 #  LEADERBOARD PAGE
@@ -1278,14 +1835,13 @@ def page_leaderboard():
     show_toast()
     st.markdown("## Leaderboard")
 
-    tab_rich, tab_acc = st.tabs(["Most V-Coins", "Most Accurate"])
+    tab_rich, tab_acc, tab_loss = st.tabs(["Richest", "Most Accurate", "Biggest Losers"])
 
     with tab_rich:
         st.markdown("### Richest Predictors")
         rows = leaderboard_rich()
         if not rows:
-            st.markdown('<div style="color:#334466;padding:12px 0;">No users yet.</div>',
-                        unsafe_allow_html=True)
+            st.markdown('<div style="color:#334466;padding:12px 0;">No users yet.</div>', unsafe_allow_html=True)
         for i, u in enumerate(rows):
             top   = i < 3
             rank  = f"#{i+1:02d}"
@@ -1299,11 +1855,10 @@ def page_leaderboard():
             """, unsafe_allow_html=True)
 
     with tab_acc:
-        st.markdown("### Most Accurate  (min. 3 bets placed)")
+        st.markdown("### Most Accurate  (min. 3 bets)")
         rows = leaderboard_accurate()
         if not rows:
-            st.markdown('<div style="color:#334466;padding:12px 0;">Not enough data yet.</div>',
-                        unsafe_allow_html=True)
+            st.markdown('<div style="color:#334466;padding:12px 0;">Not enough data yet.</div>', unsafe_allow_html=True)
         for i, u in enumerate(rows):
             top   = i < 3
             rank  = f"#{i+1:02d}"
@@ -1315,17 +1870,184 @@ def page_leaderboard():
                 <div class="lb-name">{u['username']}</div>
                 <div class="lb-stat">
                     {pct*100:.0f}%
-                    <br><span style="font-size:0.68rem;color:#1e3060;">
-                        {u['bets_correct']}/{u['bets_placed']}
+                    <br><span style="font-size:0.68rem;color:#1e3060;">{u['bets_correct']}/{u['bets_placed']}</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with tab_loss:
+        st.markdown("### Biggest Losers")
+        st.markdown('<div style="color:#334466;font-size:0.82rem;margin-bottom:12px;">Most V-Coins lost in total. A badge of honour.</div>',
+                    unsafe_allow_html=True)
+        rows = leaderboard_losers()
+        if not rows:
+            st.markdown('<div style="color:#334466;padding:12px 0;">Nobody has lost anything yet.</div>', unsafe_allow_html=True)
+        for i, u in enumerate(rows):
+            top   = i < 3
+            rank  = f"#{i+1:02d}"
+            style = "lb-rank lb-rank-top" if top else "lb-rank"
+            st.markdown(f"""
+            <div class="lb-row">
+                <div class="{style}">{rank}</div>
+                <div class="lb-name">{u['username']}</div>
+                <div class="lb-stat-loss">-{u.get('total_lost',0):,}<br>
+                    <span style="font-size:0.68rem;color:#2a1020;">
+                        biggest: -{u.get('biggest_loss',0):,}
                     </span>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
+# ─────────────────────────────────────────────
+#  MY PROFILE PAGE
+# ─────────────────────────────────────────────
+def page_my_profile():
+    show_toast()
+    username = st.session_state.username
+    user     = get_user(username)
+
+    st.markdown("## My Profile")
+
+    role  = user.get("role","")
+    r_css = {"Viewer":"role-Viewer","Streamer":"role-streamer",
+             "Clipper":"role-clipper"}.get(role,"role-Viewer")
+    title_item = get_equipped(username, "title")
+    title_str  = f' — {title_item["value"]}' if title_item else ""
+
+    st.markdown(f"""
+    <div class="profile-card">
+        <div style="font-family:'Syne',sans-serif;font-size:1.4rem;
+                    font-weight:800;color:#e8f0ff;margin-bottom:4px;">
+            {username}{title_str}
+        </div>
+        <span class="profile-role {r_css}">{role or 'No role set'}</span>
+        <div style="color:#4a6a99;font-size:0.85rem;margin-top:10px;line-height:1.6;">
+            {user.get('bio','No bio yet.')}
+        </div>
+        {f'<div style="color:#2a4060;font-size:0.8rem;margin-top:8px;">Favourite VTubers: {user.get("favorite_vtubers","")}</div>' if user.get('favorite_vtubers') else ''}
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Stats
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("V-Coins",   f"{user['coins']:,}")
+    c2.metric("Total Won", f"{user.get('total_won',0):,}")
+    c3.metric("Total Lost",f"{user.get('total_lost',0):,}")
+    c4.metric("Accuracy",
+              f"{(user['bets_correct']/user['bets_placed']*100):.0f}%"
+              if user.get('bets_placed',0) >= 1 else "N/A")
+
+    st.markdown("---")
+
+    col_badges, col_edit = st.columns([2,1])
+
+    with col_badges:
+        st.markdown("### Badges")
+        render_badges(username)
+
+    with col_edit:
+        st.markdown("### Edit Profile")
+        with st.form("edit_profile"):
+            new_bio = st.text_area("Bio", value=user.get("bio",""),
+                                   max_chars=200, height=80,
+                                   placeholder="Tell the community about yourself...")
+            new_fav = st.text_input("Favourite VTubers",
+                                    value=user.get("favorite_vtubers",""),
+                                    placeholder="e.g. Filian, Chibidoki, Nemu")
+            if st.form_submit_button("Save", use_container_width=True):
+                update_user(username, {"bio": new_bio, "favorite_vtubers": new_fav})
+                set_toast("success", "Profile updated.")
+                st.rerun()
+
+    st.markdown("---")
+    st.markdown("### Bet History")
+    all_entries = db().table("bet_entries").select("*") \
+                      .eq("username", username).execute().data or []
+    if not all_entries:
+        st.markdown('<div style="color:#334466;font-size:0.85rem;">No bets placed yet.</div>',
+                    unsafe_allow_html=True)
+    else:
+        bet_ids = [e["bet_id"] for e in all_entries[:20]]
+        bets_map = {}
+        for bid in bet_ids:
+            b = get_bet(bid)
+            if b:
+                bets_map[bid] = b
+        for e in all_entries[:10]:
+            b = bets_map.get(e["bet_id"])
+            if not b:
+                continue
+            won  = b.get("status") == "closed" and e["option"] == b.get("result")
+            lost = b.get("status") == "closed" and e["option"] != b.get("result")
+            color = "#00cc77" if won else ("#ff5577" if lost else "#4499ff")
+            outcome = "Won" if won else ("Lost" if lost else "Pending")
+            st.markdown(f"""
+            <div style="background:#0b0f1e;border:1px solid #1a2540;border-radius:8px;
+                        padding:12px 16px;margin-bottom:8px;display:flex;
+                        justify-content:space-between;align-items:center;">
+                <div>
+                    <div style="font-size:0.85rem;color:#c8d8f0;font-weight:600;">{b['title'][:60]}</div>
+                    <div style="font-size:0.75rem;color:#334466;margin-top:2px;">{b['vtuber_name']} · {e['option']}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:{color};">{outcome}</div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#334466;">{e['amount']:,} V-C</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────
+#  HOW IT WORKS PAGE
+# ─────────────────────────────────────────────
+def page_how_it_works():
+    st.markdown("## How VTuberBets Works")
+    st.markdown('<div style="color:#334466;font-size:0.88rem;margin-bottom:24px;">Everything you need to know to start predicting.</div>',
+                unsafe_allow_html=True)
+
+    sections = [
+        ("01", "What are V-Coins?",
+         "V-Coins are VTuberBets' virtual currency. They are completely fake — no real money, no cash value, ever. Every new account starts with 5,000 V-Coins. You earn more by predicting correctly, claiming your daily bonus (+250 every 20 hours), and completing achievements."),
+
+        ("02", "How do I place a bet?",
+         "Browse the open bets on the Home or All Bets page. Click View on any bet that interests you. Choose which outcome you think will happen, decide how many V-Coins to wager, and confirm. You can only place one bet per prediction — make it count."),
+
+        ("03", "How are bets resolved?",
+         "After a stream ends, the bet creator closes it and moves it to Voting phase. The community then votes on what actually happened. As soon as 3 votes are cast and one option has a clear majority, the bet resolves automatically. If no majority is reached within 6 days, the option with the most votes wins by default."),
+
+        ("04", "How do payouts work?",
+         "Winners split the entire pot proportionally based on how much they wagered. If you bet more than others on the winning side, you earn a larger share. A 5% house cut is taken from each pot and goes into the weekly bonus pool — the top 3 richest players each week receive a 2,000 V-Coin bonus from this pool."),
+
+        ("05", "What are Achievements?",
+         "Achievements are badges earned by hitting milestones — correctly predicting Hidden Gem bets, winning large amounts, casting deciding votes, and more. Most achievements come with V-Coin rewards. Check the Achievements page to see what you're working toward."),
+
+        ("06", "What is the Cosmetic Shop?",
+         "Spend V-Coins on purely decorative profile customizations — title prefixes, badge frames, and profile themes. These have no effect on gameplay. They exist as a fun way to spend excess coins and show off your style."),
+
+        ("07", "What counts as an indie VTuber?",
+         "VTuberBets is exclusively for small, independent VTubers — not large agency talents. If you're creating a bet, the VTuber should be a genuine small creator. This is the whole point: helping people discover and engage with creators who don't already have massive audiences."),
+
+        ("08", "What are the bet categories?",
+         "Hidden Gem bets spotlight unknown or underrated VTubers specifically. Boss Fight, Death Count, and Game Completion are for gameplay moments. Yap Session / Just Chatting covers pre-game or off-topic tangents. Raid / Shoutout covers end-of-stream moments. Tech Scuff, Karaoke Arc, and Chaos Moment cover the unpredictable stuff that makes indie streams great."),
+    ]
+
+    for num, title, body in sections:
+        st.markdown(f"""
+        <div class="hiw-section">
+            <div class="hiw-num">Step {num}</div>
+            <div class="hiw-title">{title}</div>
+            <div class="hiw-body">{body}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
     st.markdown("""
-    <div style="color:#1e3060;font-size:0.75rem;margin-top:16px;
-                font-family:'JetBrains Mono',monospace;">
-        Top 3 earners each week receive a 2,000 V-Coin bonus from the house cut pool.
+    <div style="background:#0b0f1e;border:1px solid #00ee8844;border-radius:10px;
+                padding:20px 24px;margin-top:8px;text-align:center;">
+        <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;
+                    color:#00ee88;margin-bottom:6px;">Ready to play?</div>
+        <div style="color:#334466;font-size:0.85rem;">
+            Head to the Home page and place your first bet.<br>
+            No real money. No downloads. Just predictions and bragging rights.
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1334,17 +2056,26 @@ def page_leaderboard():
 # ─────────────────────────────────────────────
 def main():
     if not st.session_state.username:
-        page_login()
+        page_auth()
+        return
+
+    # Role selection gates — runs before sidebar
+    if st.session_state.page == "role_select" or needs_role_selection(st.session_state.username):
+        page_role_select()
         return
 
     render_sidebar()
 
     p = st.session_state.page
-    if   p == "home":       page_home()
-    elif p == "bets":       page_bets()
-    elif p == "bet_detail": page_bet_detail()
-    elif p == "create_bet": page_create_bet()
-    elif p == "leaderboard": page_leaderboard()
-    else:                   page_home()
+    if   p == "home":         page_home()
+    elif p == "bets":         page_bets()
+    elif p == "bet_detail":   page_bet_detail()
+    elif p == "create_bet":   page_create_bet()
+    elif p == "achievements": page_achievements()
+    elif p == "shop":         page_shop()
+    elif p == "leaderboard":  page_leaderboard()
+    elif p == "my_profile":   page_my_profile()
+    elif p == "how_it_works": page_how_it_works()
+    else:                     page_home()
 
 main()
