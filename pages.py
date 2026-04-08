@@ -951,7 +951,7 @@ def page_auth():
 # ───────────────────────────────────────────────────────────────────────────
 # ── Auth ───────────────────────────────────────────────────────────────────
 def page_auth():
-    # Hide sidebar on auth page
+    # Hide default sidebar on auth page
     st.markdown("""
     <style>
     [data-testid="stSidebar"] { display: none !important; }
@@ -959,8 +959,10 @@ def page_auth():
     </style>
     """, unsafe_allow_html=True)
 
-    _, col, _ = st.columns([1, 2, 1])
-    with col:
+    # Two-column layout: Login on left, Ad on right
+    left_col, ad_col = st.columns([2, 1])
+
+    with left_col:
         # Show toast if one exists
         if st.session_state.toast:
             show_toast()
@@ -980,29 +982,6 @@ def page_auth():
         </div>
         """, unsafe_allow_html=True)
 
-        # ── YOUR ADVERTISEMENT (clean & prominent) ──
-        st.markdown("""
-        <div style="text-align:center; max-width:520px; margin:0 auto 32px auto; background:#0b0f1e; border:1px solid #8800ff44; border-radius:16px; padding:24px 20px;">
-            <div style="font-size:1.45rem; font-weight:800; background:linear-gradient(90deg,#00d4ff,#aa00ff,#00ff88); 
-                        -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:12px;">
-                The FUTURE of VTuber Discovery
-            </div>
-            <div style="font-size:1.05rem; font-weight:600; color:#c8d8f0; line-height:1.45; margin-bottom:20px;">
-                Bet fake V-Coins on indie VTuber stream moments.<br>
-                Community votes on what actually happened.
-            </div>
-            <div style="font-size:0.98rem; font-weight:700; color:#6a88aa; margin-bottom:16px;">
-                Community Focused!!
-            </div>
-            <div style="display:flex; gap:28px; justify-content:center; font-size:0.95rem;">
-                <div style="color:#ff3366;">❌ Algorithm Chasing</div>
-                <div style="color:#00ff88;">✅ Pure Fun</div>
-                <div style="color:#ffdd00;">✅ Pure Skill</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Login / Register tabs
         tab_login, tab_register = st.tabs([" Login ", " Create Account "])
 
         with tab_login:
@@ -1056,7 +1035,7 @@ def page_auth():
                         set_toast("error", msg)
                         st.rerun()
 
-        # Stats row (kept at bottom)
+        # Stats row
         st.markdown("""
         <div style="display:flex;gap:0;margin-top:24px;
                     border:1px solid #1a2a44;border-radius:12px;overflow:hidden;">
@@ -1077,6 +1056,38 @@ def page_auth():
                             font-weight:700;color:#00ee88;">$0</div>
                 <div style="font-size:0.65rem;color:#1e3060;text-transform:uppercase;
                             letter-spacing:0.08em;margin-top:2px;">Real Money</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ── ADVERTISEMENT SIDEBAR (on the right) ──
+    with ad_col:
+        st.markdown("""
+        <div style="background:linear-gradient(135deg, #1a0033, #0a001a); 
+                    border: 2px solid #8800ff44; 
+                    border-radius: 16px; 
+                    padding: 28px 20px; 
+                    height: 100%; 
+                    position: sticky; 
+                    top: 20px;">
+            <div style="font-size: 1.35rem; font-weight: 800; 
+                        background: linear-gradient(90deg, #00d4ff, #aa00ff, #00ff88); 
+                        -webkit-background-clip: text; 
+                        -webkit-text-fill-color: transparent; 
+                        margin-bottom: 16px; text-align: center;">
+                The FUTURE of VTuber Discovery
+            </div>
+            <div style="font-size: 1.0rem; font-weight: 600; color: #c8d8f0; line-height: 1.5; margin-bottom: 20px; text-align: center;">
+                Bet fake V-Coins on indie VTuber stream moments.<br>
+                Community votes on what actually happened.
+            </div>
+            <div style="font-size: 0.95rem; font-weight: 700; color: #aa88ff; margin-bottom: 20px; text-align: center;">
+                Community Focused!!
+            </div>
+            <div style="display: flex; gap: 20px; justify-content: center; font-size: 0.95rem;">
+                <div style="color: #ff3366;">❌ Algorithm Chasing</div>
+                <div style="color: #00ff88;">✅ Pure Fun</div>
+                <div style="color: #ffdd00;">✅ Pure Skill</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
