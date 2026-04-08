@@ -188,7 +188,7 @@ def page_role_select():
 # ONBOARDING PAGE
 
 # ── Home ───────────────────────────────────────────────────────────────────
-# ── Home ───────────────────────────────────────────────────────────────────
+
 # ── Home ───────────────────────────────────────────────────────────────────
 def page_home():
     check_fallback_resolutions()
@@ -220,7 +220,7 @@ def page_home():
 
     st.markdown("---")
 
-    # Simple tabs — Betting + Clips
+    # Simple tabs using your already-written code
     tab_betting, tab_clips = st.tabs(["Betting", "Clips"])
 
     with tab_betting:
@@ -246,8 +246,7 @@ def page_home():
                 render_bet_card(b, show_btn=True)
 
     with tab_clips:
-        # This re-uses the exact same code we already wrote for page_clips()
-        page_clips_content()   # ← tiny helper we’ll add next
+        page_clips()   # ← calls your exact existing Clips page code
 # ─────────────────────────────────────────────
 #  ALL BETS PAGE
 
