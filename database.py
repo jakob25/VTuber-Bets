@@ -490,3 +490,53 @@ def leaderboard_losers(n=10) -> list:
     return db().table("users") \
                .select("username,total_lost,biggest_loss") \
                .order("total_lost", desc=True).limit(n).execute().data or []
+
+
+# ── CLIP METADATA HUB ──────────────────────────────────────────────────────
+def get_clips(limit=50, sort="newest"):
+    q = db().table("clips").select("*")
+    if sort == "top":
+        q = q.order("upvotes", desc=True)
+    else:
+        q = q.order("created_at", desc=True)
+    return q.limit(limit).execute().data or []
+
+def get_clip(clip_id: str):
+    r = db().table("clips").select("*").eq("id", clip_id).execute()
+    return r.data[0] if r.data else None
+
+def submit_clip(clip_url: str, vtuber_name: str, title: str, description: str, tags: list, submitter: str, bet_id: str = None):
+    db().table("clips").insert({
+        "clip_url": clip_url.strip(),
+        "vtuber_name": vtuber_name.strip(),
+        "title": title.strip(),
+        "description": description.strip(),
+        "tags": tags,
+        "submitter": submitter,
+        "bet_id": bet_id,
+        "week_of": datetime.utcnow().date().isoformat()  # for weekly rewards
+    }).execute()
+
+def upvote_clip(clip_id: str, username: str):
+    # Simple upvote (no duplicate check for MVP — add later)
+    clip = get_clip(clip_id)
+    if not clip:
+        return False
+    new_up = clip["upvotes"] + 1
+    db().table("clips").update({"upvotes": new_up}).eq("id", clip_id).execute()
+    return True
+
+def award_weekly_clip_rewards():
+    """Manual trigger for now — top 3 get V-Coins"""
+    top = db().table("clips") \
+              .select("submitter,upvotes") \
+              .eq("week_of", datetime.utcnow().date().isoformat()) \
+              .order("upvotes", desc=True).limit(3).execute().data or []
+    rewards = [500, 300, 100]
+    for i, clip in enumerate(top[:3]):
+        if i >= len(rewards):
+            break
+        user = get_user(clip["submitter"])
+        if user:
+            update_user(clip["submitter"], {"coins": user["coins"] + rewards[i]})
+    return len(top)
