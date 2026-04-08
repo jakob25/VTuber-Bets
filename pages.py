@@ -188,6 +188,7 @@ def page_role_select():
 # ONBOARDING PAGE
 
 # ── Home ───────────────────────────────────────────────────────────────────
+# ── Home ───────────────────────────────────────────────────────────────────
 def page_home():
     check_fallback_resolutions()
     show_toast()
@@ -218,26 +219,56 @@ def page_home():
 
     st.markdown("---")
 
-    if open_bets:
-        st.markdown("### Open Bets")
-        for b in open_bets[:5]:
-            render_bet_card(b, show_btn=True)
-        if len(open_bets) > 5:
-            if st.button("View all open bets"):
-                nav("bets")
-    else:
-        st.markdown('<div class="notice notice-info">No open bets right now. Be the first to create one.</div>',
-                    unsafe_allow_html=True)
-        if st.button("Create a bet"):
-            nav("create_bet")
+    # ── NEW: Betting + Clips tabs on Home
+    tab_betting, tab_clips = st.tabs(["Betting", "Clips"])
 
-    if voting_bets:
-        st.markdown("---")
-        st.markdown("### Needs Your Vote")
-        st.markdown('<div style="color:#334466;font-size:0.82rem;margin-bottom:12px;">These streams have ended. Vote on the real outcome to resolve the pot.</div>',
+    with tab_betting:
+        if open_bets:
+            st.markdown("### Open Bets")
+            for b in open_bets[:5]:
+                render_bet_card(b, show_btn=True)
+            if len(open_bets) > 5:
+                if st.button("View all open bets"):
+                    nav("bets")
+        else:
+            st.markdown('<div class="notice notice-info">No open bets right now. Be the first to create one.</div>',
+                        unsafe_allow_html=True)
+            if st.button("Create a bet"):
+                nav("create_bet")
+
+        if voting_bets:
+            st.markdown("---")
+            st.markdown("### Needs Your Vote")
+            st.markdown('<div style="color:#334466;font-size:0.82rem;margin-bottom:12px;">These streams have ended. Vote on the real outcome to resolve the pot.</div>',
+                        unsafe_allow_html=True)
+            for b in voting_bets[:3]:
+                render_bet_card(b, show_btn=True)
+
+    with tab_clips:
+        st.markdown("## Clip Hub")
+        st.markdown('<div style="color:#334466;font-size:0.85rem;margin-bottom:20px;">Community-submitted clips of indie VTubers. Upvote your favorites — top 3 each week win V-Coins.</div>',
                     unsafe_allow_html=True)
-        for b in voting_bets[:3]:
-            render_bet_card(b, show_btn=True)
+
+        clips = get_clips(sort=st.session_state.get("clip_sort", "top"))
+
+        col1, col2 = st.columns([3,1])
+        with col1:
+            sort_mode = st.radio("Sort", ["Top this week", "Newest"], horizontal=True, key="home_clip_sort")
+            st.session_state.clip_sort = "top" if "Top" in sort_mode else "newest"
+        with col2:
+            if st.button("🏆 Award this week’s top clips", use_container_width=True):
+                count = award_weekly_clip_rewards()
+                set_toast("success", f"Awarded V-Coins to top {count} clips!")
+                st.rerun()
+
+        for clip in clips[:8]:   # limit on home for clean look
+            render_clip_card(clip)
+
+        st.markdown("---")
+        if st.button("View Full Clip Hub", use_container_width=True):
+            nav("clips")
+        st.markdown("### Submit a new clip")
+        render_clip_submit_form()
 
 # ─────────────────────────────────────────────
 #  ALL BETS PAGE
