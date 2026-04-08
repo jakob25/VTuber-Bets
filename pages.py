@@ -883,3 +883,53 @@ def page_clips():
     st.markdown("---")
     st.markdown("### Submit a new clip")
     render_clip_submit_form()
+
+    # ── CLIP FUNCTIONS (defined directly here to fix NameError) ────────────────
+def render_clip_card(clip: dict):
+    st.markdown(f"""
+    <div class="card" style="border-left: 3px solid #00d4ff;">
+        <div class="vtag">{clip['vtuber_name']}</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#ddeaff;margin-bottom:6px;">
+            {clip['title']}
+        </div>
+        <div style="color:#4a6a99;font-size:0.85rem;margin-bottom:12px;">{clip.get('description','')}</div>
+        <a href="{clip['clip_url']}" target="_blank" style="color:#00d4ff;font-family:'JetBrains Mono',monospace;font-size:0.8rem;">
+            ▶️ Watch Clip
+        </a>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+            {' '.join(f'<span class="pill" style="background:#001a2e;color:#00d4ff;font-size:0.65rem;">{tag}</span>' for tag in clip.get('tags',[]))}
+        </div>
+        <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#00d4ff;">
+            ↑ {clip['upvotes']} upvotes • by {clip['submitter']}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.button("👍 Upvote", key=f"up_{clip['id']}", use_container_width=True):
+        from database import upvote_clip
+        if upvote_clip(clip['id'], st.session_state.username):
+            set_toast("success", "+1 upvote!")
+            st.rerun()
+
+def render_clip_submit_form(bet_id=None, prefill_vtuber=""):
+    with st.form("clip_submit", clear_on_submit=True):
+        st.markdown("### Submit a new clip")
+        vtuber = st.text_input("VTuber name *", value=prefill_vtuber)
+        clip_url = st.text_input("Clip link *", placeholder="https://twitch.tv/clip/...")
+        title = st.text_input("Clip title *", placeholder="That insane clutch moment")
+        desc = st.text_area("Short description", max_chars=140, height=80)
+        tags = st.multiselect("Tags (choose 1-3)", 
+                              ["Boss Fight", "Death Count", "Chaos Moment", "Karaoke Arc", 
+                               "Raid / Shoutout", "Tech Scuff", "Hidden Gem", "Other"],
+                              default=[])
+        
+        submitted = st.form_submit_button("Submit Clip", use_container_width=True)
+        if submitted:
+            if not vtuber or not clip_url or not title:
+                set_toast("error", "VTuber, clip link, and title required.")
+                return
+            from database import submit_clip
+            submit_clip(clip_url, vtuber, title, desc or "", tags, 
+                        st.session_state.username, bet_id)
+            set_toast("success", "Clip submitted! Thank you, scout.")
+            st.rerun()
