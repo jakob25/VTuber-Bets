@@ -714,7 +714,7 @@ def render_bet_card(bet: dict, show_btn=False):
     opts_str = " / ".join(bet["options"][:2])
     st.markdown(f"""
     <div class="{card_class}">
-        <div class="vtag">{name_html}&nbsp;&nbsp;·&nbsp;&nbsp;{bet.get('category','')}</div>
+        <div class="vtag">{name_html}&nbsp;&nbsp;&nbsp;&nbsp;{bet.get('category','')}</div>
         <div class="bet-title">{bet['title']}</div>
         {game_html}
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;">
@@ -905,7 +905,7 @@ def page_auth():
                         color:#e8f0ff;line-height:1;margin-bottom:12px;">VTuberBets</div>
             <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;
                         color:#0055cc;letter-spacing:0.12em;">
-                INDIE VTUBER &nbsp;·&nbsp; COMMUNITY PREDICTIONS &nbsp;·&nbsp; FAKE MONEY ONLY
+                INDIE VTUBER &nbsp;&nbsp; COMMUNITY PREDICTIONS &nbsp;&nbsp; FAKE MONEY ONLY
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1054,7 +1054,7 @@ def page_home():
     st.markdown(f"""
     <div class="hero-wrap">
         <div class="hero">
-            <div class="hero-eyebrow">Prediction Platform &nbsp;·&nbsp; Indie VTubers</div>
+            <div class="hero-eyebrow">Prediction Platform &nbsp;&nbsp; Indie VTubers</div>
             <div class="hero-title">Welcome back, <span class="hero-name">{username}</span></div>
             <div class="hero-sub">
                 Place V-Coins on indie VTuber stream moments.<br>
@@ -1152,7 +1152,7 @@ def page_bet_detail():
     <div class="hero-wrap">
         <div class="hero">
             <div class="vtag" style="margin-bottom:8px;">
-                {name_html} &nbsp;·&nbsp; {bet.get('category','')}
+                {name_html} &nbsp;&nbsp; {bet.get('category','')}
             </div>
             <div style="font-family:'Syne',sans-serif;font-size:1.5rem;
                         font-weight:800;color:#ddeaff;margin-bottom:6px;line-height:1.3;">
@@ -1220,7 +1220,7 @@ def page_bet_detail():
         total_v = sum(vc.values())
         st.markdown("### Community Vote")
         st.markdown(f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.75rem;'
-                    f'color:#334466;margin-bottom:14px;">{total_v} votes cast · resolves at {MIN_VOTES} with majority</div>',
+                    f'color:#334466;margin-bottom:14px;">{total_v} votes cast  resolves at {MIN_VOTES} with majority</div>',
                     unsafe_allow_html=True)
         my_vote = user_vote(bet_id, username)
         if my_vote:
@@ -1417,8 +1417,8 @@ def page_shop():
                     <div style="font-size:0.8rem;color:#4a6a99;margin-bottom:6px;">{item['description']}</div>
                     <div style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#4499ff;">
                         {item['cost']:,} V-Coins
-                        {' &nbsp;·&nbsp; <span style="color:#00ee88">OWNED</span>' if owned else ''}
-                        {' &nbsp;·&nbsp; <span style="color:#ffcc00">EQUIPPED</span>' if is_equip else ''}
+                        {' &nbsp;&nbsp; <span style="color:#00ee88">OWNED</span>' if owned else ''}
+                        {' &nbsp;&nbsp; <span style="color:#ffcc00">EQUIPPED</span>' if is_equip else ''}
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -1583,7 +1583,7 @@ def page_my_profile():
                         justify-content:space-between;align-items:center;">
                 <div>
                     <div style="font-size:0.85rem;color:#c8d8f0;font-weight:600;">{b['title'][:60]}</div>
-                    <div style="font-size:0.75rem;color:#334466;margin-top:2px;">{b['vtuber_name']} · {e['option']}</div>
+                    <div style="font-size:0.75rem;color:#334466;margin-top:2px;">{b['vtuber_name']}  {e['option']}</div>
                 </div>
                 <div style="text-align:right;">
                     <div style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:{color};">{outcome}</div>
