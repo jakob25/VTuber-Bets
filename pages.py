@@ -17,12 +17,6 @@ from database import (
 )
 from ui import nav, set_toast, show_toast, render_badges, render_bet_card, render_clip_card, render_clip_submit_form
 
-# ── Auth, Role Select, Home, Bets, Bet Detail, Create Bet, etc. ─────────────
-# (Everything below is your original code — only Clips page added at the end)
-
-# [PASTE YOUR ORIGINAL FULL pages.py CONTENT HERE FROM THE FIRST MESSAGE]
-# Everything up to the end of page_how_it_works stays exactly as you had it.
-
 # ── CLIPS PAGE (standalone only) ───────────────────────────────────────────
 def page_clips():
     show_toast()
