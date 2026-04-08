@@ -951,7 +951,7 @@ def page_auth():
 # ───────────────────────────────────────────────────────────────────────────
 # ── Auth ───────────────────────────────────────────────────────────────────
 def page_auth():
-    # Hide default sidebar on auth page
+    # Hide default sidebar
     st.markdown("""
     <style>
     [data-testid="stSidebar"] { display: none !important; }
@@ -959,24 +959,23 @@ def page_auth():
     </style>
     """, unsafe_allow_html=True)
 
-    # Two-column layout: Login on left, Ad on right
-    left_col, ad_col = st.columns([2, 1])
+    # Two-column layout: Login form centered/left, Ad panel on the right (sidebar style)
+    main_col, ad_col = st.columns([2.2, 1])
 
-    with left_col:
-        # Show toast if one exists
+    with main_col:
         if st.session_state.toast:
             show_toast()
 
-        # Logo / header
+        # Logo
         st.markdown("""
-        <div style="text-align:center;padding:32px 0 28px;">
+        <div style="text-align:center;padding:40px 0 32px;">
             <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
                         color:#1e3a6e;letter-spacing:0.25em;text-transform:uppercase;
                         margin-bottom:14px;">PREDICTION PLATFORM</div>
-            <div style="font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;
+            <div style="font-family:'Syne',sans-serif;font-size:3.4rem;font-weight:800;
                         color:#e8f0ff;line-height:1;margin-bottom:12px;">VTuberBets</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;
-                        color:#0055cc;letter-spacing:0.12em;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;
+                        color:#0055cc;letter-spacing:0.15em;">
                 INDIE VTUBER &nbsp;·&nbsp; COMMUNITY PREDICTIONS &nbsp;·&nbsp; FAKE MONEY ONLY
             </div>
         </div>
@@ -985,7 +984,7 @@ def page_auth():
         tab_login, tab_register = st.tabs([" Login ", " Create Account "])
 
         with tab_login:
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
             l_user = st.text_input("Username", key="login_user", placeholder="Enter your username")
             l_pass = st.text_input("Password", key="login_pass", type="password", placeholder="Enter your password")
             if st.button("Login", use_container_width=True, key="btn_login"):
@@ -1009,7 +1008,7 @@ def page_auth():
                         st.rerun()
 
         with tab_register:
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
             r_user = st.text_input("Username", key="reg_user", placeholder="2–24 characters, no spaces")
             r_pass = st.text_input("Password", key="reg_pass", type="password", placeholder="At least 6 characters")
             r_pass2 = st.text_input("Confirm password", key="reg_pass2", type="password", placeholder="Repeat your password")
@@ -1035,9 +1034,9 @@ def page_auth():
                         set_toast("error", msg)
                         st.rerun()
 
-        # Stats row
+        # Stats row at bottom
         st.markdown("""
-        <div style="display:flex;gap:0;margin-top:24px;
+        <div style="display:flex;gap:0;margin-top:32px;
                     border:1px solid #1a2a44;border-radius:12px;overflow:hidden;">
             <div style="flex:1;padding:14px;text-align:center;border-right:1px solid #1a2a44;">
                 <div style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;
@@ -1060,37 +1059,41 @@ def page_auth():
         </div>
         """, unsafe_allow_html=True)
 
-    # ── ADVERTISEMENT SIDEBAR (on the right) ──
+    # ── RIGHT SIDE AD PANEL (sidebar style) ──
     with ad_col:
         st.markdown("""
-        <div style="background:linear-gradient(135deg, #1a0033, #0a001a); 
-                    border: 2px solid #8800ff44; 
-                    border-radius: 16px; 
-                    padding: 28px 20px; 
+        <div style="background: linear-gradient(145deg, #1a0033, #0a001a); 
+                    border: 3px solid #aa00ff88; 
+                    border-radius: 20px; 
+                    padding: 32px 24px; 
                     height: 100%; 
                     position: sticky; 
-                    top: 20px;">
-            <div style="font-size: 1.35rem; font-weight: 800; 
-                        background: linear-gradient(90deg, #00d4ff, #aa00ff, #00ff88); 
+                    top: 40px;">
+            <div style="font-size: 1.6rem; font-weight: 900; 
+                        background: linear-gradient(90deg, #00ffcc, #ff00aa, #00ccff); 
                         -webkit-background-clip: text; 
                         -webkit-text-fill-color: transparent; 
-                        margin-bottom: 16px; text-align: center;">
+                        text-align: center; margin-bottom: 20px;">
                 The FUTURE of VTuber Discovery
             </div>
-            <div style="font-size: 1.0rem; font-weight: 600; color: #c8d8f0; line-height: 1.5; margin-bottom: 20px; text-align: center;">
+            
+            <div style="font-size: 1.08rem; color: #e0e0ff; line-height: 1.6; text-align: center; margin-bottom: 28px;">
                 Bet fake V-Coins on indie VTuber stream moments.<br>
-                Community votes on what actually happened.
+                <strong>Community votes</strong> on what actually happened.
             </div>
-            <div style="font-size: 0.95rem; font-weight: 700; color: #aa88ff; margin-bottom: 20px; text-align: center;">
+
+            <div style="text-align: center; font-size: 1.05rem; font-weight: 700; color: #cc88ff; margin-bottom: 24px;">
                 Community Focused!!
             </div>
-            <div style="display: flex; gap: 20px; justify-content: center; font-size: 0.95rem;">
-                <div style="color: #ff3366;">❌ Algorithm Chasing</div>
-                <div style="color: #00ff88;">✅ Pure Fun</div>
-                <div style="color: #ffdd00;">✅ Pure Skill</div>
+
+            <div style="display: flex; justify-content: center; gap: 32px; font-size: 1.0rem;">
+                <div style="color: #ff5555;">✘ Algorithm Chasing</div>
+                <div style="color: #00ff99;">✔ Pure Fun</div>
+                <div style="color: #ffdd55;">✔ Pure Skill</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
+
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
