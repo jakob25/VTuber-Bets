@@ -4,7 +4,7 @@ Entry point — only routing + config. Clean and tiny.
 """
 import streamlit as st
 from database import needs_role_selection
-from pages import (
+from pages import(
     page_auth, page_role_select,
     page_home, page_bets, page_bet_detail, page_create_bet,
     page_achievements, page_shop, page_leaderboard,
