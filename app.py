@@ -10,7 +10,7 @@ from pages import (
     page_home, page_bets, page_bet_detail, page_create_bet,
     page_achievements, page_shop, page_leaderboard,
     page_my_profile, page_how_it_works,
-    page_clips,
+    page_clips          # ← NEW CLIP HUB
 )
 
 st.set_page_config(
@@ -47,5 +47,6 @@ def main():
         "how_it_works": page_how_it_works,
         "clips":        page_clips,          # ← NEW
     }
+    routes.get(st.session_state.page, page_home)()
+
 main()
- routes.get(st.session_state.page, page_home)()
