@@ -854,8 +854,8 @@ def render_clip_submit_form(bet_id=None, prefill_vtuber=""):
             st.rerun()
 
 
-# ── PAGE FUNCTIONS ────────────────────────────────────────────────────────
-# (All your page functions from page_auth to page_clips go here exactly as you had them)
+# ── 
+PAGE FUNCTIONS ────────────────────────────────────────────────────────
 
 # ── Auth ───────────────────────────────────────────────────────────────────
 def page_auth():
@@ -949,6 +949,7 @@ def page_auth():
 # PAGES FUNCTIONS
 # ───────────────────────────────────────────────────────────────────────────
 # ── Auth ───────────────────────────────────────────────────────────────────
+# ── Auth ───────────────────────────────────────────────────────────────────
 def page_auth():
     # Hide sidebar on auth page
     st.markdown("""
@@ -957,11 +958,13 @@ def page_auth():
     [data-testid="collapsedControl"] { display: none !important; }
     </style>
     """, unsafe_allow_html=True)
+
     _, col, _ = st.columns([1, 2, 1])
     with col:
         # Show toast if one exists
         if st.session_state.toast:
             show_toast()
+
         # Logo / header
         st.markdown("""
         <div style="text-align:center;padding:32px 0 28px;">
@@ -972,11 +975,35 @@ def page_auth():
                         color:#e8f0ff;line-height:1;margin-bottom:12px;">VTuberBets</div>
             <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;
                         color:#0055cc;letter-spacing:0.12em;">
-                INDIE VTUBER &nbsp;&nbsp; COMMUNITY PREDICTIONS &nbsp;&nbsp; FAKE MONEY ONLY
+                INDIE VTUBER &nbsp;·&nbsp; COMMUNITY PREDICTIONS &nbsp;·&nbsp; FAKE MONEY ONLY
             </div>
         </div>
         """, unsafe_allow_html=True)
+
+        # ← YOUR AD INTEGRATED HERE
+        st.markdown("""
+        <div style="text-align:center; max-width:520px; margin:0 auto 32px auto;">
+            <div style="font-size:1.35rem; font-weight:800; background:linear-gradient(90deg,#00d4ff,#aa00ff,#00ff88); 
+                        -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:8px;">
+                The FUTURE of VTuber Discovery
+            </div>
+            <div style="font-size:1.05rem; font-weight:600; color:#c8d8f0; line-height:1.4; margin-bottom:20px;">
+                Bet fake V-Coins on indie VTuber stream moments.<br>
+                Community votes on what actually happened.
+            </div>
+            <div style="font-size:0.95rem; font-weight:700; color:#6a88aa; margin-bottom:12px;">
+                Community Focused!!
+            </div>
+            <div style="display:flex; gap:28px; justify-content:center; font-size:0.95rem;">
+                <div style="color:#ff3366;">❌ Algorithm Chasing</div>
+                <div style="color:#00ff88;">✅ Pure Fun</div>
+                <div style="color:#ffdd00;">✅ Pure Skill</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
         tab_login, tab_register = st.tabs([" Login ", " Create Account "])
+
         with tab_login:
             st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
             l_user = st.text_input("Username", key="login_user", placeholder="Enter your username")
@@ -1000,9 +1027,10 @@ def page_auth():
                     else:
                         set_toast("error", msg)
                         st.rerun()
+
         with tab_register:
             st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-            r_user = st.text_input("Username", key="reg_user", placeholder="2\u201324 characters, no spaces")
+            r_user = st.text_input("Username", key="reg_user", placeholder="2–24 characters, no spaces")
             r_pass = st.text_input("Password", key="reg_pass", type="password", placeholder="At least 6 characters")
             r_pass2 = st.text_input("Confirm password", key="reg_pass2", type="password", placeholder="Repeat your password")
             if st.button("Create Account", use_container_width=True, key="btn_register"):
@@ -1026,6 +1054,7 @@ def page_auth():
                     else:
                         set_toast("error", msg)
                         st.rerun()
+
         # Stats row
         st.markdown("""
         <div style="display:flex;gap:0;margin-top:24px;
