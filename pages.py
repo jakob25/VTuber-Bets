@@ -885,14 +885,13 @@ def page_clips():
 
 # ── Update page_bet_detail (only the voting section changes) ───────────────
 def page_bet_detail():
-    # ... [ALL EXISTING CODE UNTIL THE VOTING BLOCK REMAINS EXACT] ...
+
 
     # Voting block — NEW CLIP SUBMISSION SECTION
     elif bet["status"] == "voting":
-        # ... [existing vote UI] ...
+ 
 
         st.markdown("### Help the community resolve this bet")
         st.caption("Submit clips from the stream as evidence")
         render_clip_submit_form(bet_id=bet_id, prefill_vtuber=bet.get("vtuber_name",""))
 
-        # ... [rest of voting UI unchanged] ...
