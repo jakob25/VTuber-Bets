@@ -855,5 +855,44 @@ def page_how_it_works():
     </div>
     """, unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────
-#  ROUTER
+
+# ── CLIPS PAGE ─────────────────────────────────────────────────────────────
+def page_clips():
+    show_toast()
+    st.markdown("## Clip Hub")
+    st.markdown('<div style="color:#334466;font-size:0.85rem;margin-bottom:20px;">Community-submitted clips of indie VTubers. Upvote your favorites — top 3 each week win V-Coins.</div>',
+                unsafe_allow_html=True)
+
+    from database import get_clips, award_weekly_clip_rewards
+    clips = get_clips(sort=st.session_state.get("clip_sort", "top"))
+
+    col1, col2 = st.columns([3,1])
+    with col1:
+        sort_mode = st.radio("Sort", ["Top this week", "Newest"], horizontal=True, key="clip_sort_radio")
+        st.session_state.clip_sort = "top" if "Top" in sort_mode else "newest"
+    with col2:
+        if st.button("🏆 Award this week’s top clips", use_container_width=True):
+            count = award_weekly_clip_rewards()
+            set_toast("success", f"Awarded V-Coins to top {count} clips!")
+            st.rerun()
+
+    for clip in clips:
+        render_clip_card(clip)
+
+    st.markdown("---")
+    st.markdown("### Submit a new clip")
+    render_clip_submit_form()
+
+# ── Update page_bet_detail (only the voting section changes) ───────────────
+def page_bet_detail():
+    # ... [ALL EXISTING CODE UNTIL THE VOTING BLOCK REMAINS EXACT] ...
+
+    # Voting block — NEW CLIP SUBMISSION SECTION
+    elif bet["status"] == "voting":
+        # ... [existing vote UI] ...
+
+        st.markdown("### Help the community resolve this bet")
+        st.caption("Submit clips from the stream as evidence")
+        render_clip_submit_form(bet_id=bet_id, prefill_vtuber=bet.get("vtuber_name",""))
+
+        # ... [rest of voting UI unchanged] ...
