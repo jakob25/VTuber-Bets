@@ -11,7 +11,7 @@ from database import (
     get_equipped, purchase_item, equip_item, pot_total,
     leaderboard_rich, leaderboard_accurate, leaderboard_losers,
     login_user, register_user, needs_role_selection, set_user_role, get_clips, award_weekly_clip_rewards
-    CATEGORIES, MIN_VOTES
+    CATEGORIES, MIN_VOTES,
 )
 from ui import nav, set_toast, show_toast, render_badges, render_bet_card
 
