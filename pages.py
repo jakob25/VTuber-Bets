@@ -951,7 +951,7 @@ def page_auth():
 # ───────────────────────────────────────────────────────────────────────────
 # ── Auth ───────────────────────────────────────────────────────────────────
 def page_auth():
-    # Hide default sidebar
+    # Hide default sidebar on auth page
     st.markdown("""
     <style>
     [data-testid="stSidebar"] { display: none !important; }
@@ -959,14 +959,15 @@ def page_auth():
     </style>
     """, unsafe_allow_html=True)
 
-    # Two-column layout: Login form centered/left, Ad panel on the right (sidebar style)
-    main_col, ad_col = st.columns([2.2, 1])
+    # Two-column layout: Login form on left, Ad panel on right (sidebar style)
+    login_col, ad_col = st.columns([2.2, 1])
 
-    with main_col:
+    with login_col:
+        # Show toast if one exists
         if st.session_state.toast:
             show_toast()
 
-        # Logo
+        # Logo / header
         st.markdown("""
         <div style="text-align:center;padding:40px 0 32px;">
             <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
@@ -1034,7 +1035,7 @@ def page_auth():
                         set_toast("error", msg)
                         st.rerun()
 
-        # Stats row at bottom
+        # Stats row
         st.markdown("""
         <div style="display:flex;gap:0;margin-top:32px;
                     border:1px solid #1a2a44;border-radius:12px;overflow:hidden;">
@@ -1093,7 +1094,6 @@ def page_auth():
             </div>
         </div>
         """, unsafe_allow_html=True)
-
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
