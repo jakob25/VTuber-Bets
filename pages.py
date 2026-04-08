@@ -1,13 +1,3 @@
-"""
-pages.py
-All page render functions — one per route.
-"""
-"""
-pages.py
-All page render functions — one per route.
-Includes clip functionality integrated throughout.
-NO MORE ui.py dependency — everything is self-contained.
-"""
 import streamlit as st
 from database import (
     get_user, update_user, get_bets, get_bet, get_entries, get_votes,
