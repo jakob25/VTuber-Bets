@@ -189,6 +189,7 @@ def page_role_select():
 
 # ── Home ───────────────────────────────────────────────────────────────────
 # ── Home ───────────────────────────────────────────────────────────────────
+# ── Home ───────────────────────────────────────────────────────────────────
 def page_home():
     check_fallback_resolutions()
     show_toast()
@@ -219,7 +220,7 @@ def page_home():
 
     st.markdown("---")
 
-    # ── NEW: Betting + Clips tabs on Home
+    # Simple tabs — Betting + Clips
     tab_betting, tab_clips = st.tabs(["Betting", "Clips"])
 
     with tab_betting:
@@ -245,31 +246,8 @@ def page_home():
                 render_bet_card(b, show_btn=True)
 
     with tab_clips:
-        st.markdown("## Clip Hub")
-        st.markdown('<div style="color:#334466;font-size:0.85rem;margin-bottom:20px;">Community-submitted clips of indie VTubers. Upvote your favorites — top 3 each week win V-Coins.</div>',
-                    unsafe_allow_html=True)
-
-        clips = get_clips(sort=st.session_state.get("clip_sort", "top"))
-
-        col1, col2 = st.columns([3,1])
-        with col1:
-            sort_mode = st.radio("Sort", ["Top this week", "Newest"], horizontal=True, key="home_clip_sort")
-            st.session_state.clip_sort = "top" if "Top" in sort_mode else "newest"
-        with col2:
-            if st.button("🏆 Award this week’s top clips", use_container_width=True):
-                count = award_weekly_clip_rewards()
-                set_toast("success", f"Awarded V-Coins to top {count} clips!")
-                st.rerun()
-
-        for clip in clips[:8]:   # limit on home for clean look
-            render_clip_card(clip)
-
-        st.markdown("---")
-        if st.button("View Full Clip Hub", use_container_width=True):
-            nav("clips")
-        st.markdown("### Submit a new clip")
-        render_clip_submit_form()
-
+        # This re-uses the exact same code we already wrote for page_clips()
+        page_clips_content()   # ← tiny helper we’ll add next
 # ─────────────────────────────────────────────
 #  ALL BETS PAGE
 
@@ -964,3 +942,29 @@ def render_clip_submit_form(bet_id=None, prefill_vtuber=""):
                         st.session_state.username, bet_id)
             set_toast("success", "Clip submitted! Thank you, scout.")
             st.rerun()
+# ── Helper so Home tab can reuse the full Clips page code without duplication
+def page_clips_content():
+    """Exactly the same content as page_clips() — called from Home tab"""
+    from database import get_clips, award_weekly_clip_rewards
+    st.markdown("## Clip Hub")
+    st.markdown('<div style="color:#334466;font-size:0.85rem;margin-bottom:20px;">Community-submitted clips of indie VTubers. Upvote your favorites — top 3 each week win V-Coins.</div>',
+                unsafe_allow_html=True)
+
+    clips = get_clips(sort=st.session_state.get("clip_sort", "top"))
+
+    col1, col2 = st.columns([3,1])
+    with col1:
+        sort_mode = st.radio("Sort", ["Top this week", "Newest"], horizontal=True, key="home_clip_sort")
+        st.session_state.clip_sort = "top" if "Top" in sort_mode else "newest"
+    with col2:
+        if st.button("🏆 Award this week’s top clips", use_container_width=True):
+            count = award_weekly_clip_rewards()
+            set_toast("success", f"Awarded V-Coins to top {count} clips!")
+            st.rerun()
+
+    for clip in clips[:8]:
+        render_clip_card(clip)
+
+    st.markdown("---")
+    st.markdown("### Submit a new clip")
+    render_clip_submit_form()
