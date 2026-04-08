@@ -1106,6 +1106,64 @@ def page_role_select():
             Not sure? Pick Viewer — you can update it later in your profile.
         </div>
         """, unsafe_allow_html=True)
+def page_role_select():
+    # Also hide sidebar on role select
+    st.markdown("""
+    <style>
+    [data-testid="stSidebar"] { display: none !important; }
+    [data-testid="collapsedControl"] { display: none !important; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        show_toast()
+        st.markdown(f"""
+        <div style="text-align:center;padding:40px 0 28px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;
+                        color:#0055cc;letter-spacing:0.2em;text-transform:uppercase;
+                        margin-bottom:12px;">ALMOST READY</div>
+            <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
+                        color:#e8f0ff;margin-bottom:8px;">One last thing</div>
+            <div style="color:#3a5580;font-size:0.9rem;line-height:1.6;">
+                How do you primarily engage with indie VTubers?<br>
+                <span style="color:#2a4060;font-size:0.82rem;">
+                    This personalises your experience. You can change it in your profile later.
+                </span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        roles = [
+            ("Viewer",   "role-watcher",   "You watch streams, follow indie VTubers, and bet on the chaos.",           "Bet on streams, vote on outcomes, climb the leaderboard."),
+            ("Streamer", "role-streamer",  "You are a VTuber or streamer — your community might bet on your streams.", "Get discovered through community bets featuring your content."),
+            ("Clipper",  "role-clipper",   "You create clips and highlight reels of indie VTubers.",                   "Compete in Clip Showdown events and earn the Clipper Legend badge."),
+        ]
+
+        for role, css, short_desc, detail in roles:
+            st.markdown(f"""
+            <div style="background:#0b0f1e;border:1px solid #1e3060;border-radius:12px;
+                        padding:18px 22px;margin-bottom:4px;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                    <span class="profile-role {css}">{role}</span>
+                </div>
+                <div style="color:#6a88aa;font-size:0.85rem;margin-bottom:4px;">{short_desc}</div>
+                <div style="color:#2a4060;font-size:0.78rem;">{detail}</div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"I am a {role}", key=f"role_{role}", use_container_width=True):
+                set_user_role(st.session_state.username, role)
+                st.session_state.page = "home"
+                st.session_state.show_onboarding = True
+                set_toast("success", f"Welcome! Your account is ready. You start with 5,000 V-Coins.")
+                st.rerun()
+
+        st.markdown("""
+        <div style="text-align:center;margin-top:16px;color:#1e3060;font-size:0.75rem;">
+            Not sure? Pick Viewer — you can update it later in your profile.
+        </div>
+        """, unsafe_allow_html=True)
+
 # ─────────────────────────────────────────────
 # ONBOARDING PAGE
 # ── Home ───────────────────────────────────────────────────────────────────
