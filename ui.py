@@ -878,6 +878,7 @@ def render_sidebar():
         pages = [
             ("Home",          "home"),
             ("All Bets",      "bets"),
+            ("Clips",         "clips"),
             ("Create Bet",    "create_bet"),
             ("Achievements",  "achievements"),
             ("Shop",          "shop"),
