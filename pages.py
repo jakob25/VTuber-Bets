@@ -830,8 +830,8 @@ def show_onboarding_popup():
                 </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
-if st.button("✅ Got it! Let's go", use_container_width=True, key="dismiss_onboarding"):
+            """, unsafe_allow_html=True)
+            if st.button("✅ Got it! Let's go", use_container_width=True, key="dismiss_onboarding"):
             st.session_state.show_onboarding = False
             st.rerun()
 # ── CLIP HELPER COMPONENTS (your code, untouched) ────────────────────────
