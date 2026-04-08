@@ -1,23 +1,22 @@
 """
 app.py
-Entry point — page config, style injection, and router.
+Entry point — only routing + config. Clean and tiny.
 """
 import streamlit as st
-from ui import inject_styles, init_state, nav, show_onboarding_popup, render_sidebar
 from database import needs_role_selection
 from pages import (
     page_auth, page_role_select,
     page_home, page_bets, page_bet_detail, page_create_bet,
     page_achievements, page_shop, page_leaderboard,
     page_my_profile, page_how_it_works,
-    page_clips          # ← NEW CLIP HUB
+    inject_styles, init_state, render_sidebar, show_onboarding_popup
 )
 
 st.set_page_config(
     page_title="VTuberBets",
     page_icon="🎲",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="expanded"
 )
 
 inject_styles()
@@ -45,7 +44,6 @@ def main():
         "leaderboard":  page_leaderboard,
         "my_profile":   page_my_profile,
         "how_it_works": page_how_it_works,
-        "clips":        page_clips,          # ← NEW
     }
     routes.get(st.session_state.page, page_home)()
 
