@@ -34,8 +34,7 @@ def main():
 
     render_sidebar()
     show_onboarding_popup()
-   
-main()
+    main()
     routes = {
         "home":         page_home,
         "bets":         page_bets,
@@ -48,4 +47,5 @@ main()
         "how_it_works": page_how_it_works,
         "clips":        page_clips,          # ← NEW
     }
+  
  routes.get(st.session_state.page, page_home)()
