@@ -17,13 +17,14 @@ from database import (
 )
 from ui import nav, set_toast, show_toast, render_badges, render_bet_card, render_clip_card, render_clip_submit_form
 
-# ── CLIPS PAGE (standalone only) ───────────────────────────────────────────
+# ── CLIPS PAGE (100% separate — no betting integration) ─────────────────────
 def page_clips():
     show_toast()
     st.markdown("## Clip Hub")
     st.markdown('<div style="color:#334466;font-size:0.85rem;margin-bottom:20px;">Community-submitted clips of indie VTubers. Upvote your favorites — top 3 each week win V-Coins.</div>',
                 unsafe_allow_html=True)
 
+    from database import get_clips, award_weekly_clip_rewards
     clips = get_clips(sort=st.session_state.get("clip_sort", "top"))
 
     col1, col2 = st.columns([3,1])
@@ -42,4 +43,3 @@ def page_clips():
     st.markdown("---")
     st.markdown("### Submit a new clip")
     render_clip_submit_form()
-
