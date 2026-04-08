@@ -905,7 +905,6 @@ def render_sidebar():
 
 
 # ── CLIP METADATA HUB COMPONENTS ───────────────────────────────────────────
-
 def render_clip_card(clip: dict):
     st.markdown(f"""
     <div class="card" style="border-left: 3px solid #00d4ff;">
@@ -933,7 +932,6 @@ def render_clip_card(clip: dict):
             st.rerun()
 
 def render_clip_submit_form(bet_id=None, prefill_vtuber=""):
-    """Reusable form — used only on the Clips page"""
     with st.form("clip_submit", clear_on_submit=True):
         st.markdown("### Submit a new clip")
         vtuber = st.text_input("VTuber name *", value=prefill_vtuber)
