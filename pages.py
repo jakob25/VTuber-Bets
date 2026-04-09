@@ -858,9 +858,9 @@ def render_clip_submit_form(bet_id=None, prefill_vtuber=""):
 # PAGE FUNCTIONS
 # ───────────────────────────────────────────────────────────────────────────
 
-# ── Auth / Landing Page ─────────────────────────────────────────────────────
+# # ── Auth / Landing Page ─────────────────────────────────────────────────────
 def page_auth():
-    # Hide sidebar on auth page
+    # Hide sidebar
     st.markdown("""
     <style>
     [data-testid="stSidebar"] { display: none !important; }
@@ -875,139 +875,85 @@ def page_auth():
         padding: 0 16px 48px;
     }
 
-    /* Top auth tabs strip */
-    .auth-tab-strip {
-        width: 100%;
-        max-width: 860px;
-        display: flex;
-        justify-content: flex-end;
-        padding: 20px 0 0;
-        gap: 8px;
-    }
-    .auth-tab-btn {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        padding: 8px 22px;
-        border-radius: 8px;
-        cursor: pointer;
-        border: 1px solid #1e3060;
-        background: transparent;
-        color: #3a5580;
-        transition: all 0.2s;
-    }
-    .auth-tab-btn.active {
-        background: linear-gradient(135deg, #0033bb, #0055ff);
-        color: #fff;
-        border-color: transparent;
-        box-shadow: 0 4px 16px rgba(0,85,255,0.35);
-    }
-
-    /* Hero block */
     .landing-hero {
         width: 100%;
         max-width: 860px;
         text-align: center;
-        padding: 52px 0 36px;
-        position: relative;
+        padding: 52px 0 40px;
     }
     .landing-eyebrow {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.62rem;
+        font-size: 0.65rem;
         letter-spacing: 0.3em;
         text-transform: uppercase;
         color: #1e3a6e;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
     }
     .landing-logo {
         font-family: 'Syne', sans-serif;
-        font-size: clamp(3.2rem, 8vw, 6rem);
+        font-size: clamp(3.4rem, 8vw, 6.2rem);
         font-weight: 900;
         line-height: 1;
-        margin-bottom: 16px;
-        background: linear-gradient(120deg, #e8f0ff 0%, #aaccff 40%, #44ddff 70%, #8800ff 100%);
+        margin-bottom: 12px;
+        background: linear-gradient(120deg, #e8f0ff, #aaccff, #44ddff, #8800ff);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        background-clip: text;
-        letter-spacing: -0.03em;
+        letter-spacing: -0.04em;
     }
     .landing-tagline {
         font-family: 'Syne', sans-serif;
-        font-size: clamp(1rem, 2.5vw, 1.4rem);
+        font-size: clamp(1.1rem, 3vw, 1.55rem);
         font-weight: 700;
-        color: #2a4a7a;
-        text-transform: uppercase;
-        letter-spacing: 0.15em;
-        margin-bottom: 0;
-    }
-    .landing-tagline span {
-        color: #00d4ff;
+        color: #c8d8f0;
+        letter-spacing: 0.08em;
     }
 
-    /* Divider */
-    .landing-divider {
-        width: 100%;
-        max-width: 860px;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, #1a3060, #0055ff44, #1a3060, transparent);
-        margin: 0 0 36px;
-    }
-
-    /* Basics block */
+    /* Basics box - more eye-catching */
     .basics-block {
         width: 100%;
         max-width: 860px;
-        background: linear-gradient(135deg, #090d1c 0%, #07091a 100%);
-        border: 1px solid #131d33;
-        border-radius: 18px;
-        padding: 36px 44px;
-        position: relative;
-        overflow: hidden;
-        margin-bottom: 36px;
-    }
-    .basics-block::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, #0055ff, #00d4ff66, #8800ff44, transparent);
+        background: linear-gradient(135deg, #0a0f1f, #05080f);
+        border: 2px solid #00d4ff44;
+        border-radius: 20px;
+        padding: 40px 36px;
+        box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
+        margin-bottom: 40px;
     }
     .basics-label {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.6rem;
-        letter-spacing: 0.25em;
+        font-size: 0.68rem;
+        letter-spacing: 0.3em;
         text-transform: uppercase;
-        color: #0055ff;
-        margin-bottom: 20px;
+        color: #00d4ff;
+        text-align: center;
+        margin-bottom: 28px;
     }
     .basics-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px 32px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 24px;
     }
     .basics-item {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
+        text-align: center;
     }
     .basics-num {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.6rem;
-        color: #0044bb;
-        letter-spacing: 0.15em;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #00d4ff;
+        margin-bottom: 8px;
     }
     .basics-title {
         font-family: 'Syne', sans-serif;
-        font-size: 0.9rem;
+        font-size: 1.05rem;
         font-weight: 800;
-        color: #c8dcff;
+        color: #e8f0ff;
+        margin-bottom: 6px;
     }
     .basics-body {
-        font-size: 0.78rem;
-        color: #2e4a70;
-        line-height: 1.65;
+        font-size: 0.85rem;
+        color: #8ca4d0;
+        line-height: 1.5;
     }
 
     /* Stat strip */
@@ -1015,130 +961,84 @@ def page_auth():
         width: 100%;
         max-width: 860px;
         display: flex;
-        border: 1px solid #131d33;
-        border-radius: 12px;
+        border: 1px solid #1a2a44;
+        border-radius: 14px;
         overflow: hidden;
-        margin-bottom: 36px;
+        margin-bottom: 40px;
     }
     .stat-cell {
         flex: 1;
-        padding: 16px 20px;
+        padding: 18px 12px;
         text-align: center;
-        border-right: 1px solid #131d33;
+        border-right: 1px solid #1a2a44;
     }
     .stat-cell:last-child { border-right: none; }
     .stat-val {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 1.25rem;
+        font-size: 1.35rem;
         font-weight: 700;
         color: #00aaff;
     }
     .stat-val.green { color: #00ee88; }
     .stat-lbl {
-        font-size: 0.62rem;
+        font-size: 0.65rem;
         color: #1e3060;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin-top: 3px;
-    }
-
-    /* Auth form card */
-    .auth-form-card {
-        width: 100%;
-        max-width: 480px;
-        background: linear-gradient(135deg, #090d1c, #07091a);
-        border: 1px solid #131d33;
-        border-radius: 16px;
-        padding: 36px 40px;
-        position: relative;
-        overflow: hidden;
-    }
-    .auth-form-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, #0055ff55, transparent);
-    }
-
-    @media (max-width: 640px) {
-        .basics-grid { grid-template-columns: 1fr 1fr; }
-        .landing-logo { font-size: 3rem; }
-        .auth-form-card { padding: 28px 24px; }
-        .basics-block { padding: 28px 24px; }
-        .stat-strip { flex-wrap: wrap; }
-        .stat-cell { min-width: 50%; }
-    }
-    @media (max-width: 400px) {
-        .basics-grid { grid-template-columns: 1fr; }
+        letter-spacing: 0.12em;
+        margin-top: 4px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # Show toast
     if st.session_state.toast:
         show_toast()
 
-    # ── Landing Root + Top strip ──
-    st.markdown("""
-    <div class="landing-root">
-    <div class="auth-tab-strip">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:#1e3060;letter-spacing:0.15em;text-transform:uppercase;align-self:center;margin-right:auto;">
-            INDIE VTUBER · PREDICTIONS · FAKE MONEY
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="landing-root">', unsafe_allow_html=True)
 
-    # ── Hero ──
+    # Hero
     st.markdown("""
     <div class="landing-hero">
-        <div class="landing-eyebrow">Prediction Platform &nbsp;·&nbsp; Community Powered</div>
+        <div class="landing-eyebrow">PREDICTION PLATFORM • COMMUNITY POWERED</div>
         <div class="landing-logo">VTuberBets</div>
-        <div class="landing-tagline">The <span>Future</span> of VTuber Discovery</div>
+        <div class="landing-tagline">The FUTURE of VTuber Discovery</div>
     </div>
-    <div class="landing-divider"></div>
     """, unsafe_allow_html=True)
 
-    # ── Basics of what it is ──
+    # Basics box (much shorter & punchier)
     st.markdown("""
     <div class="basics-block">
-        <div class="basics-label">// Basics of what it is</div>
+        <div class="basics-label">WHY JOIN VTUBERBETS</div>
         <div class="basics-grid">
             <div class="basics-item">
-                <div class="basics-num">01 — PREDICT</div>
-                <div class="basics-title">Bet on Stream Moments</div>
-                <div class="basics-body">Place V-Coins on what you think will happen during a live indie VTuber stream. Boss kills, rage quits, chaos moments.</div>
+                <div class="basics-num">01</div>
+                <div class="basics-title">Bet on Real Moments</div>
+                <div class="basics-body">Predict what happens in live indie VTuber streams</div>
             </div>
             <div class="basics-item">
-                <div class="basics-num">02 — VOTE</div>
-                <div class="basics-title">Community Resolves Bets</div>
-                <div class="basics-body">After the stream, the community votes on the real outcome. 3 votes with a majority auto-resolves the pot. No mods needed.</div>
+                <div class="basics-num">02</div>
+                <div class="basics-title">Community Decides</div>
+                <div class="basics-body">Everyone votes — 3 votes = instant payout</div>
             </div>
             <div class="basics-item">
-                <div class="basics-num">03 — EARN</div>
-                <div class="basics-title">Win V-Coins & Badges</div>
-                <div class="basics-body">Correct predictions pay out proportionally from the pot. Hit milestones to earn achievement badges with coin rewards.</div>
+                <div class="basics-num">03</div>
+                <div class="basics-title">Win V-Coins + Badges</div>
+                <div class="basics-body">Correct bets pay real rewards + achievements</div>
             </div>
             <div class="basics-item">
-                <div class="basics-num">04 — DISCOVER</div>
-                <div class="basics-title">Find Hidden Gems</div>
-                <div class="basics-body">Bets spotlight small indie VTubers you've never heard of. The Hidden Gem category is where legends are made.</div>
+                <div class="basics-num">04</div>
+                <div class="basics-title">Discover Hidden Gems</div>
+                <div class="basics-body">Spot the next big indie VTuber before anyone else</div>
             </div>
             <div class="basics-item">
-                <div class="basics-num">05 — COLLECT</div>
-                <div class="basics-title">Shop for Cosmetics</div>
-                <div class="basics-body">Spend V-Coins on titles, badge frames, and profile themes. Purely decorative — no pay-to-win.</div>
-            </div>
-            <div class="basics-item">
-                <div class="basics-num">06 — ZERO RISK</div>
-                <div class="basics-title">No Real Money. Ever.</div>
-                <div class="basics-body">V-Coins have zero cash value. This is a prediction game for fun, community, and indie VTuber discovery.</div>
+                <div class="basics-num">05</div>
+                <div class="basics-title">Pure Fun • Zero Risk</div>
+                <div class="basics-body">Fake money only. No real cash. Ever.</div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Stat strip ──
+    # Stat strip
     st.markdown("""
     <div class="stat-strip">
         <div class="stat-cell"><div class="stat-val">5,000</div><div class="stat-lbl">Starting Coins</div></div>
@@ -1148,13 +1048,13 @@ def page_auth():
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Auth form (centered) ──
+    # Auth form
     _, col, _ = st.columns([1, 2, 1])
     with col:
         tab_login, tab_register = st.tabs([" Login ", " Create Account "])
 
         with tab_login:
-            st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
             l_user = st.text_input("Username", key="login_user", placeholder="Enter your username")
             l_pass = st.text_input("Password", key="login_pass", type="password", placeholder="Enter your password")
             if st.button("Login", use_container_width=True, key="btn_login"):
@@ -1175,7 +1075,7 @@ def page_auth():
                         st.rerun()
 
         with tab_register:
-            st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
             r_user = st.text_input("Username", key="reg_user", placeholder="2–24 characters, no spaces")
             r_pass = st.text_input("Password", key="reg_pass", type="password", placeholder="At least 6 characters")
             r_pass2 = st.text_input("Confirm password", key="reg_pass2", type="password", placeholder="Repeat your password")
@@ -1201,7 +1101,7 @@ def page_auth():
                         set_toast("error", msg)
                         st.rerun()
 
-    st.markdown("</div>", unsafe_allow_html=True)  # close .landing-root
+    st.markdown('</div>', unsafe_allow_html=True)  # close landing-root
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
