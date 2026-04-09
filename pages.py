@@ -1063,6 +1063,7 @@ def page_auth():
     # ── RIGHT SIDE AD PANEL (sidebar style) ──
     with ad_col:
         st.markdown("""
+        </div>
         <div style="background: linear-gradient(145deg, #1a0033, #0a001a); 
                     border: 3px solid #aa00ff88; 
                     border-radius: 20px; 
@@ -1092,7 +1093,6 @@ def page_auth():
                 <div style="color: #00ff99;">✔ Pure Fun</div>
                 <div style="color: #ffdd55;">✔ Pure Skill</div>
             </div>
-        </div>
         """, unsafe_allow_html=True)
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
