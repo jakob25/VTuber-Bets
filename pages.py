@@ -1083,7 +1083,7 @@ def page_auth():
                 <strong>Community votes</strong> on what actually happened.
             </div>
         </div>
-       """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
