@@ -975,7 +975,7 @@ def page_auth():
             <div style="font-family:'Syne',sans-serif;font-size:3.4rem;font-weight:800;
                         color:#e8f0ff;line-height:1;margin-bottom:12px;">VTuberBets</div>
             <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;
-                        color:#0055cc;letter-spacing:0.15em;">
+                        color:#000000;letter-spacing:0.15em;">
                 INDIE VTUBER &nbsp;·&nbsp; COMMUNITY PREDICTIONS &nbsp;·&nbsp; FAKE MONEY ONLY
             </div>
         </div>
@@ -1061,7 +1061,7 @@ def page_auth():
 
     # ── RIGHT SIDE AD PANEL (sidebar style) ──
     with ad_col:
-        st.markdown("""
+    st.markdown("""
         <div style="background: linear-gradient(145deg, #1a0033, #0a001a); 
                     border: 3px solid #aa00ff88; 
                     border-radius: 20px; 
@@ -1087,8 +1087,7 @@ def page_auth():
                 Community Focused!!
             </div>
         </div>
-    </div>
-        """, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
