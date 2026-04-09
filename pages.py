@@ -1061,7 +1061,7 @@ def page_auth():
 
     # ── RIGHT SIDE AD PANEL (sidebar style) ──
     with ad_col:
-    st.markdown("""
+     st.markdown("""
         <div style="background: linear-gradient(145deg, #1a0033, #0a001a); 
                     border: 3px solid #aa00ff88; 
                     border-radius: 20px; 
