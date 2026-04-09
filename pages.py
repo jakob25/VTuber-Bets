@@ -706,7 +706,7 @@ def render_sidebar():
             <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#0066ff;letter-spacing:0.1em;margin-top:2px;">PREDICTION PLATFORM</div>
         </div>
         """, unsafe_allow_html=True)
-
+    </div>
         title_part = f'<div style="font-size:0.7rem;color:#4499ff;font-family:JetBrains Mono,monospace;margin-bottom:2px;">{title_item["value"]}</div>' if title_item else ""
         role = user.get("role","")
         role_color = {"Viewer":"#00aaff","Streamer":"#cc44ff","Clipper":"#00ee88"}.get(role,"#00aaff")
