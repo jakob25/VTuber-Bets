@@ -861,10 +861,10 @@ def render_clip_submit_form(bet_id=None, prefill_vtuber=""):
 # ── Auth ──────────────────────────────────────────────────────────────────
 def page_auth():
 # Hide sidebar on auth page
-st.markdown(”””
+st.markdown("""
 <style>
-[data-testid=“stSidebar”] { display: none !important; }
-[data-testid=“collapsedControl”] { display: none !important; }
+[data-testid=“stSidebar"] { display: none !important; }
+[data-testid=“collapsedControl"] { display: none !important; }
 
 ```
 /* ── LANDING LAYOUT ── */
