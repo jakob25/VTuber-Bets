@@ -869,7 +869,7 @@ def page_auth():
     .landing-root {
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: justify;
 
     }
 
