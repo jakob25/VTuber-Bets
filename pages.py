@@ -950,7 +950,6 @@ def page_auth():
 # PAGES FUNCTIONS
 # ───────────────────────────────────────────────────────────────────────────
 # ── Auth ───────────────────────────────────────────────────────────────────
-# ── Auth ───────────────────────────────────────────────────────────────────
 def page_auth():
     # Hide default sidebar on auth page
     st.markdown("""
@@ -964,7 +963,6 @@ def page_auth():
     login_col, ad_col = st.columns([2.2, 1])
 
     with login_col:
-        # Show toast if one exists
         if st.session_state.toast:
             show_toast()
 
@@ -1071,6 +1069,7 @@ def page_auth():
                     height: 100%; 
                     position: sticky; 
                     top: 40px;">
+            
             <div style="font-size: 1.6rem; font-weight: 900; 
                         background: linear-gradient(90deg, #00ffcc, #ff00aa, #00ccff); 
                         -webkit-background-clip: text; 
