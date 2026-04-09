@@ -963,7 +963,6 @@ def page_auth():
     login_col, ad_col = st.columns([2.2, 1])
 
     with login_col:
-        # Show toast if one exists
         if st.session_state.toast:
             show_toast()
 
@@ -1061,9 +1060,8 @@ def page_auth():
         """, unsafe_allow_html=True)
 
     # ── RIGHT SIDE AD PANEL (sidebar style) ──
-       # ── RIGHT SIDE AD PANEL (sidebar style) ──
     with ad_col:
-        st.markdown('''
+        st.markdown("""
         <div style="background: linear-gradient(145deg, #1a0033, #0a001a); 
                     border: 3px solid #aa00ff88; 
                     border-radius: 20px; 
@@ -1095,7 +1093,7 @@ def page_auth():
                 <div style="color: #ffdd55;">✔ Pure Skill</div>
             </div>
         </div>
-        ''', unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
