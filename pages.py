@@ -1082,12 +1082,8 @@ def page_auth():
                 Bet fake V-Coins on indie VTuber stream moments.<br>
                 <strong>Community votes</strong> on what actually happened.
             </div>
-
-            <div style="text-align: center; font-size: 1.05rem; font-weight: 700; color: #cc88ff; margin-bottom: 24px;">
-                Community Focused!!
-            </div>
         </div>
-    """, unsafe_allow_html=True)
+       """, unsafe_allow_html=True)
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
