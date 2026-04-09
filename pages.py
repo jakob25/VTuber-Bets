@@ -1061,9 +1061,9 @@ def page_auth():
         """, unsafe_allow_html=True)
 
     # ── RIGHT SIDE AD PANEL (sidebar style) ──
+       # ── RIGHT SIDE AD PANEL (sidebar style) ──
     with ad_col:
-        st.markdown("""
-        </div>
+        st.markdown('''
         <div style="background: linear-gradient(145deg, #1a0033, #0a001a); 
                     border: 3px solid #aa00ff88; 
                     border-radius: 20px; 
@@ -1071,6 +1071,7 @@ def page_auth():
                     height: 100%; 
                     position: sticky; 
                     top: 40px;">
+            
             <div style="font-size: 1.6rem; font-weight: 900; 
                         background: linear-gradient(90deg, #00ffcc, #ff00aa, #00ccff); 
                         -webkit-background-clip: text; 
@@ -1093,7 +1094,8 @@ def page_auth():
                 <div style="color: #00ff99;">✔ Pure Fun</div>
                 <div style="color: #ffdd55;">✔ Pure Skill</div>
             </div>
-        """, unsafe_allow_html=True)
+        </div>
+        ''', unsafe_allow_html=True)
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
