@@ -1086,13 +1086,8 @@ def page_auth():
             <div style="text-align: center; font-size: 1.05rem; font-weight: 700; color: #cc88ff; margin-bottom: 24px;">
                 Community Focused!!
             </div>
-
-            <div style="display: flex; justify-content: center; gap: 32px; font-size: 1.0rem;">
-                <div style="color: #ff5555;">✘ Algorithm Chasing</div>
-                <div style="color: #00ff99;">✔ Pure Fun</div>
-                <div style="color: #ffdd55;">✔ Pure Skill</div>
-            </div>
         </div>
+    </div>
         """, unsafe_allow_html=True)
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
