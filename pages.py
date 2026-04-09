@@ -1030,6 +1030,10 @@ def page_auth():
                 <div class="basics-title">Pure Fun • Zero Risk</div>
                 <div class="basics-body">Fake money only. No real cash. Ever.</div>
             </div>
+            <div class="basics-item">
+                <div class="basics-num">06</div>
+                <div class="basics-title">Constantly Evolving</div>
+                <div class="basics-body">New features added as the community grows.</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
