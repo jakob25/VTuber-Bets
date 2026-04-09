@@ -877,7 +877,6 @@ def page_auth():
         width: 100%;
         max-width: 860px;
         text-align: center;
-        padding: 20px 0 32px;      /* pulled way up */
     }
     .landing-eyebrow {
         font-family: 'JetBrains Mono', monospace;
