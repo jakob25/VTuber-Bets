@@ -858,13 +858,7 @@ def render_clip_submit_form(bet_id=None, prefill_vtuber=""):
 # PAGE FUNCTIONS
 # ───────────────────────────────────────────────────────────────────────────
 
-# ── Auth ───────────────────────────────────────────────────────────────────
-“””
-REPLACEMENT for page_auth() in pages.py
-
-Drop this function in place of the existing page_auth() — everything else stays the same.
-“””
-
+# ── Auth ──────────────────────────────────────────────────────────────────
 def page_auth():
 # Hide sidebar on auth page
 st.markdown(”””
