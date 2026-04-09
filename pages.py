@@ -858,7 +858,7 @@ def render_clip_submit_form(bet_id=None, prefill_vtuber=""):
 # PAGE FUNCTIONS
 # ───────────────────────────────────────────────────────────────────────────
 
-# # ── Auth / Landing Page ─────────────────────────────────────────────────────
+# ── Auth / Landing Page ─────────────────────────────────────────────────────
 def page_auth():
     # Hide sidebar
     st.markdown("""
@@ -866,20 +866,19 @@ def page_auth():
     [data-testid="stSidebar"] { display: none !important; }
     [data-testid="collapsedControl"] { display: none !important; }
 
-    /* ── LANDING LAYOUT ── */
     .landing-root {
         min-height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 0 16px 48px;
+        padding: 20px 16px 40px;   /* much tighter top */
     }
 
     .landing-hero {
         width: 100%;
         max-width: 860px;
         text-align: center;
-        padding: 52px 0 40px;
+        padding: 20px 0 32px;      /* pulled way up */
     }
     .landing-eyebrow {
         font-family: 'JetBrains Mono', monospace;
@@ -887,14 +886,14 @@ def page_auth():
         letter-spacing: 0.3em;
         text-transform: uppercase;
         color: #1e3a6e;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
     }
     .landing-logo {
         font-family: 'Syne', sans-serif;
         font-size: clamp(3.4rem, 8vw, 6.2rem);
         font-weight: 900;
         line-height: 1;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
         background: linear-gradient(120deg, #e8f0ff, #aaccff, #44ddff, #8800ff);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -908,16 +907,16 @@ def page_auth():
         letter-spacing: 0.08em;
     }
 
-    /* Basics box - more eye-catching */
+    /* Why Join box - eye-catching but clean */
     .basics-block {
         width: 100%;
         max-width: 860px;
         background: linear-gradient(135deg, #0a0f1f, #05080f);
         border: 2px solid #00d4ff44;
         border-radius: 20px;
-        padding: 40px 36px;
+        padding: 36px 32px;
         box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
-        margin-bottom: 40px;
+        margin-bottom: 32px;
     }
     .basics-label {
         font-family: 'JetBrains Mono', monospace;
@@ -926,7 +925,7 @@ def page_auth():
         text-transform: uppercase;
         color: #00d4ff;
         text-align: center;
-        margin-bottom: 28px;
+        margin-bottom: 24px;
     }
     .basics-grid {
         display: grid;
@@ -956,7 +955,6 @@ def page_auth():
         line-height: 1.5;
     }
 
-    /* Stat strip */
     .stat-strip {
         width: 100%;
         max-width: 860px;
@@ -964,7 +962,7 @@ def page_auth():
         border: 1px solid #1a2a44;
         border-radius: 14px;
         overflow: hidden;
-        margin-bottom: 40px;
+        margin-bottom: 32px;
     }
     .stat-cell {
         flex: 1;
@@ -995,16 +993,16 @@ def page_auth():
 
     st.markdown('<div class="landing-root">', unsafe_allow_html=True)
 
-    # Hero
+    # Hero - now appears near the top
     st.markdown("""
     <div class="landing-hero">
-        <div class="landing-eyebrow">PREDICTION PLATFORM • COMMUNITY POWERED</div>
+        <div class="landing-eyebrow">INDIE VTUBER • PREDICTIONS • FAKE MONEY</div>
         <div class="landing-logo">VTuberBets</div>
         <div class="landing-tagline">The FUTURE of VTuber Discovery</div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Basics box (much shorter & punchier)
+    # Why Join box
     st.markdown("""
     <div class="basics-block">
         <div class="basics-label">WHY JOIN VTUBERBETS</div>
@@ -1038,7 +1036,7 @@ def page_auth():
     </div>
     """, unsafe_allow_html=True)
 
-    # Stat strip
+    # Stats
     st.markdown("""
     <div class="stat-strip">
         <div class="stat-cell"><div class="stat-val">5,000</div><div class="stat-lbl">Starting Coins</div></div>
@@ -1048,7 +1046,7 @@ def page_auth():
     </div>
     """, unsafe_allow_html=True)
 
-    # Auth form
+    # Login form
     _, col, _ = st.columns([1, 2, 1])
     with col:
         tab_login, tab_register = st.tabs([" Login ", " Create Account "])
@@ -1101,7 +1099,7 @@ def page_auth():
                         set_toast("error", msg)
                         st.rerun()
 
-    st.markdown('</div>', unsafe_allow_html=True)  # close landing-root
+    st.markdown('</div>', unsafe_allow_html=True)
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
