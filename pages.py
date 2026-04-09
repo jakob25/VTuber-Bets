@@ -867,11 +867,10 @@ def page_auth():
     [data-testid="collapsedControl"] { display: none !important; }
 
     .landing-root {
-        min-height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 20px 16px 40px;   /* much tighter top */
+
     }
 
     .landing-hero {
