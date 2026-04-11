@@ -687,7 +687,7 @@ def render_bet_card(bet: dict, show_btn=False):
     opts_str = " / ".join(bet["options"][:2])
     st.markdown(f"""
     <div class="{card_class}">
-        <div class="vtag">{name_html}&nbsp;&nbsp;·&nbsp;&nbsp;{bet.get('category','')}</div>
+        <div class="vtag">{name_html}&nbsp;&nbsp;&nbsp;&nbsp;{bet.get('category','')}</div>
         <div class="bet-title">{bet['title']}</div>
         {game_html}
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;">
