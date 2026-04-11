@@ -1,9 +1,20 @@
 import streamlit as st
 from database import get_clips, award_weekly_clip_rewards, upvote_clip, submit_clip
 
-# ── Clip UI Helpers ─────────────────────────────────────────────────────
+# ── All Clips Feature (exported as one variable) ───────────────────────────
+clips = {
+
+    # Page function
+    "page": lambda: page_clips(),
+
+    # Helper functions (if you ever need them directly)
+    "render_card": render_clip_card,
+    "render_submit_form": render_clip_submit_form,
+    "award_weekly": award_weekly_clip_rewards,
+}
+
+# ── Internal Functions (not exported directly) ─────────────────────────────
 def render_clip_card(clip: dict):
-    """Single clip card with upvote"""
     st.markdown(f"""
     <div class="card" style="border-left: 3px solid #00d4ff; margin-bottom: 16px;">
         <div class="vtag">{clip['vtuber_name']}</div>
@@ -12,11 +23,8 @@ def render_clip_card(clip: dict):
         </div>
         <div style="color:#4a6a99;font-size:0.85rem;margin-bottom:12px;">{clip.get('description','')}</div>
         <a href="{clip['clip_url']}" target="_blank" style="color:#00d4ff;">▶ Watch Clip</a>
-        
         <div style="margin-top:12px;">
-            <button 
-                onclick="this.innerText = 'Upvoted!'; this.disabled=true;"
-                style="background:#00ff88;color:#000;border:none;padding:6px 16px;border-radius:9999px;font-size:0.85rem;cursor:pointer;">
+            <button style="background:#00ff88;color:#000;border:none;padding:6px 16px;border-radius:9999px;font-size:0.85rem;cursor:pointer;">
                 👍 {clip.get('upvotes', 0)}
             </button>
         </div>
@@ -24,7 +32,6 @@ def render_clip_card(clip: dict):
     """, unsafe_allow_html=True)
 
 def render_clip_submit_form():
-    """Clip submission form"""
     with st.form("clip_submit_form"):
         st.markdown("### Submit a new clip")
         clip_url = st.text_input("Clip URL (Twitch / YouTube)")
@@ -43,9 +50,7 @@ def render_clip_submit_form():
                 st.success("Clip submitted! Thank you, scout.")
                 st.rerun()
 
-# ── Main Clips Page ─────────────────────────────────────────────────────
 def page_clips():
-    """Full Clips page"""
     st.markdown("## Clip Hub")
     st.markdown(
         '<div style="color:#334466;font-size:0.85rem;margin-bottom:20px;">'
@@ -65,11 +70,11 @@ def page_clips():
             st.success(f"Awarded V-Coins to top {count} clips!")
             st.rerun()
 
-    clips = get_clips(sort=sort_param)
-    if not clips:
+    clips_data = get_clips(sort=sort_param)
+    if not clips_data:
         st.info("No clips submitted yet. Be the first!")
     else:
-        for clip in clips:
+        for clip in clips_data:
             render_clip_card(clip)
 
     st.markdown("---")
