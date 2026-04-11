@@ -1041,8 +1041,28 @@ def page_auth():
         </div>
         """, unsafe_allow_html=True)
 
-        # Login form
-        _, login_col, _ = st.columns([1, 2, 1])
+        # Login form with gradient bars on sides
+        left_bar, login_col, right_bar = st.columns([1, 2, 1])
+
+        with left_bar:
+            st.markdown("""
+            <div style="height:100%;min-height:300px;display:flex;align-items:center;justify-content:center;padding:8px;">
+                <div style="width:4px;height:100%;min-height:280px;border-radius:4px;
+                    background:linear-gradient(180deg,transparent,#0055ff,#00d4ff,#8800ff,#00ff88,transparent);
+                    background-size:100% 300%;
+                    animation:bar-flow 4s ease infinite;
+                    box-shadow:0 0 18px rgba(0,212,255,0.4);">
+                </div>
+            </div>
+            <style>
+            @keyframes bar-flow {
+                0%   { background-position: 0% 0%; }
+                50%  { background-position: 0% 100%; }
+                100% { background-position: 0% 0%; }
+            }
+            </style>
+            """, unsafe_allow_html=True)
+
         with login_col:
             tab_login, tab_register = st.tabs([" Login ", " Create Account "])
 
@@ -1093,6 +1113,25 @@ def page_auth():
                         else:
                             set_toast("error", msg)
                             st.rerun()
+
+        with right_bar:
+            st.markdown("""
+            <div style="height:100%;min-height:300px;display:flex;align-items:center;justify-content:center;padding:8px;">
+                <div style="width:4px;height:100%;min-height:280px;border-radius:4px;
+                    background:linear-gradient(180deg,transparent,#00ff88,#8800ff,#00d4ff,#0055ff,transparent);
+                    background-size:100% 300%;
+                    animation:bar-flow-r 4s ease infinite;
+                    box-shadow:0 0 18px rgba(136,0,255,0.4);">
+                </div>
+            </div>
+            <style>
+            @keyframes bar-flow-r {
+                0%   { background-position: 0% 100%; }
+                50%  { background-position: 0% 0%; }
+                100% { background-position: 0% 100%; }
+            }
+            </style>
+            """, unsafe_allow_html=True)
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
