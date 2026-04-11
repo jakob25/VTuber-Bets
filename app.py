@@ -11,6 +11,7 @@ from pages import(
     page_my_profile, page_how_it_works,
     inject_styles, init_state, render_sidebar, show_onboarding_popup
 )
+from clips_feature import clips 
 
 st.set_page_config(
     page_title="VTuberBets",
@@ -37,7 +38,7 @@ def main():
     routes = {
         "home":         page_home,
         "bets":         page_bets,
-        "clips":        page_clips,
+        "clips":        clips["page"],
         "bet_detail":   page_bet_detail,
         "create_bet":   page_create_bet,
         "achievements": page_achievements,
