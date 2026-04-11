@@ -804,129 +804,26 @@ def show_onboarding_popup():
 # ───────────────────────────────────────────────────────────────────────────
 
 # ── Auth / Landing Page ─────────────────────────────────────────────────────
+# ── Auth / Landing Page ─────────────────────────────────────────────────────
 def page_auth():
-    # Hide sidebar
+    # Aggressive sidebar + padding removal
     st.markdown("""
     <style>
     [data-testid="stSidebar"] { display: none !important; }
     [data-testid="collapsedControl"] { display: none !important; }
-
-    .landing-root {
-        display: flex;
-        flex-direction: column;
-        align-items: justify;
-
+    
+    /* Force full width and remove default padding */
+    .main .block-container {
+        padding-top: 0.5rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        max-width: 100% !important;
     }
-
-    .landing-hero {
-        width: 100%;
-        max-width: 860px;
-        text-align: center;
+    section[data-testid="stMain"] > div {
+        padding-top: 0 !important;
     }
-    .landing-eyebrow {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.65rem;
-        letter-spacing: 0.3em;
-        text-transform: uppercase;
-        color: #1e3a6e;
-        margin-bottom: 8px;
-    }
-    .landing-logo {
-        font-family: 'Syne', sans-serif;
-        font-size: clamp(3.4rem, 8vw, 6.2rem);
-        font-weight: 900;
-        line-height: 1;
-        margin-bottom: 8px;
-        background: linear-gradient(120deg, #e8f0ff, #aaccff, #44ddff, #8800ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        letter-spacing: -0.04em;
-    }
-    .landing-tagline {
-        font-family: 'Syne', sans-serif;
-        font-size: clamp(1.1rem, 3vw, 1.55rem);
-        font-weight: 700;
-        color: #c8d8f0;
-        letter-spacing: 0.08em;
-    }
-
-    /* Why Join box - eye-catching but clean */
-    .basics-block {
-        width: 100%;
-        max-width: 860px;
-        background: linear-gradient(135deg, #0a0f1f, #05080f);
-        border: 2px solid #00d4ff44;
-        border-radius: 20px;
-        padding: 36px 32px;
-        box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
-        margin-bottom: 32px;
-    }
-    .basics-label {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.68rem;
-        letter-spacing: 0.3em;
-        text-transform: uppercase;
-        color: #00d4ff;
-        text-align: center;
-        margin-bottom: 24px;
-    }
-    .basics-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 24px;
-    }
-    .basics-item {
-        text-align: center;
-    }
-    .basics-num {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #00d4ff;
-        margin-bottom: 8px;
-    }
-    .basics-title {
-        font-family: 'Syne', sans-serif;
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: #e8f0ff;
-        margin-bottom: 6px;
-    }
-    .basics-body {
-        font-size: 0.85rem;
-        color: #8ca4d0;
-        line-height: 1.5;
-    }
-
-    .stat-strip {
-        width: 100%;
-        max-width: 860px;
-        display: flex;
-        border: 1px solid #1a2a44;
-        border-radius: 14px;
-        overflow: hidden;
-        margin-bottom: 32px;
-    }
-    .stat-cell {
-        flex: 1;
-        padding: 18px 12px;
-        text-align: center;
-        border-right: 1px solid #1a2a44;
-    }
-    .stat-cell:last-child { border-right: none; }
-    .stat-val {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #00aaff;
-    }
-    .stat-val.green { color: #00ee88; }
-    .stat-lbl {
-        font-size: 0.65rem;
-        color: #1e3060;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        margin-top: 4px;
+    .stAppViewContainer {
+        padding: 0 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -936,9 +833,9 @@ def page_auth():
 
     st.markdown('<div class="landing-root">', unsafe_allow_html=True)
 
-    # Hero - now appears near the top
+    # Hero - pulled up and centered
     st.markdown("""
-    <div class="landing-hero">
+    <div class="landing-hero" style="padding: 32px 0 24px;">
         <div class="landing-eyebrow">INDIE VTUBER • PREDICTIONS • FAKE MONEY</div>
         <div class="landing-logo">VTuberBets</div>
         <div class="landing-tagline">The FUTURE of VTuber Discovery</div>
@@ -977,13 +874,14 @@ def page_auth():
             </div>
             <div class="basics-item">
                 <div class="basics-num">06</div>
-                <div class="basics-title">Constantly Evolving</div>
-                <div class="basics-body">New features added as the community grows.</div>
+                <div class="basics-title">Evolves With You</div>
+                <div class="basics-body">The site grows as the community does</div>
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Stats
+    # Stats strip
     st.markdown("""
     <div class="stat-strip">
         <div class="stat-cell"><div class="stat-val">5,000</div><div class="stat-lbl">Starting Coins</div></div>
@@ -993,9 +891,9 @@ def page_auth():
     </div>
     """, unsafe_allow_html=True)
 
-    # Login form
-    _, col, _ = st.columns([1, 2, 1])
-    with col:
+    # Login / Register - centered without extra columns
+    col1, col2, col3 = st.columns([1, 1.6, 1])
+    with col2:
         tab_login, tab_register = st.tabs([" Login ", " Create Account "])
 
         with tab_login:
