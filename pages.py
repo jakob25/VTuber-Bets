@@ -1213,8 +1213,6 @@ def page_home():
                         unsafe_allow_html=True)
             for b in voting_bets[:3]:
                 render_bet_card(b, show_btn=True)
-    with tab_clips:
-        page_clips() # ← calls your exact existing Clips page code
 # ─────────────────────────────────────────────
 # ALL BETS PAGE
 # ── All Bets ───────────────────────────────────────────────────────────────
