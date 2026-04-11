@@ -906,7 +906,8 @@ def page_auth():
         border-radius: 20px;
         padding: 36px 32px;
         box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
-        margin-bottom: 32px;
+        margin: 0 0 32px 0;
+        box-sizing: border-box;
     }
     .basics-label {
         font-family: 'JetBrains Mono', monospace;
@@ -1042,55 +1043,56 @@ def page_auth():
 
         # Login form
         _, login_col, _ = st.columns([1, 2, 1])
-        tab_login, tab_register = login_col.tabs([" Login ", " Create Account "])
+        with login_col:
+            tab_login, tab_register = st.tabs([" Login ", " Create Account "])
 
-        with tab_login:
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-            l_user = st.text_input("Username", key="login_user", placeholder="Enter your username")
-            l_pass = st.text_input("Password", key="login_pass", type="password", placeholder="Enter your password")
-            if st.button("Login", use_container_width=True, key="btn_login"):
-                if not l_user.strip():
-                    set_toast("error", "Please enter your username.")
-                    st.rerun()
-                elif not l_pass:
-                    set_toast("error", "Please enter your password.")
-                    st.rerun()
-                else:
-                    ok, msg = login_user(l_user.strip(), l_pass)
-                    if ok:
-                        st.session_state.username = l_user.strip()
-                        st.session_state.page = "role_select" if needs_role_selection(l_user.strip()) else "home"
+            with tab_login:
+                st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+                l_user = st.text_input("Username", key="login_user", placeholder="Enter your username")
+                l_pass = st.text_input("Password", key="login_pass", type="password", placeholder="Enter your password")
+                if st.button("Login", use_container_width=True, key="btn_login"):
+                    if not l_user.strip():
+                        set_toast("error", "Please enter your username.")
+                        st.rerun()
+                    elif not l_pass:
+                        set_toast("error", "Please enter your password.")
                         st.rerun()
                     else:
-                        set_toast("error", msg)
-                        st.rerun()
+                        ok, msg = login_user(l_user.strip(), l_pass)
+                        if ok:
+                            st.session_state.username = l_user.strip()
+                            st.session_state.page = "role_select" if needs_role_selection(l_user.strip()) else "home"
+                            st.rerun()
+                        else:
+                            set_toast("error", msg)
+                            st.rerun()
 
-        with tab_register:
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-            r_user = st.text_input("Username", key="reg_user", placeholder="2–24 characters, no spaces")
-            r_pass = st.text_input("Password", key="reg_pass", type="password", placeholder="At least 6 characters")
-            r_pass2 = st.text_input("Confirm password", key="reg_pass2", type="password", placeholder="Repeat your password")
-            if st.button("Create Account", use_container_width=True, key="btn_register"):
-                un = r_user.strip()
-                errs = []
-                if len(un) < 2: errs.append("Username must be at least 2 characters.")
-                elif len(un) > 24: errs.append("Username must be 24 characters or fewer.")
-                elif " " in un: errs.append("Username cannot contain spaces.")
-                if len(r_pass) < 6: errs.append("Password must be at least 6 characters.")
-                elif r_pass != r_pass2: errs.append("Passwords do not match.")
-                if errs:
-                    set_toast("error", errs[0])
-                    st.rerun()
-                else:
-                    ok, msg = register_user(un, r_pass)
-                    if ok:
-                        st.session_state.username = un
-                        st.session_state.page = "role_select"
-                        st.session_state.show_onboarding = True
+            with tab_register:
+                st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+                r_user = st.text_input("Username", key="reg_user", placeholder="2–24 characters, no spaces")
+                r_pass = st.text_input("Password", key="reg_pass", type="password", placeholder="At least 6 characters")
+                r_pass2 = st.text_input("Confirm password", key="reg_pass2", type="password", placeholder="Repeat your password")
+                if st.button("Create Account", use_container_width=True, key="btn_register"):
+                    un = r_user.strip()
+                    errs = []
+                    if len(un) < 2: errs.append("Username must be at least 2 characters.")
+                    elif len(un) > 24: errs.append("Username must be 24 characters or fewer.")
+                    elif " " in un: errs.append("Username cannot contain spaces.")
+                    if len(r_pass) < 6: errs.append("Password must be at least 6 characters.")
+                    elif r_pass != r_pass2: errs.append("Passwords do not match.")
+                    if errs:
+                        set_toast("error", errs[0])
                         st.rerun()
                     else:
-                        set_toast("error", msg)
-                        st.rerun()
+                        ok, msg = register_user(un, r_pass)
+                        if ok:
+                            st.session_state.username = un
+                            st.session_state.page = "role_select"
+                            st.session_state.show_onboarding = True
+                            st.rerun()
+                        else:
+                            set_toast("error", msg)
+                            st.rerun()
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
