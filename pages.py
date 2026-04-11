@@ -811,11 +811,11 @@ def page_auth():
     [data-testid="stSidebar"] { display: none !important; }
     [data-testid="collapsedControl"] { display: none !important; }
 
-    .landing-root {
+    landing-root {
         display: flex;
         flex-direction: column;
-        align-items: justify;
-
+        align-items: center;
+        width: 100%;
     }
 
     .landing-hero {
