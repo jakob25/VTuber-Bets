@@ -12,6 +12,21 @@ from database import (
 
 # ── UI HELPERS ─────────────────────────────────────────────────────────────
 def inject_styles():
+    [data-testid="stAppViewContainer"] > section.main {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+[data-testid="stAppViewContainer"] > section.main > div:first-child {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.block-container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+}
     st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap');
