@@ -12,7 +12,7 @@ from database import (
 
 # ── UI HELPERS ─────────────────────────────────────────────────────────────
 def inject_styles():
- st.markdown("""
+    st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -613,22 +613,6 @@ footer {visibility: hidden;}
 .stApp header {display: none;}
 .stDeployButton {display: none;}
 [data-testid="stAppViewContainer"] > div:first-child { padding-top: 0 !important; }
- [data-testid="stAppViewContainer"] > section.main {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-
-[data-testid="stAppViewContainer"] > section.main > div:first-child {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-
-.block-container {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    max-width: 100% !important;
-}
-    st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
@@ -687,7 +671,7 @@ def render_bet_card(bet: dict, show_btn=False):
     opts_str = " / ".join(bet["options"][:2])
     st.markdown(f"""
     <div class="{card_class}">
-        <div class="vtag">{name_html}&nbsp;&nbsp;&nbsp;&nbsp;{bet.get('category','')}</div>
+        <div class="vtag">{name_html}&nbsp;&nbsp;·&nbsp;&nbsp;{bet.get('category','')}</div>
         <div class="bet-title">{bet['title']}</div>
         {game_html}
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;">
@@ -849,7 +833,7 @@ def page_auth():
     }
     .landing-logo {
         font-family: 'Syne', sans-serif;
-        font-size: clamp(2rem, 8vw, 5rem);
+        font-size: clamp(2rem, 7vw, 5rem);
         font-weight: 900;
         line-height: 1;
         margin-bottom: 8px;
