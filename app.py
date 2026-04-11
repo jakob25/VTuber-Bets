@@ -37,6 +37,7 @@ def main():
     routes = {
         "home":         page_home,
         "bets":         page_bets,
+        "clips":        page_clips,
         "bet_detail":   page_bet_detail,
         "create_bet":   page_create_bet,
         "achievements": page_achievements,
