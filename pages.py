@@ -12,7 +12,6 @@ from database import (
 
 # ── UI HELPERS ─────────────────────────────────────────────────────────────
 def inject_styles():
-   
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
