@@ -1,16 +1,11 @@
 import streamlit as st
 from database import get_clips, award_weekly_clip_rewards, upvote_clip, submit_clip
 
-# ── All Clips Feature (exported as one variable) ───────────────────────────
+# ── All Clips Features (exported as one variable) ───────────────────────────
 clips = {
-
     # Page function
     "page": lambda: page_clips(),
 
-    # Helper functions (if you ever need them directly)
-    "render_card": render_clip_card,
-    "render_submit_form": render_clip_submit_form,
-    "award_weekly": award_weekly_clip_rewards,
 }
 
 # ── Internal Functions (not exported directly) ─────────────────────────────
