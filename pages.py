@@ -834,7 +834,7 @@ def page_auth():
     .landing-logo {
         font-family: 'Syne', sans-serif;
         font-size: clamp(3.4rem, 8vw, 6.2rem);
-        font-weight: 900;
+        font-weight: 800;
         line-height: 1;
         margin-bottom: 8px;
         background: linear-gradient(120deg, #e8f0ff, #aaccff, #44ddff, #8800ff);
@@ -864,7 +864,7 @@ def page_auth():
     .basics-label {
         font-family: 'JetBrains Mono', monospace;
         font-size: 1rem;
-        letter-spacing: 0.5rem;
+        letter-spacing: 0.4rem;
         text-transform: uppercase;
         color: #00d4ff;
         text-align: center;
