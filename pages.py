@@ -982,7 +982,7 @@ def page_auth():
     if st.session_state.toast:
         show_toast()
 
-    _, col, _ = st.columns([1, 3, 1])
+    _, col, _ = st.columns([1, 8, 1])
     with col:
         # Hero
         st.markdown("""
