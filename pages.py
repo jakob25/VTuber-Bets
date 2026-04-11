@@ -833,7 +833,7 @@ def page_auth():
     }
     .landing-logo {
         font-family: 'Syne', sans-serif;
-        font-size: clamp(2rem, 5vw, 5rem);
+        font-size: clamp(2rem, 7vw, 5rem);
         font-weight: 900;
         line-height: 1;
         margin-bottom: 8px;
