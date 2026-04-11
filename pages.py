@@ -1,3 +1,10 @@
+"""
+pages.py
+All page render functions — one per route.
+Includes clip functionality integrated throughout.
+Self-contained — no ui.py dependency.
+"""
+
 import streamlit as st
 from database import (
     get_user, update_user, get_bets, get_bet, get_entries, get_votes,
@@ -7,6 +14,7 @@ from database import (
     get_equipped, purchase_item, equip_item, pot_total,
     leaderboard_rich, leaderboard_accurate, leaderboard_losers,
     login_user, register_user, needs_role_selection, set_user_role,
+    get_clips, award_weekly_clip_rewards, upvote_clip, submit_clip,
     CATEGORIES, MIN_VOTES, BADGE_STYLES, db, claim_daily_bonus
 )
 
@@ -799,6 +807,53 @@ def show_onboarding_popup():
             st.rerun()
 
 
+# ── CLIP HELPER COMPONENTS ────────────────────────────────────────────────
+def render_clip_card(clip: dict):
+    st.markdown(f"""
+    <div class="card" style="border-left: 3px solid #00d4ff;">
+        <div class="vtag">{clip['vtuber_name']}</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#ddeaff;margin-bottom:6px;">
+            {clip['title']}
+        </div>
+        <div style="color:#4a6a99;font-size:0.85rem;margin-bottom:12px;">{clip.get('description','')}</div>
+        <a href="{clip['clip_url']}" target="_blank" style="color:#00d4ff;font-family:'JetBrains Mono',monospace;font-size:0.8rem;">
+            ▶️ Watch Clip
+        </a>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+            {' '.join(f'<span class="pill" style="background:#001a2e;color:#00d4ff;font-size:0.65rem;">{tag}</span>' for tag in clip.get('tags',[]))}
+        </div>
+        <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#00d4ff;">
+            ↑ {clip['upvotes']} upvotes • by {clip['submitter']}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    if st.button("👍 Upvote", key=f"up_{clip['id']}", use_container_width=True):
+        if upvote_clip(clip['id'], st.session_state.username):
+            set_toast("success", "+1 upvote!")
+            st.rerun()
+
+
+def render_clip_submit_form(bet_id=None, prefill_vtuber=""):
+    with st.form("clip_submit", clear_on_submit=True):
+        st.markdown("### Submit a new clip")
+        vtuber = st.text_input("VTuber name *", value=prefill_vtuber)
+        clip_url = st.text_input("Clip link *", placeholder="https://twitch.tv/clip/...")
+        title = st.text_input("Clip title *", placeholder="That insane clutch moment")
+        desc = st.text_area("Short description", max_chars=140, height=80)
+        tags = st.multiselect("Tags (choose 1-3)",
+                              ["Boss Fight", "Death Count", "Chaos Moment", "Karaoke Arc",
+                               "Raid / Shoutout", "Tech Scuff", "Hidden Gem", "Other"],
+                              default=[])
+        submitted = st.form_submit_button("Submit Clip", use_container_width=True)
+        if submitted:
+            if not vtuber or not clip_url or not title:
+                set_toast("error", "VTuber, clip link, and title required.")
+                return
+            submit_clip(clip_url, vtuber, title, desc or "", tags, st.session_state.username, bet_id)
+            set_toast("success", "Clip submitted! Thank you, scout.")
+            st.rerun()
+
+
 # ─────────────────────────────────────────────────────────
 # PAGE FUNCTIONS
 # ───────────────────────────────────────────────────────────────────────────
@@ -811,18 +866,6 @@ def page_auth():
     [data-testid="stSidebar"] { display: none !important; }
     [data-testid="collapsedControl"] { display: none !important; }
 
-    landing-root {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-    }
-
-    .landing-hero {
-        width: 100%;
-        max-width: 860px;
-        text-align: center;
-    }
     .landing-eyebrow {
         font-family: 'JetBrains Mono', monospace;
         font-size: 0.65rem;
@@ -830,25 +873,29 @@ def page_auth():
         text-transform: uppercase;
         color: #1e3a6e;
         margin-bottom: 8px;
+        text-align: center;
     }
     .landing-logo {
         font-family: 'Syne', sans-serif;
-        font-size: clamp(2rem, 7vw, 5rem);
+        font-size: clamp(2rem, 5vw, 5rem);
         font-weight: 900;
         line-height: 1;
         margin-bottom: 8px;
         background: linear-gradient(120deg, #e8f0ff, #aaccff, #44ddff, #8800ff);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
         letter-spacing: -0.04em;
-        white-space: nowrap;   
+        white-space: nowrap;
+        text-align: center;
     }
     .landing-tagline {
         font-family: 'Syne', sans-serif;
-        font-size: clamp(1.1rem, 3vw, 1.55rem);
+        font-size: clamp(1rem, 2.5vw, 1.4rem);
         font-weight: 700;
         color: #c8d8f0;
         letter-spacing: 0.08em;
+        text-align: center;
     }
 
     /* Why Join box - eye-catching but clean */
@@ -864,8 +911,8 @@ def page_auth():
     }
     .basics-label {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 1rem;
-        letter-spacing: 0.4rem;
+        font-size: 0.68rem;
+        letter-spacing: 0.3em;
         text-transform: uppercase;
         color: #00d4ff;
         text-align: center;
@@ -935,68 +982,67 @@ def page_auth():
     if st.session_state.toast:
         show_toast()
 
-    st.markdown('<div class="landing-root">', unsafe_allow_html=True)
-
-    # Hero - now appears near the top
-    st.markdown("""
-    <div class="landing-hero">
-        <div class="landing-eyebrow">INDIE VTUBER • PREDICTIONS • FAKE MONEY</div>
-        <div class="landing-logo">VTuberBets</div>
-        <div class="landing-tagline">The FUTURE of VTuber Discovery</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Why Join box
-    st.markdown("""
-    <div class="basics-block">
-        <div class="basics-label">WHY JOIN VTUBERBETS</div>
-        <div class="basics-grid">
-            <div class="basics-item">
-                <div class="basics-num">01</div>
-                <div class="basics-title">Bet on Real Moments</div>
-                <div class="basics-body">Predict what happens in live indie VTuber streams</div>
-            </div>
-            <div class="basics-item">
-                <div class="basics-num">02</div>
-                <div class="basics-title">Community Decides</div>
-                <div class="basics-body">Everyone votes — 3 votes = instant payout</div>
-            </div>
-            <div class="basics-item">
-                <div class="basics-num">03</div>
-                <div class="basics-title">Win V-Coins + Badges</div>
-                <div class="basics-body">Correct bets pay real rewards + achievements</div>
-            </div>
-            <div class="basics-item">
-                <div class="basics-num">04</div>
-                <div class="basics-title">Discover Hidden Gems</div>
-                <div class="basics-body">Spot the next big indie VTuber before anyone else</div>
-            </div>
-            <div class="basics-item">
-                <div class="basics-num">05</div>
-                <div class="basics-title">Pure Fun • Zero Risk</div>
-                <div class="basics-body">Fake money only. No real cash. Ever.</div>
-            </div>
-            <div class="basics-item">
-                <div class="basics-num">06</div>
-                <div class="basics-title">Constantly Evolving</div>
-                <div class="basics-body">New features added as the community grows.</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Stats
-    st.markdown("""
-    <div class="stat-strip">
-        <div class="stat-cell"><div class="stat-val">5,000</div><div class="stat-lbl">Starting Coins</div></div>
-        <div class="stat-cell"><div class="stat-val">+250</div><div class="stat-lbl">Daily Bonus</div></div>
-        <div class="stat-cell"><div class="stat-val">3</div><div class="stat-lbl">Votes to Resolve</div></div>
-        <div class="stat-cell"><div class="stat-val green">$0</div><div class="stat-lbl">Real Money</div></div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Login form
-    _, col, _ = st.columns([1, 2, 1])
+    _, col, _ = st.columns([1, 3, 1])
     with col:
+        # Hero
+        st.markdown("""
+        <div style="text-align:center;padding:32px 0 20px;">
+            <div class="landing-eyebrow">INDIE VTUBER • PREDICTIONS • FAKE MONEY</div>
+            <div class="landing-logo">VTuberBets</div>
+            <div class="landing-tagline">The FUTURE of VTuber Discovery</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Why Join box
+        st.markdown("""
+        <div class="basics-block">
+            <div class="basics-label">WHY JOIN VTUBERBETS</div>
+            <div class="basics-grid">
+                <div class="basics-item">
+                    <div class="basics-num">01</div>
+                    <div class="basics-title">Bet on Real Moments</div>
+                    <div class="basics-body">Predict what happens in live indie VTuber streams</div>
+                </div>
+                <div class="basics-item">
+                    <div class="basics-num">02</div>
+                    <div class="basics-title">Community Decides</div>
+                    <div class="basics-body">Everyone votes — 3 votes = instant payout</div>
+                </div>
+                <div class="basics-item">
+                    <div class="basics-num">03</div>
+                    <div class="basics-title">Win V-Coins + Badges</div>
+                    <div class="basics-body">Correct bets pay real rewards + achievements</div>
+                </div>
+                <div class="basics-item">
+                    <div class="basics-num">04</div>
+                    <div class="basics-title">Discover Hidden Gems</div>
+                    <div class="basics-body">Spot the next big indie VTuber before anyone else</div>
+                </div>
+                <div class="basics-item">
+                    <div class="basics-num">05</div>
+                    <div class="basics-title">Pure Fun • Zero Risk</div>
+                    <div class="basics-body">Fake money only. No real cash. Ever.</div>
+                </div>
+                <div class="basics-item">
+                    <div class="basics-num">06</div>
+                    <div class="basics-title">Constantly Evolving</div>
+                    <div class="basics-body">New features added as the community grows.</div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Stats
+        st.markdown("""
+        <div class="stat-strip">
+            <div class="stat-cell"><div class="stat-val">5,000</div><div class="stat-lbl">Starting Coins</div></div>
+            <div class="stat-cell"><div class="stat-val">+250</div><div class="stat-lbl">Daily Bonus</div></div>
+            <div class="stat-cell"><div class="stat-val">3</div><div class="stat-lbl">Votes to Resolve</div></div>
+            <div class="stat-cell"><div class="stat-val green">$0</div><div class="stat-lbl">Real Money</div></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Login form
         tab_login, tab_register = st.tabs([" Login ", " Create Account "])
 
         with tab_login:
@@ -1046,8 +1092,6 @@ def page_auth():
                     else:
                         set_toast("error", msg)
                         st.rerun()
-
-    st.markdown('</div>', unsafe_allow_html=True)
 # ─────────────────────────────────────────────
 # ROLE SELECTION PAGE
 # ─────────────────────────────────────────────
@@ -1214,6 +1258,8 @@ def page_home():
                         unsafe_allow_html=True)
             for b in voting_bets[:3]:
                 render_bet_card(b, show_btn=True)
+    with tab_clips:
+        page_clips() # ← calls your exact existing Clips page code
 # ─────────────────────────────────────────────
 # ALL BETS PAGE
 # ── All Bets ───────────────────────────────────────────────────────────────
@@ -1756,3 +1802,27 @@ def page_how_it_works():
         </div>
     </div>
     """, unsafe_allow_html=True)
+    
+# ── CLIPS PAGE ─────────────────────────────────────────────────────────────
+def page_clips():
+    show_toast()
+    st.markdown("## Clip Hub")
+    st.markdown('<div style="color:#334466;font-size:0.85rem;margin-bottom:20px;">Community-submitted clips of indie VTubers. Upvote your favorites — top 3 each week win V-Coins.</div>',
+                unsafe_allow_html=True)
+    col1, col2 = st.columns([3,1])
+    with col1:
+        sort_mode = st.radio("Sort", ["Top this week", "Newest"], horizontal=True, key="clip_sort_radio")
+        sort_param = "top" if "Top" in sort_mode else "newest"
+    with col2:
+        if st.button("🏆 Award this week’s top clips", use_container_width=True):
+            count = award_weekly_clip_rewards()
+            set_toast("success", f"Awarded V-Coins to top {count} clips!")
+            st.rerun()
+    clips = get_clips(sort=sort_param)
+    if not clips:
+        st.markdown('<div style="color:#334466;padding:12px 0;">No clips submitted yet. Be the first!</div>', unsafe_allow_html=True)
+    else:
+        for clip in clips:
+            render_clip_card(clip)
+    st.markdown("---")
+    render_clip_submit_form()
