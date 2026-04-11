@@ -901,7 +901,6 @@ def page_auth():
     /* Why Join box - eye-catching but clean */
     .basics-block {
         width: 100%;
-        max-width: 860px;
         background: linear-gradient(135deg, #0a0f1f, #05080f);
         border: 2px solid #00d4ff44;
         border-radius: 20px;
@@ -920,7 +919,7 @@ def page_auth():
     }
     .basics-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 24px;
     }
     .basics-item {
@@ -948,7 +947,6 @@ def page_auth():
 
     .stat-strip {
         width: 100%;
-        max-width: 860px;
         display: flex;
         border: 1px solid #1a2a44;
         border-radius: 14px;
@@ -1043,7 +1041,8 @@ def page_auth():
         """, unsafe_allow_html=True)
 
         # Login form
-        tab_login, tab_register = st.tabs([" Login ", " Create Account "])
+        _, login_col, _ = st.columns([1, 2, 1])
+        tab_login, tab_register = login_col.tabs([" Login ", " Create Account "])
 
         with tab_login:
             st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
