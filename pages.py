@@ -863,7 +863,7 @@ def page_auth():
     }
     .basics-label {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.68rem;
+        font-size: 0.8rem;
         letter-spacing: 0.3em;
         text-transform: uppercase;
         color: #00d4ff;
