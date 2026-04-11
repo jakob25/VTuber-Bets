@@ -833,14 +833,15 @@ def page_auth():
     }
     .landing-logo {
         font-family: 'Syne', sans-serif;
-        font-size: clamp(3.4rem, 8vw, 6.2rem);
-        font-weight: 800;
+        font-size: clamp(2rem, 5vw, 5rem);
+        font-weight: 900;
         line-height: 1;
         margin-bottom: 8px;
         background: linear-gradient(120deg, #e8f0ff, #aaccff, #44ddff, #8800ff);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         letter-spacing: -0.04em;
+        white-space: nowrap;   
     }
     .landing-tagline {
         font-family: 'Syne', sans-serif;
