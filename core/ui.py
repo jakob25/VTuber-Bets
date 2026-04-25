@@ -19,55 +19,67 @@ def _get_db():
 # ══════════════════════════════════════════════════════════════════════════════
 # STYLES
 # ══════════════════════════════════════════════════════════════════════════════
-def inject_styles():
-    """Inject all global VTuberBets styling."""
+ddef inject_styles():
+    """Inject all global VTuberBets styling - brighter & more neon."""
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; }
+
     html, body, [data-testid="stAppViewContainer"] {
         background: #05080f !important;
-        color: #c8d8f0 !important;
+        color: #e8f0ff !important;
         font-family: 'DM Sans', sans-serif;
     }
-
-    /* Basic clean layout */
-    .main .block-container {
-        padding-top: 1rem !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
+    /* Stronger neon background glow */
+    [data-testid="stAppViewContainer"]::before {
+        content: '';
+        position: fixed; inset: 0; z-index: 0;
+        background:
+            radial-gradient(ellipse 80% 50% at 20% 20%, rgba(0,212,255,0.18) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 80% 80%, rgba(170,0,255,0.15) 0%, transparent 60%);
+        animation: mesh-drift 12s ease-in-out infinite alternate;
+        pointer-events: none;
     }
-
-    /* Typography */
-    h1, h2, h3 { font-family: 'Syne', sans-serif !important; }
-
-    /* Cards */
-    .card {
-        background: linear-gradient(135deg, #0a0e1c, #080c18);
-        border: 1px solid #131d33;
-        border-radius: 12px;
-        padding: 20px 24px;
-        margin-bottom: 14px;
+    @keyframes mesh-drift {
+        0%   { opacity: 1; }
+        100% { opacity: 0.75; }
     }
-
-    /* Toasts */
-    .notice {
-        border-radius: 10px; padding: 14px 18px; margin: 12px 0;
-        font-size: 0.88rem; line-height: 1.6;
+    /* Typography - brighter */
+    h1, h2, h3, .landing-logo, .basics-title {
+        color: #ffffff !important;
     }
-    .notice-success { background: #001508; border: 1px solid #00ff8833; color: #00dd77; }
-    .notice-error   { background: #140005; border: 1px solid #ff335544; color: #ff5577; }
-    .notice-warn    { background: #150f00; border: 1px solid #ffdd0033; color: #ddaa00; }
+    .landing-tagline {
+        color: #c8f0ff !important;
+    }
+    /* Basics box & cards - much more vibrant */
+    .basics-block, .card {
+        border-color: #00eeff88 !important;
+        box-shadow: 0 0 30px rgba(0, 238, 255, 0.25) !important;
+    }
+    .basics-label, .stat-val {
+        color: #00eeff !important;
+    }
+    /* Buttons pop more */
+    .stButton > button {
+        background: linear-gradient(135deg, #00aaff, #00d4ff, #8800ff) !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 25px rgba(0, 212, 255, 0.6) !important;
+    }
+    .stButton > button:hover {
+        box-shadow: 0 0 40px rgba(0, 212, 255, 0.8) !important;
+    }
+    /* Pills and accents */
+    .pill-open   { color: #00ff99; border-color: #00ff99; }
+    .pill-voting { color: #ffdd44; border-color: #ffdd44; }
 
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background: #060a14 !important;
-        border-right: 1px solid #0d1a30 !important;
+    /* General brighter links and text */
+    a, .stream-link, .basics-body {
+        color: #a0e0ff !important;
     }
     </style>
     """, unsafe_allow_html=True)
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SESSION STATE
