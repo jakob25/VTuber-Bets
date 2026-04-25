@@ -3,6 +3,13 @@ app.py
 Entry point — only routing + config. Clean and tiny.
 """
 import streamlit as st
+from core.ui import (
+    inject_styles,
+    init_state,
+    show_toast,
+    render_sidebar,
+    nav
+)
 from database import needs_role_selection
 from pages import(
     page_auth, page_role_select,
