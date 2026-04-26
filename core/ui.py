@@ -19,7 +19,7 @@ def _get_db():
 # ══════════════════════════════════════════════════════════════════════════════
 # STYLES
 # ══════════════════════════════════════════════════════════════════════════════
-ddef inject_styles():
+def inject_styles():
     """Inject all global VTuberBets styling - brighter & more neon."""
     st.markdown("""
     <style>
