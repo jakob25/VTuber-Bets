@@ -8,17 +8,17 @@ from core.ui import (
     init_state,
     show_toast,
     render_sidebar,
-    nav
+    nav,
+    show_onboarding_popup,
 )
 from database import needs_role_selection
-from pages import(
+from pages import (
     page_auth, page_role_select,
     page_home, page_bets, page_bet_detail, page_create_bet,
     page_achievements, page_shop, page_leaderboard,
     page_my_profile, page_how_it_works,
-    inject_styles, init_state, render_sidebar, show_onboarding_popup
 )
-from feature.clips_feature import clips 
+from clips_feature import clips
 
 st.set_page_config(
     page_title="VTuberBets",
