@@ -18,6 +18,11 @@ from database import (
     CATEGORIES, MIN_VOTES, BADGE_STYLES, db, claim_daily_bonus
 )
 
+# ── Import shared UI helpers ─────────────────────────────────────
+from core.ui import (
+    set_toast, show_toast, nav, inject_styles, show_onboarding_popup
+)
+
 # ─────────────────────────────────────────────────────────
 # PAGE FUNCTIONS
 # ───────────────────────────────────────────────────────────────────────────
