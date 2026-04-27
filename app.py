@@ -18,8 +18,9 @@ from pages import (
     page_achievements, page_shop, page_leaderboard,
     page_my_profile, page_how_it_works,
 )
-from clips_feature import clips
-
+from clips_feature import (
+clips
+)
 st.set_page_config(
     page_title="VTuberBets",
     page_icon="🎲",
