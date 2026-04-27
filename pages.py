@@ -20,7 +20,7 @@ from database import (
 
 # ── Import shared UI helpers ─────────────────────────────────────
 from core.ui import (
-    set_toast, show_toast, nav, inject_styles, show_onboarding_popup
+inject_styles, init_state, set_toast, show_toast, nav, render_sidebar
 )
 
 # ─────────────────────────────────────────────────────────
