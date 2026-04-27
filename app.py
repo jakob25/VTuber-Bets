@@ -18,7 +18,7 @@ from pages import (
     page_achievements, page_shop, page_leaderboard,
     page_my_profile, page_how_it_works,
 )
-from clips_feature import (
+from features.clips_feature import (
 clips
 )
 st.set_page_config(
