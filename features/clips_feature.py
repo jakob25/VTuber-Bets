@@ -13,17 +13,20 @@ clips = {
 # ── Internal Functions ─────────────────────────────────────────────────────
 def render_clip_card(clip: dict):
     st.markdown(f"""
-    <div class="card" style="border-left: 3px solid #00d4ff; margin-bottom: 16px;">
-        <div class="vtag">{clip['vtuber_name']}</div>
-        <div style="font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;color:#ddeaff;margin-bottom:8px;">
-            {clip['title']}
+    <div class="polaroid-card">
+        <div class="polaroid-video">
+            <iframe width="100%" height="100%" 
+                    src="{clip['clip_url']}" 
+                    frameborder="0" allowfullscreen></iframe>
         </div>
-        <div style="color:#4a6a99;font-size:0.85rem;margin-bottom:12px;">{clip.get('description','')}</div>
-        <a href="{clip['clip_url']}" target="_blank" style="color:#00d4ff;">▶ Watch Clip</a>
-        <div style="margin-top:12px;">
-            <button style="background:#00ff88;color:#000;border:none;padding:6px 16px;border-radius:9999px;font-size:0.85rem;cursor:pointer;">
-                👍 {clip.get('upvotes', 0)}
-            </button>
+        <div class="polaroid-caption">
+            {clip['vtuber_name']} — {clip['title']}
+        </div>
+        <div class="polaroid-tags">
+            {' '.join([f'#{t}' for t in clip.get('tags', [])])}
+        </div>
+        <div style="margin-top:8px; font-size:0.85rem; color:#666;">
+            👍 {clip.get('upvotes', 0)} • by {clip.get('submitted_by', 'anonymous')}
         </div>
     </div>
     """, unsafe_allow_html=True)
