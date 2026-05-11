@@ -422,53 +422,45 @@ def page_role_select():
 def page_home():
     check_fallback_resolutions()
     show_toast()
-    username = st.session_state.username
-    user = get_user(username)
-    bets = get_bets()
-    open_bets = [b for b in bets if b["status"] == "open"]
-    voting_bets = [b for b in bets if b["status"] == "voting"]
-    st.markdown(f"""
-    <div class="hero-wrap">
-        <div class="hero">
-            <div class="hero-eyebrow">Prediction Platform &nbsp;&nbsp; Indie VTubers</div>
-            <div class="hero-title">Welcome back, <span class="hero-name">{username}</span></div>
-            <div class="hero-sub">
-                Place V-Coins on indie VTuber stream moments.<br>
-                Community-voted outcomes. No real money. Just predictions.
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Open Bets", len(open_bets))
-    c2.metric("Voting Now", len(voting_bets))
-    c3.metric("Your Balance", f"{user['coins']:,}")
-    c4.metric("Total Bets", len(bets))
-    st.markdown("---")
-    # Simple tabs using your already-written code
-    tab_betting, tab_clips = st.tabs(["Betting", "Clips"])
-    with tab_betting:
-        if open_bets:
-            st.markdown("### Open Bets")
-            for b in open_bets[:5]:
-                render_bet_card(b, show_btn=True)
-            if len(open_bets) > 5:
-                if st.button("View all open bets"):
-                    nav("bets")
-        else:
-            st.markdown('<div class="notice notice-info">No open bets right now. Be the first to create one.</div>',
-                        unsafe_allow_html=True)
-            if st.button("Create a bet"):
-                nav("create_bet")
-        if voting_bets:
-            st.markdown("---")
-            st.markdown("### Needs Your Vote")
-            st.markdown('<div style="color:#334466;font-size:0.82rem;margin-bottom:12px;">These streams have ended. Vote on the real outcome to resolve the pot.</div>',
-                        unsafe_allow_html=True)
-            for b in voting_bets[:3]:
-                render_bet_card(b, show_btn=True)
+
+    st.markdown('<div class="vtvault-header">⚙️ VTVault</div>', unsafe_allow_html=True)
+    st.markdown("*Recovering the best moments. Funding the Prophets.*")
+    st.divider()
+
+    tab_discovery, tab_clips, tab_bets, tab_worker = st.tabs([
+        "🔭 DISCOVERY",
+        "🎥 CLIP HUB",
+        "🎟️ VTUBERBETS",
+        "🛠️ WORKER HUB"
+    ])
+
+    with tab_discovery:
+        st.subheader("Find My Oshi")
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.markdown("### The Constellation Map")
+            st.info("Interactive Vibe-Tag Map (Phase 2). Use filters below for now.")
+        with col2:
+            st.markdown("### Vibe Filter")
+            tags = st.multiselect(
+                "Select Tags",
+                ["Gremlin Energy", "Unhinged Zatsudan", "STEM Gremlin", "Victorian Horror ASMR",
+                 "Worker VTuber", "Office Gremlin", "Burnout Zatsudan", "Chaos Lab"],
+                default=["Gremlin Energy"]
+            )
+            if st.button("Search the Vault", use_container_width=True):
+                st.success(f"Showing results for: {', '.join(tags)}")
+
     with tab_clips:
-        page_clips() # ← calls your exact existing Clips page code
+        page_clips()
+
+    with tab_bets:
+        page_bets()
+
+    with tab_worker:
+        st.subheader("After Hours — Worker VTuber Hub")
+        st.markdown("Dedicated space for office gremlins, async collabs, burnout zatsudan, and real-life VTubing.")
+        st.info("Punch-card schedules and async collab tools coming in next update.")
 # ─────────────────────────────────────────────
 # ALL BETS PAGE
 # ── All Bets ───────────────────────────────────────────────────────────────
