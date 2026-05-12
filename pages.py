@@ -423,33 +423,25 @@ def page_home():
     check_fallback_resolutions()
     show_toast()
 
-    st.markdown('<div class="vtvault-header">⚙️ VTVault</div>', unsafe_allow_html=True)
-    st.markdown("*Recovering the best moments. Funding the Prophets.*")
-    st.divider()
+    # Custom header bar like your reference image
+    st.markdown("""
+    <div class="vtvault-header-bar">
+        <div class="vtvault-logo">VTVAULT</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     tab_discovery, tab_clips, tab_bets, tab_worker = st.tabs([
-        "🔭 DISCOVERY",
-        "🎥 CLIP HUB",
-        "🎟️ VTUBERBETS",
-        "🛠️ WORKER HUB"
+        "🔭 DISCOVERY", "🎥 CLIP HUB", "🎟️ VTUBERBETS", "🛠️ WORKER HUB"
     ])
 
     with tab_discovery:
-        st.subheader("Find My Oshi")
+        st.subheader("DISCOVERY / FIND MY OSHI")
         col1, col2 = st.columns([3, 1])
         with col1:
-            st.markdown("### The Constellation Map")
-            st.info("Interactive Vibe-Tag Map (Phase 2). Use filters below for now.")
+            st.info("Constellation Map (interactive version coming soon)")
+            # Placeholder for constellation map - we can make this Plotly later
         with col2:
-            st.markdown("### Vibe Filter")
-            tags = st.multiselect(
-                "Select Tags",
-                ["Gremlin Energy", "Unhinged Zatsudan", "STEM Gremlin", "Victorian Horror ASMR",
-                 "Worker VTuber", "Office Gremlin", "Burnout Zatsudan", "Chaos Lab"],
-                default=["Gremlin Energy"]
-            )
-            if st.button("Search the Vault", use_container_width=True):
-                st.success(f"Showing results for: {', '.join(tags)}")
+            st.multiselect("Vibe Tags", ["GREMLIN ENERGY", "UNHINGED ZATSUDAN", "STEM GREMLIN", "VICTORIAN HORROR ASMR", "WEATHER", "VICTORIAN ENERGY"], default=["GREMLIN ENERGY"])
 
     with tab_clips:
         page_clips()
@@ -458,9 +450,8 @@ def page_home():
         page_bets()
 
     with tab_worker:
-        st.subheader("After Hours — Worker VTuber Hub")
-        st.markdown("Dedicated space for office gremlins, async collabs, burnout zatsudan, and real-life VTubing.")
-        st.info("Punch-card schedules and async collab tools coming in next update.")
+        st.subheader("WORKER VTUBER HUB — After Hours")
+        st.info("Punch-card schedules and office gremlin tools coming soon.")
 # ─────────────────────────────────────────────
 # ALL BETS PAGE
 # ── All Bets ───────────────────────────────────────────────────────────────
