@@ -1,12 +1,15 @@
 """
 app.py
-VTVault main entry point
+Entry point — only routing + config. Clean and tiny.
 """
-
 import streamlit as st
 from core.ui import (
-    inject_styles, init_state, show_toast, render_sidebar,
-    nav, show_onboarding_popup
+    inject_styles,
+    init_state,
+    show_toast,
+    render_sidebar,
+    nav,
+    show_onboarding_popup,
 )
 from database import needs_role_selection
 from pages import (
@@ -15,11 +18,12 @@ from pages import (
     page_achievements, page_shop, page_leaderboard,
     page_my_profile, page_how_it_works,
 )
-from features.clips_feature import page_clips
-
+from features.clips_feature import (
+clips
+)
 st.set_page_config(
-    page_title="VTVault | The Ultimate VTuber Archive",
-    page_icon="⚙️",
+    page_title="VTuberBets",
+    page_icon="🎲",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -39,19 +43,18 @@ def main():
     render_sidebar()
     show_onboarding_popup()
 
-    if st.session_state.page == "home":
-        page_home()
-    else:
-        routes = {
-            "bets": page_bets,
-            "bet_detail": page_bet_detail,
-            "create_bet": page_create_bet,
-            "achievements": page_achievements,
-            "shop": page_shop,
-            "leaderboard": page_leaderboard,
-            "my_profile": page_my_profile,
-            "how_it_works": page_how_it_works,
-        }
-        routes.get(st.session_state.page, page_home)()
+    routes = {
+        "home":         page_home,
+        "bets":         page_bets,
+        "clips":        clips["page"],
+        "bet_detail":   page_bet_detail,
+        "create_bet":   page_create_bet,
+        "achievements": page_achievements,
+        "shop":         page_shop,
+        "leaderboard":  page_leaderboard,
+        "my_profile":   page_my_profile,
+        "how_it_works": page_how_it_works,
+    }
+    routes.get(st.session_state.page, page_home)()
 
 main()
