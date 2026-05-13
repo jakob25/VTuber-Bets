@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VTVault — The Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+<style>
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold:       #c8a84b;
+  --gold-light: #e8c96a;
+  --gold-dim:   #7a6028;
+  --amber:      #d4762a;
+  --cream:      #f0e8d0;
+  --parchment:  #e8dfc0;
+  --ink:        #0e0b06;
+  --ink-mid:    #1a1508;
+  --ink-soft:   #2a2010;
+  --rust:       #8b3a1a;
+  --vault-gray: #3a3020;
+  --scan-line:  rgba(200,168,75,0.03);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--cream);
+  font-family: 'Cormorant Garamond', serif;
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+
+/* ── NOISE + SCAN TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 999;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      var(--scan-line) 2px,
+      var(--scan-line) 4px
+    );
+  animation: scan-drift 8s linear infinite;
+}
+@keyframes scan-drift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 200px; }
+}
+
+/* ── GRAIN OVERLAY ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 998;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px;
+}
+
+/* ── TOP STAMP BAR ── */
+.stamp-bar {
+  width: 100%;
+  border-bottom: 1px solid var(--gold-dim);
+  padding: 8px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--gold-dim);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  position: relative;
+}
+.stamp-bar::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+.stamp-bar .stamp-id {
+  font-size: 0.58rem;
+  color: var(--vault-gray);
+}
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Left panel */
+.hero-left {
+  padding: 80px 60px 80px 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  border-right: 1px solid var(--gold-dim);
+}
+
+.hero-left::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 30% 50%, rgba(200,168,75,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.eyebrow::before {
+  content: '';
+  display: block;
+  width: 40px; height: 1px;
+  background: var(--gold-dim);
+}
+
+.logo-lockup {
+  margin-bottom: 16px;
+}
+
+.logo-vt {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(5rem, 10vw, 9rem);
+  line-height: 0.85;
+  color: var(--gold);
+  letter-spacing: -0.02em;
+  text-shadow:
+    0 0 60px rgba(200,168,75,0.3),
+    2px 2px 0 rgba(0,0,0,0.5);
+  display: block;
+  animation: logo-reveal 1.2s cubic-bezier(0.16,1,0.3,1) both;
+}
+.logo-vault {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(5rem, 10vw, 9rem);
+  line-height: 0.85;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--gold);
+  letter-spacing: -0.02em;
+  display: block;
+  animation: logo-reveal 1.2s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+}
+
+@keyframes logo-reveal {
+  from { opacity: 0; transform: translateY(30px) skewY(1deg); }
+  to   { opacity: 1; transform: translateY(0) skewY(0); }
+}
+
+.hero-tagline {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--parchment);
+  line-height: 1.5;
+  margin-bottom: 40px;
+  max-width: 420px;
+  opacity: 0;
+  animation: fade-up 1s ease 0.5s both;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-cta-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fade-up 1s ease 0.7s both;
+}
+
+.btn-primary {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  padding: 14px 32px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  position: relative;
+  transition: all 0.2s;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+.btn-primary:hover {
+  background: var(--gold-light);
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--gold-dim);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+  padding: 13px 32px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+.btn-secondary:hover {
+  border-color: var(--gold);
+  background: rgba(200,168,75,0.08);
+}
+
+/* Right panel — vault door */
+.hero-right {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(ellipse 80% 80% at 60% 50%, rgba(200,168,75,0.04) 0%, transparent 70%);
+}
+
+.vault-door {
+  position: relative;
+  width: 340px;
+  height: 340px;
+  animation: vault-spin-slow 40s linear infinite;
+}
+@keyframes vault-spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.vault-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--gold-dim);
+}
+.vault-ring-1 { inset: 0;   border-color: var(--gold); opacity: 0.6; }
+.vault-ring-2 { inset: 20px; border-style: dashed; opacity: 0.3; animation: vault-spin-slow 20s linear infinite reverse; }
+.vault-ring-3 { inset: 50px; border-color: var(--amber); opacity: 0.4; }
+.vault-ring-4 { inset: 80px; border-style: dashed; opacity: 0.2; animation: vault-spin-slow 15s linear infinite; }
+
+.vault-spokes {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.spoke {
+  position: absolute;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, var(--gold-dim), transparent);
+  opacity: 0.25;
+  transform-origin: center;
+}
+.spoke:nth-child(1)  { transform: rotate(0deg); }
+.spoke:nth-child(2)  { transform: rotate(30deg); }
+.spoke:nth-child(3)  { transform: rotate(60deg); }
+.spoke:nth-child(4)  { transform: rotate(90deg); }
+.spoke:nth-child(5)  { transform: rotate(120deg); }
+.spoke:nth-child(6)  { transform: rotate(150deg); }
+
+.vault-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: vault-spin-slow 40s linear infinite reverse;
+}
+
+.vault-emblem {
+  width: 120px;
+  height: 120px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink-mid);
+  box-shadow: 0 0 40px rgba(200,168,75,0.2), inset 0 0 20px rgba(0,0,0,0.5);
+  flex-direction: column;
+  gap: 2px;
+}
+.vault-emblem-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  color: var(--gold);
+  line-height: 1;
+  letter-spacing: 0.05em;
+}
+.vault-emblem-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.4rem;
+  color: var(--gold-dim);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+/* Corner ticks on vault */
+.vault-tick {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+}
+.vault-tick::before, .vault-tick::after {
+  content: '';
+  position: absolute;
+  background: var(--gold);
+}
+.vault-tick::before { width: 100%; height: 1px; top: 0; left: 0; }
+.vault-tick::after  { width: 1px; height: 100%; top: 0; left: 0; }
+.vault-tick-tl { top: 0; left: 0; }
+.vault-tick-tr { top: 0; right: 0; transform: scaleX(-1); }
+.vault-tick-bl { bottom: 0; left: 0; transform: scaleY(-1); }
+.vault-tick-br { bottom: 0; right: 0; transform: scale(-1); }
+
+/* Coordinates / stamp overlay on hero right */
+.hero-coords {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--vault-gray);
+  text-align: right;
+  line-height: 1.8;
+  letter-spacing: 0.1em;
+}
+.hero-coords-left {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--vault-gray);
+  text-align: right;
+  line-height: 1.8;
+  letter-spacing: 0.1em;
+}
+
+/* Scrolling ticker */
+.ticker-wrap {
+  width: 100%;
+  border-top: 1px solid var(--gold-dim);
+  border-bottom: 1px solid var(--gold-dim);
+  padding: 10px 0;
+  overflow: hidden;
+  background: var(--ink-mid);
+  position: relative;
+}
+.ticker-inner {
+  display: flex;
+  gap: 0;
+  animation: ticker-scroll 30s linear infinite;
+  width: max-content;
+}
+.ticker-item {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--gold-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0 40px;
+  white-space: nowrap;
+}
+.ticker-sep {
+  color: var(--amber);
+  padding: 0 10px;
+}
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── DIVIDER ── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 80px;
+  margin: 60px 0 40px;
+}
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim));
+}
+.section-divider::after {
+  background: linear-gradient(90deg, var(--gold-dim), transparent);
+}
+.divider-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  white-space: nowrap;
+}
+
+/* ── FEATURES GRID ── */
+.features-section {
+  padding: 0 80px 80px;
+}
+
+.features-header {
+  margin-bottom: 60px;
+}
+.features-header h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 6vw, 6rem);
+  color: var(--cream);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+}
+.features-header h2 em {
+  font-style: normal;
+  color: var(--gold);
+  -webkit-text-stroke: 0px;
+}
+.features-header p {
+  font-size: 1.1rem;
+  font-weight: 300;
+  color: var(--parchment);
+  opacity: 0.6;
+  max-width: 500px;
+  margin-top: 16px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-dim);
+}
+
+.feature-card {
+  background: var(--ink);
+  padding: 40px 36px;
+  position: relative;
+  transition: background 0.3s;
+  cursor: default;
+}
+.feature-card:hover {
+  background: var(--ink-mid);
+}
+
+.feature-card-large {
+  grid-column: span 2;
+}
+
+.feat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 4rem;
+  color: var(--gold-dim);
+  opacity: 0.3;
+  line-height: 1;
+  margin-bottom: 16px;
+  transition: color 0.3s, opacity 0.3s;
+}
+.feature-card:hover .feat-num {
+  color: var(--gold);
+  opacity: 0.5;
+}
+
+.feat-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 12px;
+}
+
+.feat-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  color: var(--cream);
+  letter-spacing: 0.04em;
+  margin-bottom: 14px;
+  line-height: 1;
+}
+
+.feat-body {
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: var(--parchment);
+  opacity: 0.55;
+  line-height: 1.65;
+  font-style: italic;
+}
+
+/* Status badge */
+.feat-status {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border: 1px solid;
+}
+.feat-status.live { color: #5dbb7a; border-color: #5dbb7a; }
+.feat-status.soon { color: var(--amber); border-color: var(--amber); }
+.feat-status.planned { color: var(--vault-gray); border-color: var(--vault-gray); }
+
+/* ── CONSTELLATION TEASER ── */
+.constellation-section {
+  padding: 80px;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--gold-dim);
+  border-bottom: 1px solid var(--gold-dim);
+  background: var(--ink-mid);
+}
+
+.constellation-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 70% 50%, rgba(200,168,75,0.07) 0%, transparent 70%);
+}
+
+.constellation-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  position: relative;
+}
+
+.constellation-text .overline {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 20px;
+}
+
+.constellation-text h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 4vw, 4.5rem);
+  color: var(--cream);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  margin-bottom: 24px;
+}
+.constellation-text h2 span {
+  color: var(--gold);
+}
+
+.constellation-text p {
+  font-size: 1.05rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--parchment);
+  opacity: 0.6;
+  line-height: 1.7;
+  margin-bottom: 32px;
+  max-width: 420px;
+}
+
+/* Star map canvas */
+.star-map {
+  position: relative;
+  height: 400px;
+  width: 100%;
+}
+
+.star-map svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── SCRAPS / ECONOMY STRIP ── */
+.economy-strip {
+  padding: 60px 80px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 60px;
+  align-items: center;
+  border-bottom: 1px solid var(--gold-dim);
+}
+
+.economy-label-block {
+  text-align: center;
+}
+.economy-currency {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 4rem;
+  color: var(--gold);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 40px rgba(200,168,75,0.4);
+}
+.economy-currency-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--gold-dim);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+.economy-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-dim);
+}
+.econ-stat {
+  background: var(--ink);
+  padding: 24px 20px;
+  text-align: center;
+}
+.econ-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.econ-lbl {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--vault-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-top: 6px;
+}
+
+.economy-desc {
+  max-width: 220px;
+}
+.economy-desc p {
+  font-size: 0.9rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--parchment);
+  opacity: 0.5;
+  line-height: 1.7;
+}
+
+/* ── BETS TEASER ── */
+.bets-teaser {
+  padding: 80px;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.bets-header .overline {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bets-header .overline::before {
+  content: '◆';
+  font-size: 0.5rem;
+}
+
+.bets-header h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 4vw, 4rem);
+  color: var(--cream);
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  margin-bottom: 20px;
+}
+
+.bets-sub-brand {
+  display: inline-block;
+  border: 1px solid var(--gold-dim);
+  padding: 4px 12px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--gold-dim);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.bets-header p {
+  font-size: 0.95rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--parchment);
+  opacity: 0.55;
+  line-height: 1.7;
+  margin-bottom: 32px;
+  max-width: 400px;
+}
+
+/* Mock bet card */
+.mock-bets {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mock-bet {
+  border: 1px solid var(--gold-dim);
+  background: var(--ink-mid);
+  padding: 20px 24px;
+  position: relative;
+  opacity: 0;
+  transform: translateX(20px);
+  animation: bet-slide-in 0.5s ease both;
+}
+.mock-bet:nth-child(1) { animation-delay: 0.8s; }
+.mock-bet:nth-child(2) { animation-delay: 1.0s; }
+.mock-bet:nth-child(3) { animation-delay: 1.2s; }
+
+@keyframes bet-slide-in {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.mock-bet-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 8px;
+}
+.mock-bet-q {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--cream);
+  margin-bottom: 14px;
+  line-height: 1.3;
+}
+.mock-bet-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mock-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mock-bar-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--vault-gray);
+  width: 60px;
+  flex-shrink: 0;
+}
+.mock-bar-track {
+  flex: 1;
+  height: 4px;
+  background: var(--ink-soft);
+  position: relative;
+  overflow: hidden;
+}
+.mock-bar-fill {
+  position: absolute;
+  top: 0; left: 0; height: 100%;
+  background: var(--gold);
+  animation: bar-grow 1.5s cubic-bezier(0.16,1,0.3,1) both;
+}
+.mock-bar-fill.alt { background: var(--vault-gray); }
+.mock-bet:nth-child(1) .mock-bar-fill { animation-delay: 1.0s; }
+.mock-bet:nth-child(2) .mock-bar-fill { animation-delay: 1.2s; }
+.mock-bet:nth-child(3) .mock-bar-fill { animation-delay: 1.4s; }
+@keyframes bar-grow {
+  from { width: 0; }
+}
+.mock-bar-pct {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--gold-dim);
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.mock-bet-pot {
+  position: absolute;
+  top: 14px; right: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--vault-gray);
+  letter-spacing: 0.1em;
+}
+
+/* ── CLIPS TEASER ── */
+.clips-teaser {
+  padding: 80px;
+  border-top: 1px solid var(--gold-dim);
+  background: var(--ink-mid);
+}
+
+.clips-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.clips-header .overline {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 16px;
+}
+.clips-header h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 4vw, 4rem);
+  color: var(--cream);
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  margin-bottom: 20px;
+}
+.clips-header h2 em {
+  font-style: normal;
+  color: var(--gold);
+}
+.clips-header p {
+  font-size: 0.95rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--parchment);
+  opacity: 0.55;
+  line-height: 1.7;
+  max-width: 400px;
+  margin-bottom: 28px;
+}
+
+.clip-distinction {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-dim);
+  margin-top: 28px;
+}
+.clip-type {
+  background: var(--ink);
+  padding: 20px;
+}
+.clip-type-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.clip-type-label.raw  { color: var(--gold); }
+.clip-type-label.edit { color: var(--amber); }
+.clip-type-desc {
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--parchment);
+  opacity: 0.5;
+  line-height: 1.5;
+}
+
+/* Mock clip cards */
+.mock-clips {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mock-clip {
+  border: 1px solid var(--gold-dim);
+  background: var(--ink);
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.mock-clip:hover { border-color: var(--gold); }
+
+.mock-clip-thumb {
+  background: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.7rem;
+  color: var(--gold-dim);
+  letter-spacing: 0.1em;
+  position: relative;
+  overflow: hidden;
+}
+.mock-clip-thumb::before {
+  content: '▶';
+  font-size: 1.2rem;
+  color: var(--gold);
+  opacity: 0.7;
+}
+
+.mock-clip-info {
+  padding: 14px 16px;
+}
+.mock-clip-vtuber {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--amber);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.mock-clip-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--cream);
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+.mock-clip-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.vibe-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.48rem;
+  color: var(--gold-dim);
+  border: 1px solid var(--vault-gray);
+  padding: 2px 6px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--gold-dim);
+  padding: 40px 80px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  background: var(--ink-mid);
+}
+
+.footer-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+.footer-logo span {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--gold-dim);
+}
+
+.footer-center {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--vault-gray);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 2;
+}
+
+.footer-right {
+  text-align: right;
+}
+.footer-disclaimer {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.5rem;
+  color: var(--vault-gray);
+  letter-spacing: 0.1em;
+  line-height: 1.8;
+}
+
+/* ── SCROLL REVEAL ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-left { padding: 60px 40px; border-right: none; border-bottom: 1px solid var(--gold-dim); }
+  .hero-right { min-height: 300px; }
+  .vault-door { width: 220px; height: 220px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .feature-card-large { grid-column: span 1; }
+  .constellation-layout, .bets-teaser, .clips-layout { grid-template-columns: 1fr; gap: 40px; }
+  .economy-strip { grid-template-columns: 1fr; gap: 32px; text-align: center; }
+  .economy-stats { grid-template-columns: repeat(2, 1fr); }
+  .features-section, .constellation-section, .bets-teaser, .clips-teaser { padding: 40px; }
+  .section-divider { padding: 0 40px; }
+  footer { grid-template-columns: 1fr; gap: 20px; text-align: center; }
+  .footer-right { text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- STAMP BAR -->
+<div class="stamp-bar">
+  <span>VTVault // Archive Access Portal</span>
+  <span>Indie VTubers — Discovery — Clips — Predictions</span>
+  <span class="stamp-id">DOC-001 // VAULT-OPEN</span>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="eyebrow">Est. 2024 &nbsp;·&nbsp; Indie VTuber Archive</div>
+    <div class="logo-lockup">
+      <span class="logo-vt">VT</span>
+      <span class="logo-vault">VAULT</span>
+    </div>
+    <p class="hero-tagline">The archive for indie VTubers who deserve to be found. Discovery, clips, and community — no algorithm required.</p>
+    <div class="hero-cta-row">
+      <a href="#" class="btn-primary">Enter the Vault</a>
+      <a href="#features" class="btn-secondary">Explore Features</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="vault-tick vault-tick-tl"></div>
+    <div class="vault-tick vault-tick-tr"></div>
+    <div class="vault-tick vault-tick-bl"></div>
+    <div class="vault-tick vault-tick-br"></div>
+
+    <div class="vault-door">
+      <div class="vault-ring vault-ring-1"></div>
+      <div class="vault-ring vault-ring-2"></div>
+      <div class="vault-ring vault-ring-3"></div>
+      <div class="vault-ring vault-ring-4"></div>
+      <div class="vault-spokes">
+        <div class="spoke"></div>
+        <div class="spoke"></div>
+        <div class="spoke"></div>
+        <div class="spoke"></div>
+        <div class="spoke"></div>
+        <div class="spoke"></div>
+      </div>
+      <div class="vault-center">
+        <div class="vault-emblem">
+          <span class="vault-emblem-text">VTV</span>
+          <span class="vault-emblem-sub">Classified</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-coords-left">
+      STATUS: OPEN<br>
+      TIER: FREE ACCESS<br>
+      CLASS: PUBLIC
+    </div>
+    <div class="hero-coords">
+      ZONE: INDIE DISCOVERY<br>
+      SCRAPS: ACTIVE<br>
+      VERSION: 2.0
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <!-- duplicated for infinite loop -->
+    <span class="ticker-item">Discovery Engine <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Clip Hub <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">VTuberBets <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Vault Scraps Economy <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Constellation Map <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Find Your Oshi <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Community Votes <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Vibe Tagging <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Worker VTuber Hub <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Raw Clips Welcome <span class="ticker-sep">◆</span></span>
+    <!-- duplicate -->
+    <span class="ticker-item">Discovery Engine <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Clip Hub <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">VTuberBets <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Vault Scraps Economy <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Constellation Map <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Find Your Oshi <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Community Votes <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Vibe Tagging <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Worker VTuber Hub <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Raw Clips Welcome <span class="ticker-sep">◆</span></span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section-divider reveal" id="features"><span class="divider-label">Features // What Lives in the Vault</span></div>
+
+<section class="features-section">
+  <div class="features-header reveal">
+    <h2>Everything<br>the algo <em>won't</em><br>show you</h2>
+    <p>A full ecosystem built around authentic indie content — not engagement farming, not trending sounds, not the same five faces.</p>
+  </div>
+
+  <div class="features-grid reveal">
+    <div class="feature-card feature-card-large">
+      <span class="feat-status live">Live</span>
+      <div class="feat-num">01</div>
+      <div class="feat-tag">Predictions Platform</div>
+      <div class="feat-title">VTuberBets</div>
+      <div class="feat-body">Bet Vault Scraps on what happens in live indie streams. Community-voted outcomes. 3 votes = instant payout. No real money, ever. Climb the Prophet leaderboard and earn cosmetics nobody else has.</div>
+    </div>
+
+    <div class="feature-card">
+      <span class="feat-status live">Live</span>
+      <div class="feat-num">02</div>
+      <div class="feat-tag">Content Archive</div>
+      <div class="feat-title">Clip Hub</div>
+      <div class="feat-body">The proper home for raw, unedited VTuber highlights. Embed-only — every view counts toward the original. Vibe-tagged and searchable in ways YouTube will never allow.</div>
+    </div>
+
+    <div class="feature-card">
+      <span class="feat-status soon">Coming Soon</span>
+      <div class="feat-num">03</div>
+      <div class="feat-tag">Discovery</div>
+      <div class="feat-title">Constellation Map</div>
+      <div class="feat-body">Zoom in on a galaxy of indie VTubers organized by vibe, niche, and energy. No follower count. No algorithm. Just personality clusters and hidden gems.</div>
+    </div>
+
+    <div class="feature-card">
+      <span class="feat-status soon">Coming Soon</span>
+      <div class="feat-num">04</div>
+      <div class="feat-tag">Matchmaking</div>
+      <div class="feat-title">Find My Oshi</div>
+      <div class="feat-body">A vibe quiz and swipe interface that matches fans to VTubers by actual personality — gremlin energy, comfy lore, unhinged zatsudan, worker adult vibes. Every niche has a home.</div>
+    </div>
+
+    <div class="feature-card">
+      <span class="feat-status planned">Planned</span>
+      <div class="feat-num">05</div>
+      <div class="feat-tag">Fan Agency</div>
+      <div class="feat-title">Chat Made Me Do It</div>
+      <div class="feat-body">Fans submit stream ideas. VTubers pick one and set a Scraps goal. Goal met — it becomes a real stream. Community co-creation without the chaos of unfiltered chat polls.</div>
+    </div>
+
+    <div class="feature-card">
+      <span class="feat-status planned">Planned</span>
+      <div class="feat-num">06</div>
+      <div class="feat-tag">Networking</div>
+      <div class="feat-title">Collab Tools</div>
+      <div class="feat-body">Schedule comparer, vibe match percentage, blind collab matcher that hides follower counts. Built for small creators who want organic growth, not clout chasing.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONSTELLATION TEASER -->
+<section class="constellation-section reveal">
+  <div class="constellation-layout">
+    <div class="constellation-text">
+      <div class="overline">Feature Preview // Coming Soon</div>
+      <h2>Navigate by<br><span>vibe,</span><br>not metrics</h2>
+      <p>The Constellation Map renders every VTuber in the Vault as a star, grouped into clusters by energy and content type. Zoom from "Science" to "Weather VTuber" to individual creators. Discovery the way it was supposed to feel.</p>
+      <a href="#" class="btn-secondary">Join the Waitlist</a>
+    </div>
+
+    <div class="star-map">
+      <svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background dots -->
+        <g opacity="0.15" fill="#c8a84b">
+          <circle cx="45" cy="30" r="1"/>  <circle cx="120" cy="55" r="0.5"/>
+          <circle cx="300" cy="20" r="1"/> <circle cx="450" cy="60" r="0.5"/>
+          <circle cx="80"  cy="200" r="1"/><circle cx="400" cy="150" r="0.5"/>
+          <circle cx="250" cy="380" r="1"/><circle cx="470" cy="300" r="0.5"/>
+          <circle cx="30"  cy="350" r="1"/><circle cx="200" cy="10" r="0.5"/>
+          <circle cx="380" cy="380" r="0.5"/><circle cx="150" cy="280" r="1"/>
+          <circle cx="490" cy="200" r="0.5"/>
+        </g>
+        <!-- Constellation lines -->
+        <g stroke="#c8a84b" stroke-width="0.5" opacity="0.2" fill="none">
+          <line x1="160" y1="80" x2="220" y2="120"/>
+          <line x1="220" y1="120" x2="190" y2="170"/>
+          <line x1="190" y1="170" x2="240" y2="200"/>
+          <line x1="240" y1="200" x2="280" y2="160"/>
+          <line x1="280" y1="160" x2="220" y2="120"/>
+
+          <line x1="320" y1="260" x2="360" y2="240"/>
+          <line x1="360" y1="240" x2="390" y2="280"/>
+          <line x1="390" y1="280" x2="350" y2="310"/>
+          <line x1="350" y1="310" x2="320" y2="260"/>
+
+          <line x1="80" y1="280" x2="110" y2="250"/>
+          <line x1="110" y1="250" x2="140" y2="290"/>
+          <line x1="140" y1="290" x2="100" y2="320"/>
+          <line x1="100" y1="320" x2="80" y2="280"/>
+        </g>
+
+        <!-- Cluster halos -->
+        <circle cx="225" cy="150" r="70" fill="none" stroke="#c8a84b" stroke-width="0.5" stroke-dasharray="4 6" opacity="0.15"/>
+        <circle cx="355" cy="275" r="55" fill="none" stroke="#d4762a" stroke-width="0.5" stroke-dasharray="4 6" opacity="0.15"/>
+        <circle cx="105" cy="290" r="45" fill="none" stroke="#c8a84b" stroke-width="0.5" stroke-dasharray="4 6" opacity="0.15"/>
+
+        <!-- Cluster labels -->
+        <text x="225" y="92" text-anchor="middle" font-family="'Space Mono', monospace" font-size="7" fill="#c8a84b" opacity="0.5" letter-spacing="2">GREMLIN ENERGY</text>
+        <text x="355" y="230" text-anchor="middle" font-family="'Space Mono', monospace" font-size="7" fill="#d4762a" opacity="0.5" letter-spacing="2">COMFY / LORE</text>
+        <text x="105" y="248" text-anchor="middle" font-family="'Space Mono', monospace" font-size="7" fill="#c8a84b" opacity="0.5" letter-spacing="2">STEM / SCIENCE</text>
+
+        <!-- VTuber stars (main) -->
+        <!-- Gremlin cluster -->
+        <circle cx="160" cy="80"  r="4" fill="#c8a84b" opacity="0.9" class="star-pulse"/>
+        <circle cx="220" cy="120" r="6" fill="#c8a84b" opacity="1"/>
+        <circle cx="190" cy="170" r="3" fill="#c8a84b" opacity="0.7"/>
+        <circle cx="240" cy="200" r="5" fill="#e8c96a" opacity="0.9"/>
+        <circle cx="280" cy="160" r="3" fill="#c8a84b" opacity="0.7"/>
+        <circle cx="260" cy="110" r="2" fill="#c8a84b" opacity="0.5"/>
+
+        <!-- Comfy cluster -->
+        <circle cx="320" cy="260" r="5" fill="#d4762a" opacity="0.9"/>
+        <circle cx="360" cy="240" r="7" fill="#d4762a" opacity="1"/>
+        <circle cx="390" cy="280" r="3" fill="#d4762a" opacity="0.7"/>
+        <circle cx="350" cy="310" r="4" fill="#d4762a" opacity="0.8"/>
+        <circle cx="330" cy="295" r="2" fill="#d4762a" opacity="0.5"/>
+
+        <!-- STEM cluster -->
+        <circle cx="80"  cy="280" r="5" fill="#c8a84b" opacity="0.8"/>
+        <circle cx="110" cy="250" r="3" fill="#c8a84b" opacity="0.6"/>
+        <circle cx="140" cy="290" r="4" fill="#c8a84b" opacity="0.8"/>
+        <circle cx="100" cy="320" r="3" fill="#c8a84b" opacity="0.6"/>
+
+        <!-- Random field stars -->
+        <circle cx="420" cy="80"  r="2" fill="#7a6028" opacity="0.6"/>
+        <circle cx="460" cy="130" r="1.5" fill="#7a6028" opacity="0.5"/>
+        <circle cx="50"  cy="150" r="2" fill="#7a6028" opacity="0.5"/>
+        <circle cx="200" cy="340" r="2" fill="#7a6028" opacity="0.4"/>
+        <circle cx="440" cy="350" r="1.5" fill="#7a6028" opacity="0.4"/>
+
+        <!-- Cursor / zoom indicator -->
+        <circle cx="220" cy="120" r="12" fill="none" stroke="#e8c96a" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.6">
+          <animate attributeName="r" values="10;16;10" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- "You are here" indicator -->
+        <text x="230" y="108" font-family="'Space Mono', monospace" font-size="6" fill="#e8c96a" opacity="0.7">ZOOMED</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- SCRAPS ECONOMY -->
+<div class="section-divider reveal"><span class="divider-label">Economy // Vault Scraps</span></div>
+
+<section class="economy-strip reveal">
+  <div class="economy-label-block">
+    <div class="economy-currency">SCRAPS</div>
+    <div class="economy-currency-name">Vault Currency</div>
+  </div>
+
+  <div class="economy-stats">
+    <div class="econ-stat">
+      <div class="econ-val">5,000</div>
+      <div class="econ-lbl">Starting Balance</div>
+    </div>
+    <div class="econ-stat">
+      <div class="econ-val">+250</div>
+      <div class="econ-lbl">Daily Bonus</div>
+    </div>
+    <div class="econ-stat">
+      <div class="econ-val">$0</div>
+      <div class="econ-lbl">Real Money</div>
+    </div>
+    <div class="econ-stat">
+      <div class="econ-val">∞</div>
+      <div class="econ-lbl">Ways to Earn</div>
+    </div>
+  </div>
+
+  <div class="economy-desc">
+    <p>Fake currency, real bragging rights. Earn Scraps by predicting correctly, claiming daily bonuses, and topping the weekly clip charts.</p>
+  </div>
+</section>
+
+<!-- BETS TEASER -->
+<div class="section-divider reveal"><span class="divider-label">Sub-Brand // VTuberBets</span></div>
+
+<section class="bets-teaser">
+  <div class="bets-header reveal">
+    <div class="overline">Predictions Platform</div>
+    <div class="bets-sub-brand">A VTVault Sub-Brand</div>
+    <h2>Bet on the<br>chaos.</h2>
+    <p>Place Vault Scraps on live indie stream moments. Community votes resolve every outcome — no house, no house advantage, just the community deciding what actually happened.</p>
+    <a href="#" class="btn-primary">Open the Bets Vault</a>
+  </div>
+
+  <div class="mock-bets">
+    <div class="mock-bet">
+      <div class="mock-bet-pot">1,240 Scraps</div>
+      <div class="mock-bet-tag">Hidden Gem · Gremlin Energy</div>
+      <div class="mock-bet-q">Will she rage quit before finishing the final boss?</div>
+      <div class="mock-bet-bars">
+        <div class="mock-bar-row">
+          <span class="mock-bar-label">Yes</span>
+          <div class="mock-bar-track"><div class="mock-bar-fill" style="--w:68%" style="width:68%"></div></div>
+          <span class="mock-bar-pct">68%</span>
+        </div>
+        <div class="mock-bar-row">
+          <span class="mock-bar-label">No</span>
+          <div class="mock-bar-track"><div class="mock-bar-fill alt" style="width:32%"></div></div>
+          <span class="mock-bar-pct">32%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mock-bet">
+      <div class="mock-bet-pot">3,600 Scraps</div>
+      <div class="mock-bet-tag">Karaoke Arc</div>
+      <div class="mock-bet-q">Does she hit the high note in the anime OP?</div>
+      <div class="mock-bet-bars">
+        <div class="mock-bar-row">
+          <span class="mock-bar-label">Nails it</span>
+          <div class="mock-bar-track"><div class="mock-bar-fill" style="width:45%"></div></div>
+          <span class="mock-bar-pct">45%</span>
+        </div>
+        <div class="mock-bar-row">
+          <span class="mock-bar-label">Cracks</span>
+          <div class="mock-bar-track"><div class="mock-bar-fill alt" style="width:55%"></div></div>
+          <span class="mock-bar-pct">55%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mock-bet">
+      <div class="mock-bet-pot">880 Scraps</div>
+      <div class="mock-bet-tag">Tech Scuff</div>
+      <div class="mock-bet-q">Audio dies within the first 15 minutes of stream?</div>
+      <div class="mock-bet-bars">
+        <div class="mock-bar-row">
+          <span class="mock-bar-label">Yes</span>
+          <div class="mock-bar-track"><div class="mock-bar-fill" style="width:72%"></div></div>
+          <span class="mock-bar-pct">72%</span>
+        </div>
+        <div class="mock-bar-row">
+          <span class="mock-bar-label">No</span>
+          <div class="mock-bar-track"><div class="mock-bar-fill alt" style="width:28%"></div></div>
+          <span class="mock-bar-pct">28%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLIPS TEASER -->
+<section class="clips-teaser">
+  <div class="clips-layout">
+    <div class="clips-header reveal">
+      <div class="overline">Content Archive</div>
+      <h2>Raw clips<br>deserve a<br><em>real home.</em></h2>
+      <p>The Clip Hub is an embed-only archive for long-form, unedited VTuber highlights. Every embed counts toward the creator's original view count. Vibe-tagged. Searchable. Zero bandwidth cost.</p>
+      <div class="clip-distinction">
+        <div class="clip-type">
+          <div class="clip-type-label raw">Raw Tab</div>
+          <div class="clip-type-desc">Unedited VOD segments. Authentic context. No Shorts. The real stuff.</div>
+        </div>
+        <div class="clip-type">
+          <div class="clip-type-label edit">Edited Tab</div>
+          <div class="clip-type-desc">For the clippers who put in the work. Curated, crafted, rewarded.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mock-clips reveal">
+      <div class="mock-clip">
+        <div class="mock-clip-thumb"></div>
+        <div class="mock-clip-info">
+          <div class="mock-clip-vtuber">Chibidoki</div>
+          <div class="mock-clip-title">Loses her mind at the falling boulder trap for 8 minutes straight</div>
+          <div class="mock-clip-tags">
+            <span class="vibe-tag">Gremlin Energy</span>
+            <span class="vibe-tag">Boss Fight</span>
+            <span class="vibe-tag">Raw</span>
+          </div>
+        </div>
+      </div>
+      <div class="mock-clip">
+        <div class="mock-clip-thumb"></div>
+        <div class="mock-clip-info">
+          <div class="mock-clip-vtuber">Meteorologist VTuber</div>
+          <div class="mock-clip-title">Actually explains the science behind the tornado warning mid-stream</div>
+          <div class="mock-clip-tags">
+            <span class="vibe-tag">STEM</span>
+            <span class="vibe-tag">Unhinged Zatsudan</span>
+            <span class="vibe-tag">Raw</span>
+          </div>
+        </div>
+      </div>
+      <div class="mock-clip">
+        <div class="mock-clip-thumb"></div>
+        <div class="mock-clip-info">
+          <div class="mock-clip-vtuber">Nemu</div>
+          <div class="mock-clip-title">Fully constructed lore deep-dive while chat spams "touch grass"</div>
+          <div class="mock-clip-tags">
+            <span class="vibe-tag">Comfy / Lore</span>
+            <span class="vibe-tag">Victorian Horror</span>
+            <span class="vibe-tag">Edited</span>
+          </div>
+        </div>
+      </div>
+      <div class="mock-clip">
+        <div class="mock-clip-thumb"></div>
+        <div class="mock-clip-info">
+          <div class="mock-clip-vtuber">Worker VTuber</div>
+          <div class="mock-clip-title">30-minute post-work rant that somehow turns into career advice</div>
+          <div class="mock-clip-tags">
+            <span class="vibe-tag">Worker Adulting</span>
+            <span class="vibe-tag">Just Chatting</span>
+            <span class="vibe-tag">Raw</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">VT<span>VAULT</span></div>
+  <div class="footer-center">
+    No real money · No re-uploads · No algorithm<br>
+    Indie VTubers only · Embed-only archive<br>
+    Built for discovery — not engagement farming
+  </div>
+  <div class="footer-right">
+    <div class="footer-disclaimer">
+      VTuberBets is a sub-brand of VTVault.<br>
+      Vault Scraps have no monetary value.<br>
+      All clips are embedded from original sources.
+    </div>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver(
+  (entries) => entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  }),
+  { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+);
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Bar fill animation fix for inline style
+document.querySelectorAll('.mock-bar-fill').forEach(el => {
+  const pct = el.style.getPropertyValue('--w') || el.getAttribute('style')?.match(/width:(\d+%)/)?.[1];
+  // bars are already set via inline style, animation handles them
+});
+
+// Staggered reveal for feature cards
+document.querySelectorAll('.feature-card').forEach((card, i) => {
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(20px)';
+  card.style.transition = `opacity 0.5s ease ${i * 0.08}s, transform 0.5s ease ${i * 0.08}s`;
+
+  const cardObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+        cardObserver.unobserve(card);
+      }
+    });
+  }, { threshold: 0.1 });
+  cardObserver.observe(card);
+});
+</script>
+</body>
+</html>
